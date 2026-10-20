@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap">
+<style>@keyframes dcRipple{0%{transform:scale(1);opacity:.85}100%{transform:scale(1.4);opacity:0}}html,body{margin:0;height:100%;background:#000;}*{box-sizing:border-box;}a{color:#008000;}a:hover{color:#00a000;}input::selection,textarea::selection{background:rgba(0,128,0,.45);}[data-scroll]::-webkit-scrollbar{width:8px;height:8px;}[data-scroll]::-webkit-scrollbar-track{background:transparent;margin:8px 0;}[data-scroll]::-webkit-scrollbar-thumb{background:#555;border:3px solid transparent;background-clip:padding-box;border-radius:4px;}[data-scroll]::-webkit-scrollbar-thumb:hover{background-color:#6a6a6a;}[data-scroll]::-webkit-scrollbar-corner{background:transparent;}</style>
+</helmet>
+<div style="position:fixed;inset:0;background:#000;color:#fff;font-family:'Google Sans','Product Sans',Figtree,system-ui,sans-serif;display:grid;grid-template-columns:59px minmax(0,1fr);grid-template-rows:63px minmax(0,1fr);overflow:hidden;user-select:none;">
+  <header style="grid-column:1 / 3;display:flex;align-items:center;justify-content:space-between;padding:0 20px 4px 18px;min-width:0;gap:clamp(16px,2.7vw,53px);">
+    <h1 style="margin:0;flex:none;font-size:24px;font-weight:700;letter-spacing:-0.2px;line-height:1;">
+      <sc-if value="{{ isNotas }}" hint-placeholder-val="{{ true }}">Notas</sc-if>
+      <sc-if value="{{ isAgenda }}" hint-placeholder-val="{{ false }}">Agenda</sc-if>
+    </h1>
+    <nav style="display:flex;align-items:center;gap:clamp(13px,2.1vw,41px);min-width:0;">
+      <div style="display:flex;align-items:center;gap:clamp(13px,2.8vw,53px);min-width:0;overflow-x:auto;scrollbar-width:none;">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+          <div style="display:inline-grid;flex:none;font-size:16px;line-height:21px;">
+            <span style="grid-area:1 / 1;white-space:pre;visibility:hidden;font-weight:{{ t.weight }};padding:0 1px;">{{ t.display }}</span>
+            <input value="{{ t.text }}" readOnly="{{ t.readOnly }}" maxLength="22" spellCheck="false" title="Doble clic para editar" onDoubleClick="{{ t.onDbl }}" onChange="{{ t.onChange }}" onKeyDown="{{ t.onKey }}" onBlur="{{ t.onBlur }}" onMouseDown="{{ t.onDown }}" onClick="{{ t.onClick }}" style="grid-area:1 / 1;width:0;min-width:100%;margin:0;padding:0 1px;border:0;outline:none;background:transparent;font:inherit;font-weight:{{ t.weight }};color:{{ t.color }};cursor:{{ t.cursor }};caret-color:#008000;box-shadow:{{ t.underline }};">
+          </div>
+        </sc-for>
+      </div>
+      <button onClick="{{ addNote }}" title="Añadir nota" style="width:27px;height:27px;padding:0;border:0;background:url(assets/agregar-activo.svg) center / contain no-repeat;cursor:pointer;flex:none;" aria-label="Añadir"></button>
+    </nav>
+  </header>
+
+  <aside style="display:flex;flex-direction:column;align-items:center;padding-bottom:20px;min-height:0;">
+    <button onClick="{{ toggleMode }}" aria-label="Cambiar modo" style="position:relative;width:38px;height:75px;padding:0;border:0;border-radius:19px;background:#2b2b2b;cursor:pointer;flex:none;">
+      <span style="position:absolute;left:0;top:{{ pillTop }};width:38px;height:38px;border-radius:50%;background:#008000;transition:top .28s cubic-bezier(.4,0,.2,1);"></span>
+      <span style="position:absolute;left:9px;top:9px;width:19px;height:19px;background:#fff;mask:url(assets/lineas-de-calendario.svg) center / contain no-repeat;-webkit-mask:url(assets/lineas-de-calendario.svg) center / contain no-repeat;"></span>
+      <span style="position:absolute;left:10px;top:47px;width:18px;height:18px;background:#fff;mask:url(assets/lista-de-rectangulos.svg) center / contain no-repeat;-webkit-mask:url(assets/lista-de-rectangulos.svg) center / contain no-repeat;"></span>
+    </button>
+    <sc-if value="{{ isNotas }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:0 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;align-items:center;margin-top:28px;margin-bottom:16px;gap:clamp(11px,3.5vh,37px);">
+        <button onClick="{{ addTable }}" aria-label="Añadir tabla" title="Tabla" style="width:20px;height:20px;flex:none;padding:0;border:0;cursor:pointer;background:#5a5a5a;mask:url(assets/lista-de-tablas.svg) center / contain no-repeat;-webkit-mask:url(assets/lista-de-tablas.svg) center / contain no-repeat;"></button>
+        <button onClick="{{ addExpr }}" aria-label="Añadir expresión" title="Expresión" style="width:20px;height:20px;flex:none;padding:0;border:0;cursor:pointer;background:#5a5a5a;mask:url(assets/entrada-numerica.svg) center / contain no-repeat;-webkit-mask:url(assets/entrada-numerica.svg) center / contain no-repeat;"></button>
+        <button onClick="{{ addToggle }}" aria-label="Añadir interruptor" title="Interruptor" style="width:20px;height:20px;flex:none;padding:0;border:0;cursor:pointer;background:#5a5a5a;mask:url(assets/boton-de-radio.svg) center / contain no-repeat;-webkit-mask:url(assets/boton-de-radio.svg) center / contain no-repeat;"></button>
+        <button onClick="{{ addLogic }}" aria-label="Añadir lógica" title="Lógica" style="width:20px;height:20px;flex:none;padding:0;border:0;cursor:pointer;background:#5a5a5a;mask:url(assets/rama-de-codigo.svg) center / contain no-repeat;-webkit-mask:url(assets/rama-de-codigo.svg) center / contain no-repeat;"></button>
+        <button onClick="{{ addSlider }}" aria-label="Añadir deslizador" title="Deslizador" style="width:20px;height:14px;flex:none;padding:0;border:0;cursor:pointer;background:#5a5a5a;mask:url(assets/agregar-barra.svg) center / contain no-repeat;-webkit-mask:url(assets/agregar-barra.svg) center / contain no-repeat;"></button>
+        <button onClick="{{ addPct }}" aria-label="Añadir porcentaje" title="Porcentaje" style="width:17px;height:17px;flex:none;padding:0;border:0;cursor:pointer;background:#5a5a5a;mask:url(assets/porcentaje.svg) center / contain no-repeat;-webkit-mask:url(assets/porcentaje.svg) center / contain no-repeat;"></button>
+        <button onClick="{{ addSep }}" aria-label="Añadir separador" title="Separador" style="width:20px;height:20px;flex:none;padding:0;border:0;cursor:pointer;background:transparent;display:flex;align-items:center;gap:3px;"><span style="flex:1;height:2px;border-radius:1px;background:#5a5a5a;"></span><span style="flex:none;width:5px;height:9px;border-radius:1px;background:#5a5a5a;"></span><span style="flex:1;height:2px;border-radius:1px;background:#5a5a5a;"></span></button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isAgenda }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:0 1 auto;min-height:0;overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;align-items:center;margin-top:28px;margin-bottom:16px;gap:clamp(11px,3.5vh,37px);">
+        <button onClick="{{ addDate }}" aria-label="Calendario" title="Calendario" style="width:19px;height:19px;flex:none;padding:0;border:0;cursor:pointer;background:#5a5a5a;mask:url(assets/lineas-de-calendario.svg) center / contain no-repeat;-webkit-mask:url(assets/lineas-de-calendario.svg) center / contain no-repeat;"></button>
+        <button onClick="{{ addCount }}" aria-label="Contador" title="Contador" style="width:20px;height:20px;flex:none;padding:0;border:0;cursor:pointer;background:#5a5a5a;mask:url(assets/reloj.svg) center / contain no-repeat;-webkit-mask:url(assets/reloj.svg) center / contain no-repeat;"></button>
+        <button onClick="{{ addNotif }}" aria-label="Notificación" title="Notificación" style="width:20px;height:20px;flex:none;padding:0;border:0;cursor:pointer;background:#5a5a5a;mask:url(assets/campana.svg) center / contain no-repeat;-webkit-mask:url(assets/campana.svg) center / contain no-repeat;"></button>
+        <button onClick="{{ addCheck }}" aria-label="Casilla True/False" title="Casilla True/False" style="width:20px;height:20px;flex:none;padding:0;border:0;cursor:pointer;background:#5a5a5a;mask:url(assets/boton-de-radio.svg) center / contain no-repeat;-webkit-mask:url(assets/boton-de-radio.svg) center / contain no-repeat;"></button>
+        <button onClick="{{ addLogic }}" aria-label="Lógica" title="Lógica" style="width:20px;height:20px;flex:none;padding:0;border:0;cursor:pointer;background:#5a5a5a;mask:url(assets/rama-de-codigo.svg) center / contain no-repeat;-webkit-mask:url(assets/rama-de-codigo.svg) center / contain no-repeat;"></button>
+        <button onClick="{{ addText }}" aria-label="Añadir texto" title="Texto" style="width:19px;height:19px;flex:none;padding:0;border:0;cursor:pointer;background:#5a5a5a;mask:url(assets/texto.svg) center / contain no-repeat;-webkit-mask:url(assets/texto.svg) center / contain no-repeat;"></button>
+        <button onClick="{{ addSep }}" aria-label="Añadir separador" title="Separador" style="width:20px;height:20px;flex:none;padding:0;border:0;cursor:pointer;background:transparent;display:flex;align-items:center;gap:3px;"><span style="flex:1;height:2px;border-radius:1px;background:#5a5a5a;"></span><span style="flex:none;width:5px;height:9px;border-radius:1px;background:#5a5a5a;"></span><span style="flex:1;height:2px;border-radius:1px;background:#5a5a5a;"></span></button>
+      </div>
+    </sc-if>
+    <button aria-label="Ajustes" style="margin-top:auto;width:19px;height:19px;padding:0;border:0;cursor:pointer;flex:none;background:#fff;mask:url(assets/ajustes.svg) center / contain no-repeat;-webkit-mask:url(assets/ajustes.svg) center / contain no-repeat;"></button>
+  </aside>
+
+  <main style="margin:0 6px 5px 0;background:#333;border-radius:11px;display:flex;flex-direction:column;padding:3px 4px;min-width:0;min-height:0;">
+    <div style="display:flex;gap:5px;height:27px;flex:none;">
+      <div style="display:flex;align-items:center;gap:9px;padding:0 9px 0 7px;background:#2a2a2a;border-radius:7px;">
+        <button aria-label="Convertir" style="width:16px;height:16px;padding:0;border:0;cursor:pointer;background:#8a8a8a;mask:url(assets/convertir-documento.svg) center / contain no-repeat;-webkit-mask:url(assets/convertir-documento.svg) center / contain no-repeat;"></button>
+        <button onClick="{{ toggleView }}" aria-label="Vista limpia" aria-pressed="{{ clean }}" title="Vista limpia / sucia" style="position:relative;width:31px;height:15px;padding:0;border:0;border-radius:7px;background:#555;cursor:pointer;">
+          <span style="position:absolute;left:{{ knobLeft }};top:0;width:15px;height:15px;border-radius:50%;background:{{ knobColor }};transition:left .22s cubic-bezier(.4,0,.2,1),background-color .22s;"></span>
+        </button>
+      </div>
+      <div style="flex:1;min-width:0;display:flex;align-items:center;gap:15px;padding-right:8px;background:#2a2a2a;border-radius:7px;"><sc-if value="{{ isAgenda }}" hint-placeholder-val="{{ false }}"><span style="flex:none;padding-left:11px;font-size:14px;color:#a6a6a6;white-space:nowrap;font-variant-numeric:tabular-nums;">{{ clockTxt }}</span></sc-if>
+        <div style="flex:1;min-width:0;height:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;display:flex;padding:1px;">
+          <div style="margin-left:auto;display:flex;align-items:stretch;gap:12px;">
+            <sc-for list="{{ sheets }}" as="t" hint-placeholder-count="3">
+              <div style="display:inline-grid;align-items:center;flex:none;padding:0 11px;border-radius:6px;background:{{ t.bg }};font-size:15px;line-height:20px;">
+                <span style="grid-area:1 / 1;white-space:pre;visibility:hidden;font-weight:{{ t.weight }};padding:0 1px;">{{ t.display }}</span>
+                <input value="{{ t.text }}" readOnly="{{ t.readOnly }}" maxLength="22" spellCheck="false" title="Doble clic para editar" onDoubleClick="{{ t.onDbl }}" onChange="{{ t.onChange }}" onKeyDown="{{ t.onKey }}" onBlur="{{ t.onBlur }}" onMouseDown="{{ t.onDown }}" onClick="{{ t.onClick }}" style="grid-area:1 / 1;width:0;min-width:100%;margin:0;padding:0 1px;border:0;outline:none;background:transparent;font:inherit;font-weight:{{ t.weight }};color:{{ t.color }};cursor:{{ t.cursor }};caret-color:#008000;box-shadow:{{ t.underline }};">
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <button onClick="{{ addSheet }}" title="Añadir hoja" aria-label="Añadir página" style="position:relative;flex:none;width:13px;height:13px;padding:0;border:0;background:transparent;cursor:pointer;">
+          <span style="position:absolute;left:6px;top:2px;width:2px;height:11px;background:#7a7a7a;border-radius:1px;"></span>
+          <span style="position:absolute;left:2px;top:6px;width:11px;height:2px;background:#7a7a7a;border-radius:1px;"></span>
+        </button>
+        <div data-menu="1" style="position:relative;flex:none;display:flex;">
+          <button onClick="{{ toggleMenu }}" aria-label="Estado" aria-haspopup="menu" aria-expanded="{{ menuOpen }}" title="Opciones" style="flex:none;width:11px;height:11px;padding:0;border:0;border-radius:50%;background:{{ dotColor }};cursor:pointer;transition:background-color .15s;" style-hover="background:#a6a6a6;"></button>
+          <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+            <div role="menu" style="position:absolute;top:21px;right:-6px;z-index:20;min-width:160px;padding:4px;background:#1c1c1c;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:2px;">
+              <button role="menuitem" onClick="{{ deleteSheet }}" disabled="{{ noSheet }}" style="display:flex;align-items:center;width:100%;padding:7px 10px;border:0;border-radius:5px;background:transparent;color:#fff;font:inherit;font-size:14px;line-height:18px;text-align:left;cursor:pointer;white-space:nowrap;opacity:{{ sheetItemOpacity }};" style-hover="background:#2a2a2a;">Eliminar hoja</button>
+              <button role="menuitem" onClick="{{ deleteNote }}" disabled="{{ noNote }}" style="display:flex;align-items:center;width:100%;padding:7px 10px;border:0;border-radius:5px;background:transparent;color:#fff;font:inherit;font-size:14px;line-height:18px;text-align:left;cursor:pointer;white-space:nowrap;opacity:{{ noteItemOpacity }};" style-hover="background:#2a2a2a;">Eliminar nota</button>
+            </div>
+          </sc-if>
+        </div>
+
+      </div>
+    </div>
+    <sc-if value="{{ noSheet }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:16px;">
+        <p style="margin:0 0 20px;font-size:24px;font-weight:700;text-align:center;text-wrap:pretty;">Añade una página para empezar</p>
+      </div>
+    </sc-if>
+    <sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:1;min-height:0;display:flex;gap:4px;padding-top:5px;">
+      <sc-if value="{{ isNotas }}" hint-placeholder-val="{{ true }}"><section ref="{{ panelRef }}" onMouseDown="{{ panelDown }}" style="position:relative;flex:0 1 {{ panelWidth }};max-width:100%;min-width:min(200px,100%);background:#1c1c1c;border-radius:7px;padding:8px 2px 8px 0;cursor:{{ panelCursor }};">
+        <div data-scroll="" style="height:100%;overflow-y:auto;overflow-x:hidden;padding:8px 20px 27px 22px;">
+          <sc-for list="{{ lines }}" as="ln" hint-placeholder-count="4">
+            <div data-line="1" onMouseDown="{{ ln.onDown }}" style="position:relative;margin-top:{{ ln.mt }};padding:{{ ln.pad }};background:{{ ln.bg }};border-radius:{{ ln.rad }};box-shadow:{{ ln.bar }};font-size:{{ ln.fs }};line-height:{{ ln.lh }};font-weight:{{ ln.fw }};color:{{ ln.color }};">
+              <sc-if value="{{ ln.isHr }}" hint-placeholder-val="{{ false }}"><div style="height:25px;display:flex;align-items:center;"><span style="flex:1;height:2px;background:#3a3a3a;"></span></div></sc-if>
+              <sc-if value="{{ ln.hasMarker }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:0;left:{{ ln.mkLeft }};width:20px;text-align:right;color:#008000;font-weight:600;">{{ ln.marker }}</span></sc-if>
+              <sc-if value="{{ ln.hasCopy }}" hint-placeholder-val="{{ false }}"><button onClick="{{ ln.onCopy }}" aria-label="Copiar contenido" title="{{ ln.copyTitle }}" style="position:absolute;top:8px;right:10px;z-index:1;width:22px;height:22px;padding:0;border:0;border-radius:5px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#1c1c1c;"><span style="width:15px;height:15px;background:{{ ln.copyColor }};mask:url(assets/clon.svg) center / contain no-repeat;-webkit-mask:url(assets/clon.svg) center / contain no-repeat;transition:background-color .15s;"></span></button></sc-if>
+              <sc-if value="{{ ln.showText }}" hint-placeholder-val="{{ true }}"><div style="white-space:pre-wrap;word-break:break-word;min-height:{{ ln.lh }};"><sc-for list="{{ ln.segs }}" as="sg" hint-placeholder-count="1"><sc-if value="{{ sg.isText }}" hint-placeholder-val="{{ true }}"><span data-off="{{ sg.off }}" style="color:{{ sg.color }};font-weight:{{ sg.fw }};font-style:{{ sg.fst }};">{{ sg.text }}</span></sc-if><sc-if value="{{ sg.isEnt }}" hint-placeholder-val="{{ false }}"><span title="{{ sg.title }}" style="background:#1d2b1d;box-shadow:0 0 0 4px #1d2b1d;border-radius:2px;"><span data-off="{{ sg.off }}" style="color:#fff;">{{ sg.eq }}</span><span data-off="{{ sg.off2 }}" style="color:#008000;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};">{{ sg.label }}</span></span></sc-if><sc-if value="{{ sg.isBox }}" hint-placeholder-val="{{ false }}"><span onMouseDown="{{ sg.onToggle }}" role="checkbox" aria-checked="{{ sg.on }}" style="display:inline-block;width:15px;height:15px;border-radius:3px;vertical-align:-2px;margin-right:{{ sg.mr }};background:{{ sg.bg }};box-shadow:inset 0 0 0 2px #008000;"></span></sc-if></sc-for>&#8203;</div></sc-if>
+              <sc-if value="{{ ln.focused }}" hint-placeholder-val="{{ false }}">
+                <textarea ref="{{ taRef }}" rows="1" spellCheck="false" value="{{ ln.text }}" onChange="{{ ln.onChange }}" onKeyDown="{{ ln.onKey }}" onPaste="{{ ln.onPaste }}" onBlur="{{ ln.onBlur }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;outline:none;resize:none;overflow:hidden;background:transparent;color:transparent;caret-color:#008000;font:inherit;line-height:inherit;letter-spacing:inherit;white-space:pre-wrap;word-break:break-word;"></textarea>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div data-handle="1" onPointerDown="{{ resizeDown }}" onPointerMove="{{ resizeMove }}" onPointerUp="{{ resizeUp }}" onPointerCancel="{{ resizeUp }}" onDoubleClick="{{ resizeReset }}" title="Arrastra para ajustar el ancho" style="position:absolute;top:0;bottom:0;right:-5px;width:7px;cursor:col-resize;z-index:2;touch-action:none;display:flex;justify-content:center;">
+          <span data-handle="1" style="width:2px;height:100%;border-radius:2px;background:{{ handleColor }};transition:background-color .15s;" style-hover="background:#008000;"></span>
+        </div>
+      </section></sc-if>
+      <div data-scroll="" style="flex:1;min-width:min(440px,58%);overflow-y:auto;overflow-x:hidden;padding:14px 30px 40px 34px;">
+        <sc-if value="{{ agendaEmpty }}" hint-placeholder-val="{{ false }}"><p style="margin:80px 0 0;font-size:24px;font-weight:700;text-align:center;text-wrap:pretty;">Añade un calendario desde la barra lateral</p></sc-if>
+        <div style="display:flex;flex-direction:column;gap:{{ entGap }};width:100%;max-width:{{ colMax }};margin:0 auto;">
+          <sc-for list="{{ entities }}" as="e" hint-placeholder-count="0">
+            <div style="position:relative;">
+              <sc-if value="{{ e.isSep }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:14px;height:30px;margin-left:{{ e.sepMl }};">
+                  <span style="flex:1;min-width:24px;height:1px;background:#4a4a4a;"></span>
+                  <sc-if value="{{ e.sepStatic }}" hint-placeholder-val="{{ false }}"><span style="flex:0 1 auto;min-width:0;font-size:14px;font-weight:600;letter-spacing:.3px;color:#8a8a8a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.title }}</span></sc-if>
+                  <sc-if value="{{ dirty }}" hint-placeholder-val="{{ false }}"><div style="display:inline-grid;flex:0 1 auto;min-width:60px;max-width:70%;font-size:14px;font-weight:600;letter-spacing:.3px;"><span style="grid-area:1 / 1;white-space:pre;visibility:hidden;overflow:hidden;padding:0 4px;">{{ e.titleSizer }}</span><input value="{{ e.title }}" onChange="{{ e.onTitle }}" maxLength="40" spellCheck="false" placeholder="Título" style="grid-area:1 / 1;width:0;min-width:100%;margin:0;padding:0 4px;border:0;outline:none;background:transparent;font:inherit;color:#a6a6a6;text-align:center;caret-color:#008000;box-shadow:0 1px 0 #008000;"></div></sc-if>
+                  <span style="flex:1;min-width:24px;height:1px;background:#4a4a4a;"></span>
+                  <sc-if value="{{ dirty }}" hint-placeholder-val="{{ false }}">
+                    <div data-entmenu="1" style="position:relative;flex:none;display:flex;">
+                      <button onClick="{{ e.toggleMenu }}" aria-label="Opciones del separador" aria-haspopup="menu" aria-expanded="{{ e.menuOpen }}" title="Opciones" style="width:11px;height:11px;padding:0;border:0;border-radius:50%;background:{{ e.menuDot }};cursor:pointer;transition:background-color .15s;" style-hover="background:#a6a6a6;"></button>
+                      <sc-if value="{{ e.menuOpen }}" hint-placeholder-val="{{ false }}">
+                        <div role="menu" style="position:absolute;top:21px;right:-6px;z-index:40;min-width:160px;padding:4px;background:#1c1c1c;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:2px;">
+                          <button role="menuitem" onClick="{{ e.duplicate }}" style="display:flex;align-items:center;width:100%;padding:7px 10px;border:0;border-radius:5px;background:transparent;color:#fff;font:inherit;font-size:14px;line-height:18px;text-align:left;cursor:pointer;white-space:nowrap;" style-hover="background:#2a2a2a;">Duplicar separador</button>
+                          <button role="menuitem" onClick="{{ e.remove }}" style="display:flex;align-items:center;width:100%;padding:7px 10px;border:0;border-radius:5px;background:transparent;color:#fff;font:inherit;font-size:14px;line-height:18px;text-align:left;cursor:pointer;white-space:nowrap;" style-hover="background:#2a2a2a;">Borrar separador</button>
+                        </div>
+                      </sc-if>
+                    </div>
+                    <button onClick="{{ e.up }}" aria-label="Subir" style="position:absolute;right:-28px;top:-1px;width:16px;height:16px;padding:0;border:0;cursor:pointer;transform:rotate(-90deg);background:{{ e.upColor }};mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;-webkit-mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;"></button>
+                    <button onClick="{{ e.down }}" aria-label="Bajar" style="position:absolute;right:-28px;top:15px;width:16px;height:16px;padding:0;border:0;cursor:pointer;transform:rotate(90deg);background:{{ e.downColor }};mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;-webkit-mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;"></button>
+                  </sc-if>
+                </div>
+              </sc-if>
+              <sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;align-items:center;gap:17px;height:30px;margin:0 0 9px -30px;padding:0 2px 0 4px;border-bottom:1px solid #008000;font-size:16px;">
+                  <span style="flex:none;width:16px;height:16px;background:#fff;mask:url({{ e.icon }}) center / contain no-repeat;-webkit-mask:url({{ e.icon }}) center / contain no-repeat;"></span>
+                  <input value="{{ e.nm.text }}" readOnly="{{ e.nm.readOnly }}" maxLength="22" spellCheck="false" title="Doble clic para editar" onDoubleClick="{{ e.nm.onDbl }}" onChange="{{ e.nm.onChange }}" onKeyDown="{{ e.nm.onKey }}" onBlur="{{ e.nm.onBlur }}" onMouseDown="{{ e.nm.onDown }}" style="flex:1;min-width:0;margin:0;padding:0;border:0;outline:none;background:transparent;font:inherit;color:#fff;cursor:{{ e.nm.cursor }};caret-color:#008000;box-shadow:{{ e.nm.underline }};">
+                  <sc-if value="{{ e.hasDec }}" hint-placeholder-val="{{ false }}"><button onClick="{{ e.toggleDec }}" title="Coma flotante" aria-pressed="{{ e.decimals }}" style="flex:none;width:16px;height:16px;padding:0;border:0;cursor:pointer;background:{{ e.decColor }};mask:url({{ e.decIcon }}) center / contain no-repeat;-webkit-mask:url({{ e.decIcon }}) center / contain no-repeat;"></button></sc-if>
+                  <sc-if value="{{ e.hasFx }}" hint-placeholder-val="{{ true }}"><button onClick="{{ e.toggleFx }}" aria-label="Función" aria-pressed="{{ e.showIn }}" title="{{ e.fxTitle }}" style="flex:none;width:16px;height:16px;padding:0;border:0;cursor:pointer;background:{{ e.fxColor }};mask:url(assets/funcion.svg) center / contain no-repeat;-webkit-mask:url(assets/funcion.svg) center / contain no-repeat;"></button></sc-if>
+                  <div data-entmenu="1" style="position:relative;flex:none;display:flex;">
+                    <button onClick="{{ e.toggleMenu }}" aria-label="Opciones de la entidad" aria-haspopup="menu" aria-expanded="{{ e.menuOpen }}" title="Opciones" style="width:11px;height:11px;padding:0;border:0;border-radius:50%;background:{{ e.menuDot }};cursor:pointer;transition:background-color .15s;" style-hover="background:#a6a6a6;"></button>
+                    <sc-if value="{{ e.menuOpen }}" hint-placeholder-val="{{ false }}">
+                      <div role="menu" style="position:absolute;top:21px;right:-6px;z-index:40;min-width:160px;padding:4px;background:#1c1c1c;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:2px;">
+                        <button role="menuitem" onClick="{{ e.duplicate }}" style="display:flex;align-items:center;width:100%;padding:7px 10px;border:0;border-radius:5px;background:transparent;color:#fff;font:inherit;font-size:14px;line-height:18px;text-align:left;cursor:pointer;white-space:nowrap;" style-hover="background:#2a2a2a;">Duplicar entidad</button>
+                        <button role="menuitem" onClick="{{ e.remove }}" style="display:flex;align-items:center;width:100%;padding:7px 10px;border:0;border-radius:5px;background:transparent;color:#fff;font:inherit;font-size:14px;line-height:18px;text-align:left;cursor:pointer;white-space:nowrap;" style-hover="background:#2a2a2a;">Borrar entidad</button>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+                <button onClick="{{ e.up }}" aria-label="Subir" style="position:absolute;right:-28px;top:7px;width:16px;height:16px;padding:0;border:0;cursor:pointer;transform:rotate(-90deg);background:{{ e.upColor }};mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;-webkit-mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;"></button>
+                <button onClick="{{ e.down }}" aria-label="Bajar" style="position:absolute;right:-28px;bottom:2px;width:16px;height:16px;padding:0;border:0;cursor:pointer;transform:rotate(90deg);background:{{ e.downColor }};mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;-webkit-mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;"></button>
+              </sc-if>
+              <sc-if value="{{ e.isText }}" hint-placeholder-val="{{ false }}">
+                <sc-if value="{{ dirty }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;align-items:center;gap:17px;height:30px;margin:0 0 9px -30px;padding:0 2px 0 4px;border-bottom:1px solid #008000;font-size:16px;">
+                    <span style="width:16px;height:16px;flex:none;background:#fff;mask:url(assets/texto.svg) center / contain no-repeat;-webkit-mask:url(assets/texto.svg) center / contain no-repeat;"></span>
+                    <span style="flex:1;min-width:0;color:#a6a6a6;">Texto</span>
+                    <button onClick="{{ e.toggleFx }}" aria-label="Fórmula" aria-pressed="{{ e.fxOn }}" title="{{ e.fxTitle }}" style="flex:none;width:16px;height:16px;padding:0;border:0;cursor:pointer;background:{{ e.fxColor }};mask:url(assets/funcion.svg) center / contain no-repeat;-webkit-mask:url(assets/funcion.svg) center / contain no-repeat;"></button>
+                    <div data-entmenu="1" style="position:relative;flex:none;display:flex;">
+                    <button onClick="{{ e.toggleMenu }}" aria-label="Opciones" aria-haspopup="menu" aria-expanded="{{ e.menuOpen }}" title="Opciones" style="width:11px;height:11px;padding:0;border:0;border-radius:50%;background:{{ e.menuDot }};cursor:pointer;transition:background-color .15s;" style-hover="background:#a6a6a6;"></button>
+                    <sc-if value="{{ e.menuOpen }}" hint-placeholder-val="{{ false }}">
+                      <div role="menu" style="position:absolute;top:21px;right:-6px;z-index:40;min-width:160px;padding:4px;background:#1c1c1c;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:2px;">
+                        <button role="menuitem" onClick="{{ e.duplicate }}" style="display:flex;align-items:center;width:100%;padding:7px 10px;border:0;border-radius:5px;background:transparent;color:#fff;font:inherit;font-size:14px;line-height:18px;text-align:left;cursor:pointer;white-space:nowrap;" style-hover="background:#2a2a2a;">Duplicar texto</button>
+                        <button role="menuitem" onClick="{{ e.remove }}" style="display:flex;align-items:center;width:100%;padding:7px 10px;border:0;border-radius:5px;background:transparent;color:#fff;font:inherit;font-size:14px;line-height:18px;text-align:left;cursor:pointer;white-space:nowrap;" style-hover="background:#2a2a2a;">Borrar texto</button>
+                      </div>
+                    </sc-if>
+                  </div>
+                  </div>
+                  <button onClick="{{ e.up }}" aria-label="Subir" style="position:absolute;right:-28px;top:7px;width:16px;height:16px;padding:0;border:0;cursor:pointer;transform:rotate(-90deg);background:{{ e.upColor }};mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;-webkit-mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;"></button>
+                <button onClick="{{ e.down }}" aria-label="Bajar" style="position:absolute;right:-28px;top:23px;width:16px;height:16px;padding:0;border:0;cursor:pointer;transform:rotate(90deg);background:{{ e.downColor }};mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;-webkit-mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;"></button>
+                </sc-if>
+                <div onMouseDown="{{ e.boxDown }}" style="width:fit-content;min-width:min(220px,100%);max-width:100%;margin:0 auto;padding:12px 18px 14px;background:#1c1c1c;border-radius:7px;cursor:{{ e.boxCursor }};">
+                  <sc-for list="{{ e.lines }}" as="ln" hint-placeholder-count="1">
+            <div data-line="1" onMouseDown="{{ ln.onDown }}" style="position:relative;margin-top:{{ ln.mt }};padding:{{ ln.pad }};background:{{ ln.bg }};border-radius:{{ ln.rad }};box-shadow:{{ ln.bar }};font-size:{{ ln.fs }};line-height:{{ ln.lh }};font-weight:{{ ln.fw }};color:{{ ln.color }};">
+              <sc-if value="{{ ln.isHr }}" hint-placeholder-val="{{ false }}"><div style="height:25px;display:flex;align-items:center;"><span style="flex:1;height:2px;background:#3a3a3a;"></span></div></sc-if>
+              <sc-if value="{{ ln.hasMarker }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:0;left:{{ ln.mkLeft }};width:20px;text-align:right;color:#008000;font-weight:600;">{{ ln.marker }}</span></sc-if>
+              <sc-if value="{{ ln.hasCopy }}" hint-placeholder-val="{{ false }}"><button onClick="{{ ln.onCopy }}" aria-label="Copiar contenido" title="{{ ln.copyTitle }}" style="position:absolute;top:8px;right:10px;z-index:1;width:22px;height:22px;padding:0;border:0;border-radius:5px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#1c1c1c;"><span style="width:15px;height:15px;background:{{ ln.copyColor }};mask:url(assets/clon.svg) center / contain no-repeat;-webkit-mask:url(assets/clon.svg) center / contain no-repeat;transition:background-color .15s;"></span></button></sc-if>
+              <sc-if value="{{ ln.showText }}" hint-placeholder-val="{{ true }}"><div style="white-space:pre-wrap;word-break:break-word;min-height:{{ ln.lh }};"><sc-for list="{{ ln.segs }}" as="sg" hint-placeholder-count="1"><sc-if value="{{ sg.isText }}" hint-placeholder-val="{{ true }}"><span data-off="{{ sg.off }}" style="color:{{ sg.color }};font-weight:{{ sg.fw }};font-style:{{ sg.fst }};">{{ sg.text }}</span></sc-if><sc-if value="{{ sg.isEnt }}" hint-placeholder-val="{{ false }}"><span title="{{ sg.title }}" style="background:#1d2b1d;box-shadow:0 0 0 4px #1d2b1d;border-radius:2px;"><span data-off="{{ sg.off }}" style="color:#fff;">{{ sg.eq }}</span><span data-off="{{ sg.off2 }}" style="color:#008000;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};">{{ sg.label }}</span></span></sc-if><sc-if value="{{ sg.isBox }}" hint-placeholder-val="{{ false }}"><span onMouseDown="{{ sg.onToggle }}" role="checkbox" aria-checked="{{ sg.on }}" style="display:inline-block;width:15px;height:15px;border-radius:3px;vertical-align:-2px;margin-right:{{ sg.mr }};background:{{ sg.bg }};box-shadow:inset 0 0 0 2px #008000;"></span></sc-if></sc-for>&#8203;</div></sc-if>
+              <sc-if value="{{ ln.focused }}" hint-placeholder-val="{{ false }}">
+                <textarea ref="{{ taRef }}" rows="1" spellCheck="false" value="{{ ln.text }}" onChange="{{ ln.onChange }}" onKeyDown="{{ ln.onKey }}" onPaste="{{ ln.onPaste }}" onBlur="{{ ln.onBlur }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;outline:none;resize:none;overflow:hidden;background:transparent;color:transparent;caret-color:#008000;font:inherit;line-height:inherit;letter-spacing:inherit;white-space:pre-wrap;word-break:break-word;"></textarea>
+              </sc-if>
+            </div>
+          </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ e.isNotif }}" hint-placeholder-val="{{ false }}"><div style="background:#2a2a2a;border-radius:7px;font-size:16px;">
+                <div style="display:flex;height:37px;min-width:0;">
+                  <sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}"><div style="display:inline-grid;flex:0 1 auto;min-width:60px;max-width:40%;align-items:center;padding:0 10px;overflow:hidden;"><span style="grid-area:1 / 1;white-space:pre;visibility:hidden;overflow:hidden;">{{ e.descSizer }}</span><input value="{{ e.desc }}" onChange="{{ e.onDesc }}" maxLength="40" spellCheck="false" style="grid-area:1 / 1;width:0;min-width:100%;margin:0;padding:0;border:0;outline:none;background:transparent;font:inherit;color:#fff;caret-color:#008000;"></div><div style="flex:1;min-width:0;"></div><div role="radiogroup" aria-label="Origen de la fecha" style="flex:none;display:flex;align-items:center;gap:2px;margin:5px 6px;padding:2px;background:#1c1c1c;border-radius:7px;"><sc-for list="{{ e.nkinds }}" as="m" hint-placeholder-count="2"><button role="radio" aria-checked="{{ m.on }}" onClick="{{ m.onClick }}" title="{{ m.title }}" style="height:23px;padding:0 9px;border:0;border-radius:5px;background:{{ m.bg }};color:{{ m.color }};font:inherit;font-size:13px;font-weight:{{ m.fw }};cursor:pointer;white-space:nowrap;" style-hover="color:#fff;">{{ m.label }}</button></sc-for></div><sc-if value="{{ e.hasRefSeg }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Referencia del periodo" style="flex:none;display:flex;align-items:center;gap:2px;margin:5px 6px;padding:2px;background:#1c1c1c;border-radius:7px;"><sc-for list="{{ e.nrefs }}" as="m" hint-placeholder-count="2"><button role="radio" aria-checked="{{ m.on }}" onClick="{{ m.onClick }}" title="{{ m.title }}" style="height:23px;padding:0 9px;border:0;border-radius:5px;background:{{ m.bg }};color:{{ m.color }};font:inherit;font-size:13px;font-weight:{{ m.fw }};cursor:pointer;white-space:nowrap;" style-hover="color:#fff;">{{ m.label }}</button></sc-for></div></sc-if></sc-if>
+                  <sc-if value="{{ e.headClean }}" hint-placeholder-val="{{ false }}"><div style="flex:1;min-width:0;display:flex;align-items:center;padding:0 10px;"><span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.desc }}</span></div></sc-if>
+                  <div style="flex:none;min-width:95px;max-width:50%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;background:#1c1c1c;border-radius:7px;color:{{ e.outColor }};font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;">{{ e.outTxt }}</div>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;min-height:46px;padding:5px 6px 6px 10px;font-size:15px;">
+                  <sc-if value="{{ e.headClean }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ e.cparts }}" as="p" hint-placeholder-count="4"><span style="color:{{ p.color }};font-weight:{{ p.fw }};white-space:nowrap;">{{ p.text }}</span></sc-for></sc-if>
+                  <sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}">
+                    <span style="color:#a6a6a6;">Avisar</span>
+                    <sc-for list="{{ e.offs }}" as="o" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:6px;"><input value="{{ o.value }}" onChange="{{ o.onChange }}" inputMode="numeric" maxLength="3" spellCheck="false" placeholder="0" aria-label="{{ o.label }}" style="width:44px;height:34px;margin:0;padding:0 9px;border:0;border-radius:7px;outline:none;background:#1c1c1c;font:inherit;font-weight:600;color:#008000;text-align:right;caret-color:#008000;"><span style="color:#a6a6a6;">{{ o.unit }}</span></div></sc-for>
+                    <span style="color:#a6a6a6;">antes de</span>
+                    <sc-if value="{{ e.isManual }}" hint-placeholder-val="{{ false }}"><input type="date" value="{{ e.ndate }}" onChange="{{ e.onDate }}" aria-label="Fecha" style="height:34px;margin:0;padding:0 10px;border:0;border-radius:7px;outline:none;background:#1c1c1c;color:#fff;font:inherit;color-scheme:dark;"><input type="time" value="{{ e.ntime }}" onChange="{{ e.onTime }}" aria-label="Hora" style="height:34px;margin:0;padding:0 10px;border:0;border-radius:7px;outline:none;background:#1c1c1c;color:#fff;font:inherit;color-scheme:dark;"></sc-if>
+                    <sc-if value="{{ e.isEntField }}" hint-placeholder-val="{{ false }}"><div style="flex:1 1 180px;min-width:150px;height:34px;display:flex;background:#1c1c1c;border-radius:7px;"><div style="position:relative;flex:1;min-width:0;align-self:stretch;"><div style="position:absolute;inset:0;padding:0 10px;display:flex;align-items:center;justify-content:{{ e.ft.justify }};overflow:hidden;white-space:pre;visibility:{{ e.ft.hlVis }};text-decoration:{{ e.ft.deco }};"><sc-for list="{{ e.ft.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></div><input value="{{ e.ft.value }}" spellCheck="false" onChange="{{ e.ft.onChange }}" onFocus="{{ e.ft.onFocus }}" onBlur="{{ e.ft.onBlur }}" onKeyDown="{{ e.ft.onKey }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0 10px;border:0;outline:none;background:transparent;font:inherit;color:#fff;text-align:{{ e.ft.align }};opacity:{{ e.ft.inOp }};caret-color:#008000;"></div></div><span style="color:{{ e.tgtColor }};font-weight:600;white-space:nowrap;">{{ e.tgtTxt }}</span></sc-if>
+                  </sc-if>
+                </div>
+                <sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:8px;padding:0 6px 6px 10px;font-size:15px;"><input value="{{ e.msg }}" onChange="{{ e.onMsg }}" maxLength="120" spellCheck="false" placeholder="Mensaje del aviso (opcional)" style="flex:1;min-width:0;height:34px;margin:0;padding:0 10px;border:0;border-radius:7px;outline:none;background:#1c1c1c;color:#fff;font:inherit;caret-color:#008000;"><button onClick="{{ e.test }}" title="Lanza el aviso ahora" style="flex:none;height:34px;padding:0 12px;border:0;border-radius:7px;background:#1c1c1c;color:#a6a6a6;font:inherit;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;" style-hover="color:#fff;"><span style="width:14px;height:14px;flex:none;background:#008000;mask:url(assets/campana.svg) center / contain no-repeat;-webkit-mask:url(assets/campana.svg) center / contain no-repeat;"></span>Probar aviso</button></div></sc-if>
+                <sc-if value="{{ e.hasMsgClean }}" hint-placeholder-val="{{ false }}"><p style="margin:0;padding:0 10px 11px;font-size:15px;line-height:21px;color:#cfcfcf;text-wrap:pretty;">{{ e.msg }}</p></sc-if>
+              </div></sc-if>
+              <sc-if value="{{ e.exprClean }}" hint-placeholder-val="{{ false }}"><div style="display:flex;height:37px;background:#2a2a2a;border-radius:7px;font-size:16px;"><div style="flex:1;min-width:0;display:flex;align-items:center;padding:0 10px;"><span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.desc }}</span></div><div style="flex:none;min-width:95px;max-width:50%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;background:#1c1c1c;border-radius:7px;color:#008000;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;">{{ e.out }}</div></div></sc-if>
+              <sc-if value="{{ e.exprDirty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;height:37px;background:#2a2a2a;border-radius:7px;font-size:16px;"><div style="display:inline-grid;flex:0 1 auto;min-width:60px;max-width:50%;align-items:center;padding:0 10px;overflow:hidden;"><span style="grid-area:1 / 1;white-space:pre;visibility:hidden;overflow:hidden;">{{ e.descSizer }}</span><input value="{{ e.desc }}" onChange="{{ e.onDesc }}" maxLength="40" spellCheck="false" style="grid-area:1 / 1;width:0;min-width:100%;margin:0;padding:0;border:0;outline:none;background:transparent;font:inherit;color:#fff;caret-color:#008000;"></div><div style="flex:1;min-width:0;display:flex;background:#1c1c1c;border-radius:7px;"><sc-if value="{{ e.showIn }}" hint-placeholder-val="{{ true }}"><div style="position:relative;flex:1;min-width:0;align-self:stretch;"><div style="position:absolute;inset:0;padding:0 10px;display:flex;align-items:center;justify-content:{{ e.fx.justify }};overflow:hidden;white-space:pre;visibility:{{ e.fx.hlVis }};text-decoration:{{ e.fx.deco }};"><sc-for list="{{ e.fx.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></div><input value="{{ e.fx.value }}" spellCheck="false" onChange="{{ e.fx.onChange }}" onFocus="{{ e.fx.onFocus }}" onBlur="{{ e.fx.onBlur }}" onKeyDown="{{ e.fx.onKey }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0 10px;border:0;outline:none;background:transparent;font:inherit;color:#fff;text-align:{{ e.fx.align }};opacity:{{ e.fx.inOp }};caret-color:#008000;"></div></sc-if><sc-if value="{{ e.showOut }}" hint-placeholder-val="{{ false }}"><div style="flex:1;min-width:0;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;font-size:15px;white-space:pre;overflow:hidden;"><sc-if value="{{ e.hasSubst }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ e.subst }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for><span style="color:#fff;padding:0 8px;">=</span></sc-if><span style="color:#008000;font-weight:600;">{{ e.out }}</span></div></sc-if></div></div></sc-if>
+              <sc-if value="{{ e.toggleClean }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:5px;height:37px;font-size:16px;"><button onClick="{{ e.onToggle }}" aria-pressed="{{ e.on }}" style="flex:none;width:37px;height:37px;padding:0;border:0;border-radius:7px;background:{{ e.boxBg }};display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="width:15px;height:15px;border-radius:3px;background:{{ e.chkBg }};box-shadow:inset 0 0 0 1.5px #008000;"></span></button><div style="flex:1;min-width:0;display:flex;background:{{ e.rowBg }};border-radius:7px;"><div style="flex:1;min-width:0;display:flex;align-items:center;padding:0 10px;"><span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.desc }}</span></div><div style="flex:none;min-width:95px;max-width:50%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;background:{{ e.valBg }};border-radius:7px;color:#008000;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;">{{ e.out }}</div></div></div></sc-if>
+              <sc-if value="{{ e.toggleDirty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:5px;height:37px;font-size:16px;"><button onClick="{{ e.onToggle }}" aria-pressed="{{ e.on }}" style="flex:none;width:37px;height:37px;padding:0;border:0;border-radius:7px;background:{{ e.boxBg }};display:flex;align-items:center;justify-content:center;cursor:pointer;"><span style="width:15px;height:15px;border-radius:3px;background:{{ e.chkBg }};box-shadow:inset 0 0 0 1.5px #008000;"></span></button><div style="flex:1;min-width:0;display:flex;background:{{ e.rowBg }};border-radius:7px;"><div style="display:inline-grid;flex:0 1 auto;min-width:60px;max-width:50%;align-items:center;padding:0 10px;overflow:hidden;"><span style="grid-area:1 / 1;white-space:pre;visibility:hidden;overflow:hidden;">{{ e.descSizer }}</span><input value="{{ e.desc }}" onChange="{{ e.onDesc }}" maxLength="40" spellCheck="false" style="grid-area:1 / 1;width:0;min-width:100%;margin:0;padding:0;border:0;outline:none;background:transparent;font:inherit;color:#fff;caret-color:#008000;"></div><div style="flex:1;min-width:0;display:flex;background:{{ e.valBg }};border-radius:7px;"><sc-if value="{{ e.showIn }}" hint-placeholder-val="{{ true }}"><div style="position:relative;flex:1;min-width:0;align-self:stretch;"><div style="position:absolute;inset:0;padding:0 10px;display:flex;align-items:center;justify-content:{{ e.fx.justify }};overflow:hidden;white-space:pre;visibility:{{ e.fx.hlVis }};text-decoration:{{ e.fx.deco }};"><sc-for list="{{ e.fx.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></div><input value="{{ e.fx.value }}" spellCheck="false" onChange="{{ e.fx.onChange }}" onFocus="{{ e.fx.onFocus }}" onBlur="{{ e.fx.onBlur }}" onKeyDown="{{ e.fx.onKey }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0 10px;border:0;outline:none;background:transparent;font:inherit;color:#fff;text-align:{{ e.fx.align }};opacity:{{ e.fx.inOp }};caret-color:#008000;"></div></sc-if><sc-if value="{{ e.showOut }}" hint-placeholder-val="{{ false }}"><div style="flex:1;min-width:0;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;font-size:15px;white-space:pre;overflow:hidden;"><sc-if value="{{ e.hasSubst }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ e.subst }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for><span style="color:#fff;padding:0 8px;">=</span></sc-if><span style="color:#008000;font-weight:600;">{{ e.out }}</span></div></sc-if></div></div></div></sc-if>
+              <sc-if value="{{ e.sliderClean }}" hint-placeholder-val="{{ false }}"><div style="background:#2a2a2a;border-radius:7px;font-size:16px;"><div style="display:flex;height:37px;"><div style="flex:1;min-width:0;display:flex;align-items:center;padding:0 10px;"><span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.desc }}</span></div><div style="flex:none;min-width:95px;max-width:50%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;background:#1c1c1c;border-radius:7px;color:#008000;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;">{{ e.out }}</div></div><div style="display:flex;align-items:center;gap:10px;height:46px;padding:0 10px 4px;color:#008000;font-weight:600;font-size:15px;"><span style="flex:none;">{{ e.minTxt }}</span><div onPointerDown="{{ e.slDown }}" onPointerMove="{{ e.slMove }}" onPointerUp="{{ e.slUp }}" onPointerCancel="{{ e.slUp }}" style="flex:1;min-width:0;height:22px;display:flex;align-items:center;gap:4px;cursor:pointer;touch-action:none;"><span style="flex:none;height:6px;border-radius:3px;background:#008000;width:{{ e.fillW }};"></span><span style="flex:1;height:6px;border-radius:3px;background:#5a5a5a;"></span></div><span style="flex:none;">{{ e.maxTxt }}</span></div></div></sc-if>
+              <sc-if value="{{ e.sliderDirty }}" hint-placeholder-val="{{ false }}"><div style="background:#2a2a2a;border-radius:7px;font-size:16px;"><div style="display:flex;height:37px;"><div style="display:inline-grid;flex:0 1 auto;min-width:60px;max-width:50%;align-items:center;padding:0 10px;overflow:hidden;"><span style="grid-area:1 / 1;white-space:pre;visibility:hidden;overflow:hidden;">{{ e.descSizer }}</span><input value="{{ e.desc }}" onChange="{{ e.onDesc }}" maxLength="40" spellCheck="false" style="grid-area:1 / 1;width:0;min-width:100%;margin:0;padding:0;border:0;outline:none;background:transparent;font:inherit;color:#fff;caret-color:#008000;"></div><div style="flex:1;"></div><div style="flex:none;min-width:95px;max-width:50%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;background:#1c1c1c;border-radius:7px;color:#008000;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;">{{ e.out }}</div></div><sc-if value="{{ e.showIn }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;height:46px;padding-bottom:4px;font-size:15px;"><div style="position:relative;flex:1;min-width:0;align-self:stretch;"><div style="position:absolute;inset:0;padding:0 10px;display:flex;align-items:center;justify-content:{{ e.fMin.justify }};overflow:hidden;white-space:pre;visibility:{{ e.fMin.hlVis }};text-decoration:{{ e.fMin.deco }};"><sc-for list="{{ e.fMin.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></div><input value="{{ e.fMin.value }}" spellCheck="false" onChange="{{ e.fMin.onChange }}" onFocus="{{ e.fMin.onFocus }}" onBlur="{{ e.fMin.onBlur }}" onKeyDown="{{ e.fMin.onKey }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0 10px;border:0;outline:none;background:transparent;font:inherit;color:#fff;text-align:{{ e.fMin.align }};opacity:{{ e.fMin.inOp }};caret-color:#008000;"></div><div style="position:relative;flex:1;min-width:0;align-self:stretch;"><div style="position:absolute;inset:0;padding:0 10px;display:flex;align-items:center;justify-content:{{ e.fMax.justify }};overflow:hidden;white-space:pre;visibility:{{ e.fMax.hlVis }};text-decoration:{{ e.fMax.deco }};"><sc-for list="{{ e.fMax.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></div><input value="{{ e.fMax.value }}" spellCheck="false" onChange="{{ e.fMax.onChange }}" onFocus="{{ e.fMax.onFocus }}" onBlur="{{ e.fMax.onBlur }}" onKeyDown="{{ e.fMax.onKey }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0 10px;border:0;outline:none;background:transparent;font:inherit;color:#fff;text-align:{{ e.fMax.align }};opacity:{{ e.fMax.inOp }};caret-color:#008000;"></div></div></sc-if><sc-if value="{{ e.showOut }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:10px;height:46px;padding:0 10px 4px;color:#008000;font-weight:600;font-size:15px;"><span style="flex:none;">{{ e.minTxt }}</span><div onPointerDown="{{ e.slDown }}" onPointerMove="{{ e.slMove }}" onPointerUp="{{ e.slUp }}" onPointerCancel="{{ e.slUp }}" style="flex:1;min-width:0;height:22px;display:flex;align-items:center;gap:4px;cursor:pointer;touch-action:none;"><span style="flex:none;height:6px;border-radius:3px;background:#008000;width:{{ e.fillW }};"></span><span style="flex:1;height:6px;border-radius:3px;background:#5a5a5a;"></span></div><span style="flex:none;">{{ e.maxTxt }}</span></div></sc-if></div></sc-if>
+              <sc-if value="{{ e.pctClean }}" hint-placeholder-val="{{ false }}"><div style="background:#2a2a2a;border-radius:7px;font-size:16px;"><div style="display:flex;height:37px;"><div style="flex:1;min-width:0;display:flex;align-items:center;padding:0 10px;"><span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.desc }}</span></div><div style="flex:none;min-width:95px;max-width:50%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;background:#1c1c1c;border-radius:7px;color:#008000;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;">{{ e.outTxt }}</div></div><div style="display:flex;align-items:center;gap:8px;min-height:46px;padding:0 6px 5px 10px;font-size:15px;white-space:nowrap;"><sc-for list="{{ e.sent }}" as="p" hint-placeholder-count="6"><sc-if value="{{ p.isWord }}" hint-placeholder-val="{{ true }}"><span style="flex:none;color:#a6a6a6;">{{ p.text }}</span></sc-if><sc-if value="{{ p.isField }}" hint-placeholder-val="{{ false }}"><div title="{{ p.label }}" style="flex:1 1 0;min-width:56px;height:34px;display:flex;background:#1c1c1c;border-radius:7px;"><div style="position:relative;flex:1;min-width:0;align-self:stretch;"><div style="position:absolute;inset:0;padding:0 10px;display:flex;align-items:center;justify-content:{{ p.f.justify }};overflow:hidden;white-space:pre;visibility:{{ p.f.hlVis }};text-decoration:{{ p.f.deco }};"><sc-for list="{{ p.f.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></div><input value="{{ p.f.value }}" spellCheck="false" onChange="{{ p.f.onChange }}" onFocus="{{ p.f.onFocus }}" onBlur="{{ p.f.onBlur }}" onKeyDown="{{ p.f.onKey }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0 10px;border:0;outline:none;background:transparent;font:inherit;color:#fff;text-align:{{ p.f.align }};opacity:{{ p.f.inOp }};caret-color:#008000;"></div></div></sc-if><sc-if value="{{ p.isVal }}" hint-placeholder-val="{{ false }}"><span title="{{ p.label }}" style="flex:none;min-width:0;overflow:hidden;text-overflow:ellipsis;"><sc-for list="{{ p.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></span></sc-if><sc-if value="{{ p.isOut }}" hint-placeholder-val="{{ false }}"><span title="Resultado" style="flex:{{ p.flex }};min-width:56px;height:{{ p.h }};display:flex;align-items:center;justify-content:{{ p.justify }};padding:0 10px;background:#1d2b1d;border-radius:7px;color:#008000;font-weight:600;">{{ p.text }}</span></sc-if></sc-for></div></div></sc-if>
+              <sc-if value="{{ e.pctDirty }}" hint-placeholder-val="{{ false }}"><div style="background:#2a2a2a;border-radius:7px;font-size:16px;"><div style="display:flex;height:37px;min-width:0;"><div style="display:inline-grid;flex:0 1 auto;min-width:60px;max-width:50%;align-items:center;padding:0 10px;overflow:hidden;"><span style="grid-area:1 / 1;white-space:pre;visibility:hidden;overflow:hidden;">{{ e.descSizer }}</span><input value="{{ e.desc }}" onChange="{{ e.onDesc }}" maxLength="40" spellCheck="false" style="grid-area:1 / 1;width:0;min-width:100%;margin:0;padding:0;border:0;outline:none;background:transparent;font:inherit;color:#fff;caret-color:#008000;"></div><div style="flex:1;min-width:0;"></div><div role="radiogroup" aria-label="Qué calcular" style="flex:none;display:flex;align-items:center;gap:2px;margin:5px 6px;padding:2px;background:#1c1c1c;border-radius:7px;"><sc-for list="{{ e.modes }}" as="m" hint-placeholder-count="3"><button role="radio" aria-checked="{{ m.on }}" onClick="{{ m.onClick }}" title="{{ m.title }}" style="height:23px;padding:0 9px;border:0;border-radius:5px;background:{{ m.bg }};color:{{ m.color }};font:inherit;font-size:13px;font-weight:{{ m.fw }};cursor:pointer;white-space:nowrap;" style-hover="color:#fff;">{{ m.label }}</button></sc-for></div><div style="flex:none;min-width:95px;max-width:50%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;background:#1c1c1c;border-radius:7px;color:#008000;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;">{{ e.outTxt }}</div></div><div style="display:flex;align-items:center;gap:8px;min-height:46px;padding:0 6px 5px 10px;font-size:15px;white-space:nowrap;"><sc-for list="{{ e.sent }}" as="p" hint-placeholder-count="6"><sc-if value="{{ p.isWord }}" hint-placeholder-val="{{ true }}"><span style="flex:none;color:#a6a6a6;">{{ p.text }}</span></sc-if><sc-if value="{{ p.isField }}" hint-placeholder-val="{{ false }}"><div title="{{ p.label }}" style="flex:1 1 0;min-width:56px;height:34px;display:flex;background:#1c1c1c;border-radius:7px;"><div style="position:relative;flex:1;min-width:0;align-self:stretch;"><div style="position:absolute;inset:0;padding:0 10px;display:flex;align-items:center;justify-content:{{ p.f.justify }};overflow:hidden;white-space:pre;visibility:{{ p.f.hlVis }};text-decoration:{{ p.f.deco }};"><sc-for list="{{ p.f.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></div><input value="{{ p.f.value }}" spellCheck="false" onChange="{{ p.f.onChange }}" onFocus="{{ p.f.onFocus }}" onBlur="{{ p.f.onBlur }}" onKeyDown="{{ p.f.onKey }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0 10px;border:0;outline:none;background:transparent;font:inherit;color:#fff;text-align:{{ p.f.align }};opacity:{{ p.f.inOp }};caret-color:#008000;"></div></div></sc-if><sc-if value="{{ p.isVal }}" hint-placeholder-val="{{ false }}"><span title="{{ p.label }}" style="flex:none;min-width:0;overflow:hidden;text-overflow:ellipsis;"><sc-for list="{{ p.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></span></sc-if><sc-if value="{{ p.isOut }}" hint-placeholder-val="{{ false }}"><span title="Resultado" style="flex:{{ p.flex }};min-width:56px;height:{{ p.h }};display:flex;align-items:center;justify-content:{{ p.justify }};padding:0 10px;background:#1d2b1d;border-radius:7px;color:#008000;font-weight:600;">{{ p.text }}</span></sc-if></sc-for></div></div></sc-if>
+              <sc-if value="{{ e.isLogic }}" hint-placeholder-val="{{ false }}"><div style="background:#2a2a2a;border-radius:7px;font-size:16px;"><div style="display:flex;height:37px;min-width:0;"><sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}"><div style="display:inline-grid;flex:0 1 auto;min-width:60px;max-width:50%;align-items:center;padding:0 10px;overflow:hidden;"><span style="grid-area:1 / 1;white-space:pre;visibility:hidden;overflow:hidden;">{{ e.descSizer }}</span><input value="{{ e.desc }}" onChange="{{ e.onDesc }}" maxLength="40" spellCheck="false" style="grid-area:1 / 1;width:0;min-width:100%;margin:0;padding:0;border:0;outline:none;background:transparent;font:inherit;color:#fff;caret-color:#008000;"></div><div style="flex:1;min-width:0;"></div><div role="radiogroup" aria-label="{{ e.cmpLabel }}" style="flex:none;display:flex;align-items:center;gap:2px;margin:5px 6px;padding:2px;background:#1c1c1c;border-radius:7px;"><sc-for list="{{ e.cmps }}" as="m" hint-placeholder-count="6"><button role="radio" aria-checked="{{ m.on }}" onClick="{{ m.onClick }}" title="{{ m.title }}" style="height:23px;min-width:26px;padding:0 7px;border:0;border-radius:5px;background:{{ m.bg }};color:{{ m.color }};font:inherit;font-size:13px;font-weight:{{ m.fw }};cursor:pointer;white-space:nowrap;" style-hover="color:#fff;">{{ m.label }}</button></sc-for></div></sc-if><sc-if value="{{ e.logicHeadClean }}" hint-placeholder-val="{{ false }}"><div style="flex:1;min-width:0;display:flex;align-items:center;padding:0 10px;"><span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.desc }}</span></div></sc-if><div style="flex:none;min-width:95px;max-width:50%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;background:#1c1c1c;border-radius:7px;color:#008000;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;">{{ e.outTxt }}</div></div><div style="display:grid;grid-template-columns:{{ e.lgrid }};grid-auto-rows:{{ e.lrowH }};justify-content:start;align-items:center;column-gap:8px;padding:{{ e.lpad }};font-size:15px;white-space:nowrap;overflow:hidden;"><sc-for list="{{ e.lrows }}" as="rw" hint-placeholder-count="1"><div onMouseDown="{{ rw.onDown }}" style="display:contents;"><sc-for list="{{ rw.parts }}" as="p" hint-placeholder-count="6"><sc-if value="{{ p.isLead }}" hint-placeholder-val="{{ false }}"><span style="grid-column:1;color:{{ p.color }};font-weight:{{ p.fw }};transition:color .15s;">{{ p.text }}</span></sc-if><sc-if value="{{ p.isWord }}" hint-placeholder-val="{{ true }}"><span style="color:#a6a6a6;">{{ p.text }}</span></sc-if><sc-if value="{{ p.isField }}" hint-placeholder-val="{{ false }}"><div title="{{ p.label }}" style="grid-column:{{ p.col }};min-width:56px;height:34px;display:flex;background:#1c1c1c;border-radius:7px;"><div style="position:relative;flex:1;min-width:0;align-self:stretch;"><div style="position:absolute;inset:0;padding:0 10px;display:flex;align-items:center;justify-content:{{ p.f.justify }};overflow:hidden;white-space:pre;visibility:{{ p.f.hlVis }};text-decoration:{{ p.f.deco }};"><sc-for list="{{ p.f.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></div><input value="{{ p.f.value }}" spellCheck="false" onChange="{{ p.f.onChange }}" onFocus="{{ p.f.onFocus }}" onBlur="{{ p.f.onBlur }}" onKeyDown="{{ p.f.onKey }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0 10px;border:0;outline:none;background:transparent;font:inherit;color:#fff;text-align:{{ p.f.align }};opacity:{{ p.f.inOp }};caret-color:#008000;"></div></div></sc-if><sc-if value="{{ p.isVal }}" hint-placeholder-val="{{ false }}"><span title="{{ p.label }}" style="grid-column:{{ p.col }};min-width:0;overflow:hidden;text-overflow:ellipsis;"><sc-for list="{{ p.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></span></sc-if><sc-if value="{{ p.isDel }}" hint-placeholder-val="{{ false }}"><button onClick="{{ p.onClick }}" aria-label="Quitar caso" title="Quitar caso" style="width:22px;height:22px;padding:0;border:0;border-radius:5px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#1c1c1c;"><span style="width:13px;height:13px;background:#7a7a7a;mask:url(assets/papelera.svg) center / contain no-repeat;-webkit-mask:url(assets/papelera.svg) center / contain no-repeat;"></span></button></sc-if><sc-if value="{{ p.isAdd }}" hint-placeholder-val="{{ false }}"><button onClick="{{ p.onClick }}" aria-label="Añadir caso" title="Añadir caso «si no, si»" style="position:relative;width:22px;height:22px;padding:0;border:0;border-radius:5px;background:transparent;cursor:pointer;" style-hover="background:#1c1c1c;"><span style="position:absolute;left:50%;top:50%;width:11px;height:2px;margin:-1px 0 0 -5.5px;background:#7a7a7a;border-radius:1px;"></span><span style="position:absolute;left:50%;top:50%;width:2px;height:11px;margin:-5.5px 0 0 -1px;background:#7a7a7a;border-radius:1px;"></span></button></sc-if></sc-for></div></sc-for></div></div></sc-if>
+              <sc-if value="{{ e.isDate }}" hint-placeholder-val="{{ false }}"><div style="background:#2a2a2a;border-radius:7px;font-size:16px;"><div style="display:flex;height:37px;min-width:0;"><sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}"><div style="display:inline-grid;flex:0 1 auto;min-width:60px;max-width:50%;align-items:center;padding:0 10px;overflow:hidden;"><span style="grid-area:1 / 1;white-space:pre;visibility:hidden;overflow:hidden;">{{ e.descSizer }}</span><input value="{{ e.desc }}" onChange="{{ e.onDesc }}" maxLength="40" spellCheck="false" style="grid-area:1 / 1;width:0;min-width:100%;margin:0;padding:0;border:0;outline:none;background:transparent;font:inherit;color:#fff;caret-color:#008000;"></div><div style="flex:1;min-width:0;"></div></sc-if><sc-if value="{{ e.headClean }}" hint-placeholder-val="{{ false }}"><div style="flex:1;min-width:0;display:flex;align-items:center;padding:0 10px;"><span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.desc }}</span></div></sc-if><sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Tipo de fecha" style="flex:none;display:flex;align-items:center;gap:2px;margin:5px 6px;padding:2px;background:#1c1c1c;border-radius:7px;"><sc-for list="{{ e.kinds }}" as="m" hint-placeholder-count="2"><button role="radio" aria-checked="{{ m.on }}" onClick="{{ m.onClick }}" title="{{ m.title }}" style="height:23px;padding:0 9px;border:0;border-radius:5px;background:{{ m.bg }};color:{{ m.color }};font:inherit;font-size:13px;font-weight:{{ m.fw }};cursor:pointer;white-space:nowrap;" style-hover="color:#fff;">{{ m.label }}</button></sc-for></div></sc-if><sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Tipo de hora" style="flex:none;display:flex;align-items:center;gap:2px;margin:5px 6px;padding:2px;background:#1c1c1c;border-radius:7px;"><sc-for list="{{ e.tkinds }}" as="m" hint-placeholder-count="2"><button role="radio" aria-checked="{{ m.on }}" onClick="{{ m.onClick }}" title="{{ m.title }}" style="height:23px;padding:0 9px;border:0;border-radius:5px;background:{{ m.bg }};color:{{ m.color }};font:inherit;font-size:13px;font-weight:{{ m.fw }};cursor:pointer;white-space:nowrap;" style-hover="color:#fff;">{{ m.label }}</button></sc-for></div></sc-if><div style="flex:none;min-width:95px;max-width:60%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;background:#1c1c1c;border-radius:7px;color:#008000;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;">{{ e.outTxt }}</div></div><sc-if value="{{ e.hasHint }}" hint-placeholder-val="{{ false }}"><div style="padding:10px 12px 0;font-size:14px;color:#8a8a8a;text-align:center;">{{ e.hint }}</div></sc-if><div onMouseLeave="{{ e.calLeave }}" style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px 40px;padding:10px 12px 14px 10px;"><sc-for list="{{ e.cals }}" as="c" hint-placeholder-count="1"><div style="flex:1 1 260px;min-width:230px;max-width:330px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;"><sc-if value="{{ c.hasLabel }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;font-weight:600;letter-spacing:.3px;color:#8a8a8a;">{{ c.label }}</span></sc-if><div style="align-self:stretch;"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;height:28px;margin-bottom:4px;"><button onClick="{{ c.prevMonth }}" aria-label="Mes anterior" title="Mes anterior" style="width:26px;height:26px;padding:0;border:0;border-radius:6px;cursor:pointer;background:transparent;display:flex;align-items:center;justify-content:center;" style-hover="background:#1c1c1c;"><span style="width:12px;height:12px;transform:rotate(180deg);background:#a6a6a6;mask:url(assets/angulo-pequeno-derecho.svg) center / contain no-repeat;-webkit-mask:url(assets/angulo-pequeno-derecho.svg) center / contain no-repeat;"></span></button><span style="font-size:15px;font-weight:600;">{{ c.monthTxt }}</span><button onClick="{{ c.nextMonth }}" aria-label="Mes siguiente" title="Mes siguiente" style="width:26px;height:26px;padding:0;border:0;border-radius:6px;cursor:pointer;background:transparent;display:flex;align-items:center;justify-content:center;" style-hover="background:#1c1c1c;"><span style="width:12px;height:12px;transform:rotate(0deg);background:#a6a6a6;mask:url(assets/angulo-pequeno-derecho.svg) center / contain no-repeat;-webkit-mask:url(assets/angulo-pequeno-derecho.svg) center / contain no-repeat;"></span></button></div><div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;"><sc-for list="{{ e.wdays }}" as="w" hint-placeholder-count="7"><span style="height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#7a7a7a;">{{ w.t }}</span></sc-for><sc-for list="{{ c.days }}" as="d" hint-placeholder-count="35"><button onClick="{{ d.onClick }}" onDoubleClick="{{ d.onDbl }}" title="{{ d.tip }}" aria-pressed="{{ d.sel }}" style="position:relative;height:30px;padding:0;border:0;border-radius:6px;background:{{ d.bg }};box-shadow:{{ d.ring }};color:{{ d.color }};font:inherit;font-size:14px;font-weight:{{ d.fw }};font-variant-numeric:tabular-nums;cursor:pointer;" style-hover="box-shadow:inset 0 0 0 1.5px #008000;">{{ d.n }}{{ d.rippleEl }}</button></sc-for></div></div><span style="font-size:18px;font-weight:700;line-height:24px;text-wrap:pretty;">{{ c.longDate }}</span><sc-if value="{{ c.hasTimes }}" hint-placeholder-val="{{ true }}"><div style="margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;"><span style="font-size:15px;color:#a6a6a6;">{{ c.timeLbl }}</span><sc-if value="{{ c.hasStart }}" hint-placeholder-val="{{ true }}"><input type="time" value="{{ c.time }}" onChange="{{ c.onTime }}" style="height:34px;padding:0 10px;border:0;border-radius:7px;outline:none;background:#1c1c1c;color:#008000;font:inherit;font-size:15px;font-weight:600;color-scheme:dark;caret-color:#008000;"></sc-if><sc-if value="{{ c.hasBoth }}" hint-placeholder-val="{{ false }}"><span style="font-size:15px;color:#a6a6a6;">–</span></sc-if><sc-if value="{{ c.hasEnd }}" hint-placeholder-val="{{ false }}"><input type="time" value="{{ c.timeEnd }}" onChange="{{ c.onTimeEnd }}" style="height:34px;padding:0 10px;border:0;border-radius:7px;outline:none;background:#1c1c1c;color:#008000;font:inherit;font-size:15px;font-weight:600;color-scheme:dark;caret-color:#008000;"></sc-if><sc-if value="{{ c.hasToday }}" hint-placeholder-val="{{ true }}"><button onClick="{{ c.goToday }}" style="height:34px;padding:0 12px;border:0;border-radius:7px;background:#1c1c1c;color:#a6a6a6;font:inherit;font-size:14px;cursor:pointer;" style-hover="color:#fff;">Hoy</button></sc-if></div></sc-if></div></sc-for></div></div></sc-if>
+              <sc-if value="{{ e.isCount }}" hint-placeholder-val="{{ false }}"><div style="background:#2a2a2a;border-radius:7px;font-size:16px;"><div style="display:flex;height:37px;min-width:0;"><sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}"><div style="display:inline-grid;flex:0 1 auto;min-width:60px;max-width:50%;align-items:center;padding:0 10px;overflow:hidden;"><span style="grid-area:1 / 1;white-space:pre;visibility:hidden;overflow:hidden;">{{ e.descSizer }}</span><input value="{{ e.desc }}" onChange="{{ e.onDesc }}" maxLength="40" spellCheck="false" style="grid-area:1 / 1;width:0;min-width:100%;margin:0;padding:0;border:0;outline:none;background:transparent;font:inherit;color:#fff;caret-color:#008000;"></div><div style="flex:1;min-width:0;"></div></sc-if><sc-if value="{{ e.headClean }}" hint-placeholder-val="{{ false }}"><div style="flex:1;min-width:0;display:flex;align-items:center;padding:0 10px;"><span style="min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ e.desc }}</span></div></sc-if><sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Unidad de salida" style="flex:none;display:flex;align-items:center;gap:2px;margin:5px 6px;padding:2px;background:#1c1c1c;border-radius:7px;"><sc-for list="{{ e.units }}" as="m" hint-placeholder-count="4"><button role="radio" aria-checked="{{ m.on }}" onClick="{{ m.onClick }}" title="{{ m.title }}" style="height:23px;padding:0 9px;border:0;border-radius:5px;background:{{ m.bg }};color:{{ m.color }};font:inherit;font-size:13px;font-weight:{{ m.fw }};cursor:pointer;white-space:nowrap;" style-hover="color:#fff;">{{ m.label }}</button></sc-for></div></sc-if><div style="flex:none;min-width:95px;max-width:60%;display:flex;align-items:center;justify-content:flex-end;padding:0 10px;background:#1c1c1c;border-radius:7px;color:#008000;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;">{{ e.outTxt }}</div></div><sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:6px 6px 0 10px;font-size:15px;"><span style="flex:none;color:#a6a6a6;">Referencia</span><div role="radiogroup" aria-label="Referencia de la cuenta atrás" style="flex:none;display:flex;align-items:center;gap:2px;padding:2px;background:#1c1c1c;border-radius:7px;"><sc-for list="{{ e.refs }}" as="m" hint-placeholder-count="3"><button role="radio" aria-checked="{{ m.on }}" onClick="{{ m.onClick }}" title="{{ m.title }}" style="height:23px;padding:0 9px;border:0;border-radius:5px;background:{{ m.bg }};color:{{ m.color }};font:inherit;font-size:13px;font-weight:{{ m.fw }};cursor:pointer;white-space:nowrap;" style-hover="color:#fff;">{{ m.label }}</button></sc-for></div></div></sc-if><div style="display:flex;align-items:center;gap:8px;min-height:46px;padding:0 6px 0 10px;font-size:15px;white-space:nowrap;"><sc-if value="{{ e.headClean }}" hint-placeholder-val="{{ false }}"><span style="flex:none;color:#a6a6a6;">{{ e.lead }}</span></sc-if><sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}"><div title="Texto del contador" style="display:inline-grid;flex:none;max-width:40%;align-items:center;"><span style="grid-area:1 / 1;white-space:pre;visibility:hidden;overflow:hidden;padding:0 2px;">{{ e.leadSizer }}</span><input value="{{ e.leadTxt }}" placeholder="{{ e.leadDef }}" onChange="{{ e.onLead }}" maxLength="40" spellCheck="false" style="grid-area:1 / 1;width:0;min-width:100%;margin:0;padding:0 2px;border:0;outline:none;background:transparent;font:inherit;color:#a6a6a6;caret-color:#008000;box-shadow:0 1px 0 #4a4a4a;"></div></sc-if><sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}"><div title="Fecha objetivo" style="flex:1 1 0;min-width:56px;height:34px;display:flex;background:#1c1c1c;border-radius:7px;"><div style="position:relative;flex:1;min-width:0;align-self:stretch;"><div style="position:absolute;inset:0;padding:0 10px;display:flex;align-items:center;justify-content:{{ e.ft.justify }};overflow:hidden;white-space:pre;visibility:{{ e.ft.hlVis }};"><sc-for list="{{ e.ft.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></div><input value="{{ e.ft.value }}" spellCheck="false" onChange="{{ e.ft.onChange }}" onFocus="{{ e.ft.onFocus }}" onBlur="{{ e.ft.onBlur }}" onKeyDown="{{ e.ft.onKey }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0 10px;border:0;outline:none;background:transparent;font:inherit;color:#fff;text-align:{{ e.ft.align }};opacity:{{ e.ft.inOp }};caret-color:#008000;"></div></div></sc-if><sc-if value="{{ e.headClean }}" hint-placeholder-val="{{ false }}"><div style="flex:0 1 auto;min-width:0;height:28px;display:flex;align-items:center;padding:0 10px;background:#1c1c1c;border-radius:7px;overflow:hidden;"><sc-for list="{{ e.tSegs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};font-weight:{{ s.fw }};">{{ s.text }}</span></sc-for></div></sc-if></div><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:0 6px 6px;"><sc-for list="{{ e.tiles }}" as="t" hint-placeholder-count="4"><div style="min-width:0;display:flex;flex-direction:column;gap:2px;padding:10px 12px 9px;background:#1c1c1c;border-radius:7px;"><span style="font-size:30px;line-height:36px;font-weight:700;color:{{ t.color }};font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;">{{ t.v }}</span><span style="font-size:13px;color:#8a8a8a;">{{ t.l }}</span></div></sc-for></div></div></sc-if>
+              <sc-if value="{{ e.isTable }}" hint-placeholder-val="{{ false }}"><div style="position:relative;font-size:16px;"><div style="display:grid;grid-template-columns:{{ e.grid }};height:40px;border-bottom:1px solid #555;"><sc-for list="{{ e.cols }}" as="c" hint-placeholder-count="3"><div style="position:relative;min-width:0;display:flex;align-items:center;justify-content:{{ c.justify }};padding:0 14px;font-weight:700;"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ c.label }}</span><span style="position:absolute;left:0;right:0;bottom:-2px;height:3px;background:{{ c.bar }};"></span></div></sc-for></div><sc-for list="{{ e.rows }}" as="r" hint-placeholder-count="3"><div style="display:grid;grid-template-columns:{{ e.grid }};height:50px;border-bottom:{{ r.border }};"><sc-for list="{{ r.cells }}" as="cell" hint-placeholder-count="3"><div style="position:relative;min-width:0;display:flex;align-items:center;justify-content:{{ cell.justify }};border-left:{{ cell.bl }};padding:{{ cell.pad }};"><sc-if value="{{ cell.isBox }}" hint-placeholder-val="{{ false }}"><button onClick="{{ cell.onToggle }}" style="flex:none;width:15px;height:15px;padding:0;border:0;border-radius:3px;cursor:pointer;background:{{ cell.chkBg }};box-shadow:inset 0 0 0 1.5px #008000;"></button></sc-if><sc-if value="{{ cell.isText }}" hint-placeholder-val="{{ false }}"><span style="min-width:0;color:{{ cell.color }};font-weight:{{ cell.fw }};text-decoration:{{ cell.deco }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ cell.text }}</span></sc-if><sc-if value="{{ cell.isField }}" hint-placeholder-val="{{ false }}"><div style="position:relative;flex:1;min-width:0;align-self:stretch;"><div style="position:absolute;inset:0;padding:0 10px;display:flex;align-items:center;justify-content:{{ cell.f.justify }};overflow:hidden;white-space:pre;visibility:{{ cell.f.hlVis }};text-decoration:{{ cell.f.deco }};"><sc-for list="{{ cell.f.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></div><input value="{{ cell.f.value }}" spellCheck="false" onChange="{{ cell.f.onChange }}" onFocus="{{ cell.f.onFocus }}" onBlur="{{ cell.f.onBlur }}" onKeyDown="{{ cell.f.onKey }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0 10px;border:0;outline:none;background:transparent;font:inherit;color:#fff;text-align:{{ cell.f.align }};opacity:{{ cell.f.inOp }};caret-color:#008000;"></div></sc-if></div></sc-for></div></sc-for><sc-if value="{{ e.showTotal }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:{{ e.grid }};height:38px;border-top:1px solid #555;"><sc-for list="{{ e.totals }}" as="tt" hint-placeholder-count="3"><div style="min-width:0;display:flex;align-items:center;justify-content:{{ tt.justify }};padding:0 14px;font-size:15px;white-space:pre;"><span style="color:#fff;">{{ tt.label }}</span><span style="color:#008000;font-weight:600;">{{ tt.text }}</span></div></sc-for></div></sc-if><sc-if value="{{ e.tblEdit }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ e.rowAdders }}" as="a" hint-placeholder-count="0"><button onClick="{{ a.onClick }}" title="Añadir fila" style="position:absolute;left:-31px;top:{{ a.top }};margin-top:-11px;width:22px;height:22px;padding:0;border:0;background:transparent;cursor:pointer;opacity:0;transition:opacity .15s;z-index:1;" style-hover="opacity:1;"><span style="position:absolute;left:50%;top:50%;width:11px;height:2px;margin:-1px 0 0 -5.5px;background:#7a7a7a;border-radius:1px;"></span><span style="position:absolute;left:50%;top:50%;width:2px;height:11px;margin:-5.5px 0 0 -1px;background:#7a7a7a;border-radius:1px;"></span></button></sc-for><div style="display:grid;grid-template-columns:{{ e.grid }};height:38px;"><sc-for list="{{ e.cols }}" as="c" hint-placeholder-count="3"><div style="position:relative;display:flex;align-items:center;justify-content:center;"><button onClick="{{ c.addLeft }}" title="Añadir columna" style="position:absolute;left:-11px;top:8px;width:22px;height:22px;padding:0;border:0;background:transparent;cursor:pointer;opacity:0;transition:opacity .15s;z-index:1;" style-hover="opacity:1;"><span style="position:absolute;left:50%;top:50%;width:11px;height:2px;margin:-1px 0 0 -5.5px;background:#7a7a7a;border-radius:1px;"></span><span style="position:absolute;left:50%;top:50%;width:2px;height:11px;margin:-5.5px 0 0 -1px;background:#7a7a7a;border-radius:1px;"></span></button><sc-if value="{{ c.isLast }}" hint-placeholder-val="{{ false }}"><button onClick="{{ c.addRight }}" title="Añadir columna" style="position:absolute;right:-11px;top:8px;width:22px;height:22px;padding:0;border:0;background:transparent;cursor:pointer;opacity:0;transition:opacity .15s;z-index:1;" style-hover="opacity:1;"><span style="position:absolute;left:50%;top:50%;width:11px;height:2px;margin:-1px 0 0 -5.5px;background:#7a7a7a;border-radius:1px;"></span><span style="position:absolute;left:50%;top:50%;width:2px;height:11px;margin:-5.5px 0 0 -1px;background:#7a7a7a;border-radius:1px;"></span></button></sc-if><button data-colmenu="1" onClick="{{ c.openMenu }}" title="Opciones de la columna" style="width:11px;height:11px;padding:0;border:0;border-radius:50%;background:{{ c.dotColor }};cursor:pointer;" style-hover="background:#a6a6a6;"></button><sc-if value="{{ c.menuOpen }}" hint-placeholder-val="{{ false }}"><div data-colmenu="1" style="position:absolute;top:30px;left:{{ c.mLeft }};right:{{ c.mRight }};transform:{{ c.mTf }};z-index:30;width:160px;padding:14px 10px 10px;background:#1c1c1c;border:1px solid #000;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:3px;"><button onClick="{{ c.menu.remove }}" disabled="{{ c.menu.noRemove }}" aria-label="Eliminar columna" title="Eliminar columna" style="align-self:center;width:26px;height:26px;margin:-6px 0 6px;padding:0;border:0;border-radius:6px;background:transparent;cursor:{{ c.menu.rmCursor }};opacity:{{ c.menu.rmOp }};display:flex;align-items:center;justify-content:center;" style-hover="background:#2a2a2a;"><span style="width:15px;height:15px;background:#a6a6a6;mask:url(assets/papelera.svg) center / contain no-repeat;-webkit-mask:url(assets/papelera.svg) center / contain no-repeat;"></span></button><input value="{{ c.menu.title.text }}" readOnly="{{ c.menu.title.readOnly }}" maxLength="22" spellCheck="false" title="Doble clic para editar" onDoubleClick="{{ c.menu.title.onDbl }}" onChange="{{ c.menu.title.onChange }}" onKeyDown="{{ c.menu.title.onKey }}" onBlur="{{ c.menu.title.onBlur }}" onMouseDown="{{ c.menu.title.onDown }}" style="width:100%;margin:0 0 10px;padding:0;border:0;outline:none;background:transparent;font:inherit;font-size:16px;font-weight:700;color:#fff;text-align:center;cursor:{{ c.menu.title.cursor }};caret-color:#008000;box-shadow:{{ c.menu.title.underline }};"><sc-for list="{{ c.menu.ops }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.onClick }}" style="padding:7px 10px;border:0;border-radius:7px;background:{{ o.bg }};color:#fff;font:inherit;font-size:14px;font-weight:{{ o.fw }};text-align:center;cursor:pointer;" style-hover="background:#262626;">{{ o.label }}</button></sc-for><div style="display:flex;gap:6px;margin-top:10px;padding:5px;background:#000;border-radius:9px;"><sc-for list="{{ c.menu.pills }}" as="p" hint-placeholder-count="3"><button onClick="{{ p.onClick }}" title="{{ p.title }}" style="flex:1;height:9px;padding:0;border:0;border-radius:5px;background:{{ p.bg }};cursor:pointer;"></button></sc-for></div></div></sc-if></div></sc-for></div></sc-if></div></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+  </main>
+  <div aria-live="polite" style="position:fixed;right:18px;bottom:18px;z-index:100;display:flex;flex-direction:column;gap:8px;width:min(340px,calc(100vw - 36px));pointer-events:none;">
+    <sc-for list="{{ toasts }}" as="t" hint-placeholder-count="0">
+      <div role="alert" style="pointer-events:auto;display:flex;gap:12px;padding:12px 12px 13px 14px;background:#1c1c1c;border-radius:9px;box-shadow:0 10px 30px rgba(0,0,0,.55),inset 0 0 0 1px #2e2e2e;">
+        <span style="width:18px;height:18px;flex:none;background:#008000;mask:url(assets/campana.svg) center / contain no-repeat;-webkit-mask:url(assets/campana.svg) center / contain no-repeat;margin-top:1px;"></span>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;">
+          <span style="font-size:15px;font-weight:600;">{{ t.title }}</span>
+          <span style="font-size:14px;line-height:19px;color:#cfcfcf;text-wrap:pretty;">{{ t.body }}</span>
+          <span style="font-size:13px;color:#8a8a8a;">{{ t.when }}</span>
+        </div>
+        <button onClick="{{ t.close }}" aria-label="Cerrar aviso" style="flex:none;position:relative;width:18px;height:18px;padding:0;border:0;background:transparent;cursor:pointer;transform:rotate(45deg);"><span style="position:absolute;left:8px;top:3px;width:2px;height:12px;background:#7a7a7a;border-radius:1px;"></span><span style="position:absolute;left:3px;top:8px;width:12px;height:2px;background:#7a7a7a;border-radius:1px;"></span></button>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const PINK = '#cc55cc', TOKEN = '#1a9a1a', DIM = '#5f5f5f';
+const HEAD = { 1: ['24px', '30px'], 2: ['20px', '27px'], 3: ['18px', '24px'] };
+const RX = /\(\[(True|False)\]([^)]*)\)|\[(True|False)\]/g;
+
+function parseLine(text) {
+  const h = /^(#{1,6}) (.*)$/.exec(text);
+  return h ? { level: h[1].length, start: h[1].length + 1 } : { level: 0, start: 0 };
+}
+const ENT = /(=\([^()=]*?\/[^()]*?\))|=([A-Za-zÀ-ÖØ-öø-ÿ0-9_]+)/g;
+let RESOLVE = () => null;
+const resolveEntity = name => { try { return fmt(RESOLVE(name)); } catch (_) { return 'ND'; } };
+const ID_CH = 'A-Za-zÀ-ÖØ-öø-ÿ0-9_', NAME_START = 'A-Za-zÀ-ÖØ-öø-ÿ_';
+const PATH_RX = '=\\([^()=]*?\\/[^()]*?\\)';
+const isPath = n => /^=\(/.test(n);
+const pathSegs = raw => [{ text: '=(', color: '#fff' }, { text: raw.slice(2, -1), color: '#008000' }, { text: ')', color: '#fff' }];
+let NOW = Date.now();
+const num = v => ({ t: 'num', v }), bool = v => ({ t: 'bool', v }), dt = v => ({ t: 'date', v });
+const pad2 = n => String(n).padStart(2, '0');
+const ymd = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+const cap = t => t ? t[0].toUpperCase() + t.slice(1) : t;
+const dateMs = e => { const p = String(e.date || '').split('-').map(Number), q = String(e.time || '00:00').split(':').map(Number); if (p.length < 3 || p.some(isNaN)) return NaN; return new Date(p[0], p[1] - 1, p[2], q[0] || 0, q[1] || 0).getTime(); };
+function durTxt(a) { const d = Math.floor(a / 864e5), h = Math.floor(a / 36e5) % 24, m = Math.floor(a / 6e4) % 60, s = Math.floor(a / 1e3) % 60; return d ? d + ' d ' + h + ' h ' + m + ' min' : h ? h + ' h ' + m + ' min' : m ? m + ' min ' + s + ' s' : s + ' s'; }
+const toNum = x => !x ? NaN : x.t === 'num' || x.t === 'date' ? x.v : x.t === 'bool' ? (x.v ? 1 : 0) : NaN;
+const parseNum = s => { s = String(s == null ? '' : s).trim(); return /^-?\d+(?:[.,]\d+)?$/.test(s) ? parseFloat(s.replace(',', '.')) : null; };
+function fmt(x) {
+  if (!x) return 'ND';
+  if (x.t === 'num') return isFinite(x.v) ? x.v.toLocaleString('es-ES', { maximumFractionDigits: 2, useGrouping: false }) : 'ND';
+  if (x.t === 'bool') return x.v ? 'True' : 'False';
+  if (x.t === 'date') { const f1 = ms => { const d = new Date(ms); return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }; if (x.end != null) { const a = f1(x.v), b = f1(x.end); return a.slice(0, 10) === b.slice(0, 10) ? a + ' – ' + b.slice(11) : a + ' – ' + b; } const d = new Date(x.v); return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
+  return String(x.v);
+}
+class NDErr extends Error {}
+function evalExpr(src, get) {
+  const s = String(src || '').trim(); if (!s) return null;
+  const re = new RegExp('\\s*(' + PATH_RX + '|=?[' + NAME_START + '][' + ID_CH + ']*|\\d+(?:[.,]\\d+)?|[()+\\-*/])', 'y');
+  const toks = []; let pos = 0;
+  while (pos < s.length) { re.lastIndex = pos; const m = re.exec(s); if (!m) return { t: 'text', v: s }; toks.push(m[1]); pos = re.lastIndex; }
+  const run = look => {
+    let i = 0;
+    const peek = () => toks[i], next = () => toks[i++];
+    const arith = (a, b, op) => { if (a.t === 'date' || b.t === 'date') { if (op === '-' && a.t === 'date' && b.t === 'date') return num((a.v - b.v) / 864e5); const n = toNum(a.t === 'date' ? b : a); if (!isNaN(n) && (op === '+' || (op === '-' && a.t === 'date')) && !(a.t === 'date' && b.t === 'date')) return dt((a.t === 'date' ? a : b).v + (op === '-' ? -n : n) * 864e5); throw new NDErr(); } const x = toNum(a), y = toNum(b); if (isNaN(x) || isNaN(y)) throw new NDErr(); if (op === '/' && y === 0) throw new NDErr(); return num(op === '+' ? x + y : op === '-' ? x - y : op === '*' ? x * y : x / y); };
+    const factor = () => {
+      const t = next(); if (t === undefined) throw new SyntaxError();
+      if (t === '-') { const v = toNum(factor()); if (isNaN(v)) throw new NDErr(); return num(-v); }
+      if (t === '+') return factor();
+      if (t === '(') { const v = expr(); if (next() !== ')') throw new SyntaxError(); return v; }
+      if (/^\d/.test(t)) return num(parseFloat(t.replace(',', '.')));
+      if (/^[)*/]$/.test(t)) throw new SyntaxError();
+      const name = isPath(t) ? t : t.replace(/^=/, '');
+      if (name === 'True') return bool(true);
+      if (name === 'False') return bool(false);
+      const v = look(name); if (!v) throw new NDErr(); return v;
+    };
+    const expr = () => { let a = factor(); while (peek() === '+' || peek() === '-' || peek() === '*' || peek() === '/') { const op = next(); a = arith(a, factor(), op); } return a; };
+    const v = expr(); if (i < toks.length) throw new SyntaxError(); return v;
+  };
+  try { run(() => num(0)); } catch (e) { if (!(e instanceof NDErr)) return { t: 'text', v: s }; }
+  try { return run(get); } catch (e) { return e instanceof NDErr ? null : { t: 'text', v: s }; }
+}
+function cellInfo(text, get) {
+  const t = String(text || '').trim();
+  const b = /\[(True|False)\]/.exec(t);
+  if (b) return { kind: 'box', on: b[1] === 'True', val: bool(b[1] === 'True') };
+  const r = new RegExp('^=([' + NAME_START + '][' + ID_CH + ']*)$').exec(t);
+  if (r) return { kind: 'ref', val: get(r[1]) };
+  if (new RegExp('^' + PATH_RX + '$').test(t)) return { kind: 'ref', val: get(t) };
+  const n = parseNum(t); if (n !== null) return { kind: 'num', val: num(n) };
+  return { kind: t ? 'text' : 'empty', text: t };
+}
+const rowActive = (row, cols) => !cols.some(c => /\[False\]/.test(row.cells[c.id] || ''));
+function colAlign(col, rows) {
+  const infos = rows.map(r => cellInfo(r.cells[col.id], () => num(0))).filter(i => i.kind !== 'empty');
+  if (infos.some(i => i.kind === 'box')) return 'center';
+  if (infos.length && infos.every(i => i.kind === 'num' || i.kind === 'ref')) return 'right';
+  return 'left';
+}
+function tableOut(e, get) {
+  const col = e.cols.find(c => c.op); if (!col) return null;
+  const xs = e.rows.filter(r => rowActive(r, e.cols)).map(r => toNum(cellInfo(r.cells[col.id], get).val)).filter(x => !isNaN(x));
+  if (!xs.length) return num(0);
+  const a = xs[0], rest = xs.slice(1);
+  if (col.op === 'sum') return num(xs.reduce((p, q) => p + q, 0));
+  if (col.op === 'sub') return num(rest.reduce((p, q) => p - q, a));
+  if (col.op === 'mul') return num(xs.reduce((p, q) => p * q, 1));
+  if (col.op === 'div') return rest.some(q => q === 0) ? null : num(rest.reduce((p, q) => p / q, a));
+  return null;
+}
+function sliderRange(e, get) {
+  let lo = toNum(evalExpr(e.min, get)), hi = toNum(evalExpr(e.max, get));
+  if (isNaN(lo)) lo = 0; if (isNaN(hi)) hi = 100;
+  if (hi < lo) { const t = lo; lo = hi; hi = t; } if (hi === lo) hi = lo + 1;
+  return [lo, hi];
+}
+function sliderVal(e, get) { const r = sliderRange(e, get); const v = Math.min(r[1], Math.max(r[0], +e.value || 0)); return e.decimals ? Math.round(v * 10) / 10 : Math.round(v); }
+const toggleShown = (e, get) => (e.expr || '').trim() ? evalExpr(e.expr, get) : bool(e.on);
+function entOut(e, get) {
+  if (e.type === 'expr') return evalExpr(e.expr, get);
+  if (e.type === 'toggle') { const has = (e.expr || '').trim(); if (!e.on) return has ? num(0) : bool(false); return has ? evalExpr(e.expr, get) : bool(true); }
+  if (e.type === 'slider') return num(sliderVal(e, get));
+  if (e.type === 'table') return tableOut(e, get);
+  if (e.type === 'pct') return pctOut(e, get);
+  if (e.type === 'logic') return logicOut(e, get);
+  if (e.type === 'date') { const ms = dateMs(e); if (isNaN(ms)) return null; if (!e.range && !e.trange) return dt(ms); const m2 = dateMs({ date: e.range ? (e.date2 || e.date) : e.date, time: e.trange ? (e.timeEnd || e.time) : '23:59' }); return { t: 'date', v: ms, end: isNaN(m2) ? ms : Math.max(ms, m2) }; }
+  if (e.type === 'notif') { const i = notifInfo(e, get); return i ? bool(NOW >= i.fire) : null; }
+  if (e.type === 'count') { const c = countInfo(e, get); if (!c) return null; const a = Math.abs(c.diff), u = e.unit || 'd'; if (u === 'txt') return { t: 'text', v: (c.past ? 'hace ' : '') + durTxt(a) }; const eu = countUnit(a, u); return { t: 'num', v: (c.past ? -1 : 1) * Math.floor(a / UNIT_MS[eu]), unit: eu }; }
+  return null;
+}
+function countInfo(e, get) {
+  const t = evalExpr(e.target, get); if (!t || t.t !== 'date') return null;
+  const end = t.end != null ? t.end : t.v, ref = e.ref || 'start';
+  if (ref === 'span') return { diff: end - t.v, past: false, span: true, ref, t, shown: t };
+  const to = ref === 'end' ? end : t.v, diff = to - NOW;
+  return { diff, past: diff < 0, ref, t, shown: dt(to) };
+}
+const UNIT_MS = { d: 864e5, h: 36e5, m: 6e4, s: 1e3 }, UNIT_SFX = { d: ' d', h: ' h', m: ' min', s: ' s' };
+function countUnit(a, u) { const order = ['d', 'h', 'm', 's']; let i = Math.max(0, order.indexOf(u)); while (i < 3 && Math.floor(a / UNIT_MS[order[i]]) === 0) i++; return order[i]; }
+const normN = s => String(s || '').trim().replace(/\s+/g, ' ').toLowerCase();
+function makeWorld(s) {
+  const entries = [];
+  const ag = s.mode === 'agenda', nNotes = ag ? s.other.notes : s.notes, aNotes = ag ? s.notes : s.other.notes;
+  [['n', nNotes], ['a', aNotes]].forEach(([scope, list]) => list.forEach(n => n.sheets.forEach(x => (x.entities || []).forEach(e => { if (!NOVAL(e.type)) entries.push({ e, scope, note: n.name, sheet: x.name }); }))));
+  const byN = new Map(), byA = new Map();
+  entries.forEach(en => { const m = en.scope === 'a' ? byA : byN; if (!m.has(en.e.name)) m.set(en.e.name, en); });
+  const memo = new Map(), stack = new Set();
+  const val = en => {
+    const id = en.e.id; if (memo.has(id)) return memo.get(id); if (stack.has(id)) return null;
+    stack.add(id); let v = null;
+    try { v = entOut(en.e, en.scope === 'a' ? gA : gN); } catch (_) { v = null; } finally { stack.delete(id); }
+    memo.set(id, v); return v;
+  };
+  const pmemo = new Map();
+  const findPath = key => {
+    if (pmemo.has(key)) return pmemo.get(key);
+    const p = key.slice(2, -1).split('/').map(normN); let en = null;
+    if (p.length === 4 && p[0] === 'agenda') en = entries.find(x => x.scope === 'a' && normN(x.note) === p[1] && normN(x.sheet) === p[2] && x.e.name.toLowerCase() === p[3]);
+    else if (p.length === 2 && p[0] === 'agenda') en = entries.find(x => x.scope === 'a' && x.e.name.toLowerCase() === p[1]);
+    else if (p.length === 3) en = entries.find(x => x.scope === 'n' && normN(x.note) === p[0] && normN(x.sheet) === p[1] && x.e.name.toLowerCase() === p[2]);
+    pmemo.set(key, en || null); return en || null;
+  };
+  const mk = map => {
+    const g = name => {
+      if (isPath(name)) { const en = findPath(name); return en ? val(en) : null; }
+      const en = map.get(name); if (en) return val(en);
+      if (name === 'Ahora') return dt(NOW);
+      if (name === 'Hoy') { const d = new Date(NOW); d.setHours(0, 0, 0, 0); return dt(d.getTime()); }
+      return null;
+    };
+    g.has = name => isPath(name) ? !!findPath(name) : map.has(name) || name === 'Ahora' || name === 'Hoy';
+    return g;
+  };
+  const gN = mk(byN), gA = mk(byA);
+  return { gN, gA };
+}
+function hlExpr(text) {
+  const out = [], re = new RegExp('(' + PATH_RX + ')|(=?)([' + NAME_START + '][' + ID_CH + ']*)|(\\d+(?:[.,]\\d+)?)', 'g');
+  let last = 0, m;
+  while ((m = re.exec(text))) {
+    if (m.index > last) out.push({ text: text.slice(last, m.index), color: '#fff' });
+    if (m[1]) out.push(...pathSegs(m[1]));
+    else if (m[3]) { if (m[2]) out.push({ text: '=', color: '#fff' }); out.push({ text: m[3], color: '#008000' }); }
+    else out.push({ text: m[4], color: '#008000' });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push({ text: text.slice(last), color: '#fff' });
+  return out;
+}
+function substSegs(text, get) {
+  const src = String(text || '').trim(), out = [];
+  const re = new RegExp('(' + PATH_RX + ')|(=?)([' + NAME_START + '][' + ID_CH + ']*)|(\\d+(?:[.,]\\d+)?)', 'g');
+  let last = 0, m, refs = 0;
+  while ((m = re.exec(src))) {
+    if (m.index > last) out.push({ text: src.slice(last, m.index).replace(/\s+/g, ' '), color: '#fff' });
+    if (m[1]) { refs++; out.push({ text: fmt(get(m[1])), color: '#008000' }); }
+    else if (m[3]) {
+      if (m[3] === 'True' || m[3] === 'False') out.push({ text: m[3], color: '#008000' });
+      else { refs++; out.push({ text: fmt(get(m[3])), color: '#008000' }); }
+    } else out.push({ text: m[4], color: '#008000' });
+    last = m.index + m[0].length;
+  }
+  if (last < src.length) out.push({ text: src.slice(last).replace(/\s+/g, ' '), color: '#fff' });
+  const show = !!src && /[-+*/()]/.test(src.replace(new RegExp(PATH_RX, 'g'), ''));
+  return { segs: out, show };
+}
+function hlCell(text) {
+  if (parseNum(text) !== null) return [{ text, color: '#008000' }];
+  const out = [], re = new RegExp('\\(\\[(True|False)\\]([^)]*)\\)|\\[(True|False)\\]|=([' + NAME_START + '][' + ID_CH + ']*)|(' + PATH_RX + ')', 'g');
+  let last = 0, m;
+  while ((m = re.exec(text))) {
+    if (m.index > last) out.push({ text: text.slice(last, m.index), color: '#fff' });
+    if (m[1]) { out.push({ text: '(', color: PINK }, { text: '[' + m[1] + ']', color: TOKEN }); if (m[2]) out.push({ text: m[2], color: '#fff' }); out.push({ text: ')', color: PINK }); }
+    else if (m[3]) out.push({ text: m[0], color: TOKEN });
+    else if (m[4]) out.push({ text: '=', color: '#fff' }, { text: m[4], color: '#008000' });
+    else out.push(...pathSegs(m[5]));
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push({ text: text.slice(last), color: '#fff' });
+  return out;
+}
+let _cv = null;
+function textW(t) {
+  if (!_cv) _cv = document.createElement('canvas').getContext('2d');
+  _cv.font = "700 16px 'Google Sans','Product Sans',Figtree,system-ui,sans-serif";
+  return _cv.measureText(String(t || '')).width;
+}
+const PCT_SLOTS = { part: 'Parte', pct: 'Porcentaje', total: 'Total' };
+const PCT_MODES = [['pct', '%', 'El ?% de B es X'], ['total', 'Total', 'El A% de ? es X'], ['part', 'Parte', 'El A% de B es ?']];
+function pctOut(e, get) {
+  const r = pctRaw(e, get);
+  return r && e.decimals === false ? num(Math.round(r.v)) : r;
+}
+function pctRaw(e, get) {
+  const v = k => { const x = toNum(evalExpr(e[k], get)); return isNaN(x) ? null : x; };
+  const m = e.mode || 'part';
+  if (m === 'part') { const p = v('pct'), t = v('total'); return p == null || t == null ? null : num(p * t / 100); }
+  if (m === 'pct') { const a = v('part'), t = v('total'); return a == null || t == null || t === 0 ? null : num(a / t * 100); }
+  const a = v('part'), p = v('pct'); return a == null || p == null || p === 0 ? null : num(a * 100 / p);
+}
+const CMPS = [['=', '=', 'Igual que'], ['!', '≠', 'Diferente a'], ['<', '<', 'Menor que'], ['>', '>', 'Mayor que'], ['<=', '≤', 'Menor o igual que'], ['>=', '≥', 'Mayor o igual que']];
+const LOGIC_SLOTS = { a: 'Dato A', b: 'Dato B', out: 'Salida', els: 'Si no' };
+const QUOTE = /^(["'«“])([^]*)(["'»”])$/;
+const interp = (t, get) => { const has = get.has || (() => true); return t.replace(new RegExp(PATH_RX + '|=([' + NAME_START + '][' + ID_CH + ']*)', 'g'), (m, n) => { const k = n || m; return has(k) ? fmt(get(k)) : m; }); };
+function outVal(src, get) {
+  const s = String(src || '').trim(); if (!s) return null;
+  const q = s.length > 1 && QUOTE.exec(s); if (q) return { t: 'text', v: interp(q[2], get) };
+  const v = evalExpr(s, get);
+  if (v && v.t !== 'text') return v;
+  if (!v) { const has = get.has || (() => true), paths = s.match(new RegExp(PATH_RX, 'g')) || [], names = s.replace(new RegExp(PATH_RX, 'g'), ' ').match(new RegExp('[' + NAME_START + '][' + ID_CH + ']*', 'g')) || []; if (paths.every(p => has(p)) && names.every(n => n === 'True' || n === 'False' || has(n))) return null; }
+  return { t: 'text', v: interp(s, get) };
+}
+function hlOut(text, get) {
+  const v = outVal(text, get); if (!v || v.t !== 'text') return hlExpr(text);
+  const has = get.has || (() => true), out = [], re = new RegExp('(' + PATH_RX + ')|=([' + NAME_START + '][' + ID_CH + ']*)', 'g'); let last = 0, m;
+  while ((m = re.exec(text))) { const k = m[1] || m[2]; if (!has(k)) continue; if (m.index > last) out.push({ text: text.slice(last, m.index), color: '#fff' }); if (m[1]) out.push(...pathSegs(m[1])); else out.push({ text: '=', color: '#fff' }, { text: m[2], color: '#008000' }); last = m.index + m[0].length; }
+  if (last < text.length) out.push({ text: text.slice(last), color: '#fff' });
+  return out;
+}
+const logicBranches = e => [{ id: 'main', a: e.a, cmp: e.cmp, b: e.b, out: e.out }].concat(e.alts || []);
+function logicTest(e, get) {
+  const a = outVal(e.a, get), b = outVal(e.b, get); if (!a || !b) return null;
+  const c = e.cmp || '=', x = toNum(a), y = toNum(b);
+  if (isNaN(x) || isNaN(y)) { if (c !== '=' && c !== '!') return null; const eq = fmt(a) === fmt(b); return c === '=' ? eq : !eq; }
+  const eq = Math.abs(x - y) < 1e-9;
+  return c === '=' ? eq : c === '!' ? !eq : c === '<' ? x < y && !eq : c === '>' ? x > y && !eq : c === '<=' ? x < y || eq : x > y || eq;
+}
+function logicEval(e, get) {
+  const brs = logicBranches(e), anyOut = brs.some(b => (b.out || '').trim());
+  for (const br of brs) {
+    if (br.id !== 'main' && !(br.a || '').trim() && !(br.b || '').trim()) continue;
+    const r = logicTest(br, get); if (r === null) return { val: null, hit: null };
+    if (r) return { val: (br.out || '').trim() ? outVal(br.out, get) : bool(true), hit: br.id };
+  }
+  return { val: (e.els || '').trim() ? outVal(e.els, get) : anyOut ? num(0) : bool(false), hit: 'else' };
+}
+const logicOut = (e, get) => logicEval(e, get).val;
+const NOVAL = t => t === 'sep' || t === 'text';
+function notifInfo(e, get) {
+  let t;
+  if (e.mode === 'manual') { const ms = dateMs(e); if (isNaN(ms)) return null; t = dt(ms); }
+  else { t = evalExpr(e.target, get); if (!t || t.t !== 'date') return null; }
+  const range = t.end != null && t.end !== t.v, ref = range && e.ref === 'end' ? 'end' : 'start', tgt = ref === 'end' ? t.end : t.v;
+  const n = k => Math.max(0, parseInt(e[k], 10) || 0), off = n('d') * 864e5 + n('h') * 36e5 + n('m') * 6e4;
+  return { tgt, fire: tgt - off, off, range, ref };
+}
+function offTxt(e) { const n = k => Math.max(0, parseInt(e[k], 10) || 0), p = []; if (n('d')) p.push(n('d') + (n('d') === 1 ? ' día' : ' días')); if (n('h')) p.push(n('h') + ' h'); if (n('m')) p.push(n('m') + ' min'); return p.join(' '); }
+const ENT_ICON = { notif: 'assets/campana.svg', text: 'assets/texto.svg', date: 'assets/lineas-de-calendario.svg', count: 'assets/reloj.svg', logic: 'assets/rama-de-codigo.svg', pct: 'assets/porcentaje.svg', expr: 'assets/entrada-numerica.svg', toggle: 'assets/boton-de-radio.svg', table: 'assets/lista-de-tablas.svg', slider: 'assets/agregar-barra.svg' };
+const ENT_BASE = { notif: 'Aviso', date: 'Fecha', count: 'Contador', logic: 'Lógica', pct: 'Porcentaje', expr: 'Expresion', toggle: 'Interruptor', table: 'Tabla', slider: 'Deslizador' };
+const OPS = [['sum', 'Sumar'], ['sub', 'Restar'], ['mul', 'Multiplicar'], ['div', 'Dividir']];
+function newEnt(type, name, extra) {
+  const e = { id: uid('e'), type, name, desc: 'Nombre descriptivo' };
+  if (type === 'expr') e.expr = '';
+  if (type === 'toggle') { e.on = false; e.expr = ''; }
+  if (type === 'logic') { e.a = ''; e.cmp = '='; e.b = ''; e.out = ''; e.alts = []; e.els = ''; }
+  if (type === 'pct') { e.mode = 'part'; e.pct = ''; e.total = ''; e.part = ''; e.decimals = true; }
+  if (type === 'date') { e.date = ymd(new Date()); e.time = '09:00'; }
+  if (type === 'count') { e.target = ''; e.unit = 'd'; }
+  if (type === 'notif') { e.desc = 'Aviso'; e.mode = 'ent'; e.target = ''; e.ref = 'start'; e.date = ymd(new Date()); e.time = '09:00'; e.d = '1'; e.h = ''; e.m = ''; e.msg = ''; }
+  if (type === 'slider') { e.value = 0; e.min = '0'; e.max = '100'; e.decimals = true; }
+  if (type === 'table') { e.cols = [0, 1, 2].map(i => ({ id: uid('c'), title: 'Título', op: i === 2 ? 'sum' : null })); e.rows = [0, 1, 2].map(() => ({ id: uid('r'), cells: {} })); }
+  return Object.assign(e, extra || {});
+}
+function splitEnt(out, t, off, color, raw) {
+  let last = 0, m; ENT.lastIndex = 0;
+  while ((m = ENT.exec(t))) {
+    if (m.index > last) out.push({ t: 'text', text: t.slice(last, m.index), off: off + last, color });
+    out.push({ t: 'ent', name: m[1] || m[2], off: off + m.index, raw });
+    last = m.index + m[0].length;
+  }
+  if (last < t.length) out.push({ t: 'text', text: t.slice(last), off: off + last, color });
+}
+function rawSegs(text) {
+  const out = [], push = (t, off, color) => t && (color === '#fff' ? splitEnt(out, t, off, color, true) : out.push({ t: 'text', text: t, off, color }));
+  let last = 0, m; RX.lastIndex = 0;
+  while ((m = RX.exec(text))) {
+    push(text.slice(last, m.index), last, '#fff');
+    if (m[1]) {
+      const tok = '[' + m[1] + ']', a = m.index;
+      push('(', a, PINK); push(tok, a + 1, TOKEN);
+      push(m[2], a + 1 + tok.length, '#fff');
+      push(')', a + m[0].length - 1, PINK);
+    } else push(m[0], m.index, TOKEN);
+    last = m.index + m[0].length;
+  }
+  push(text.slice(last), last, '#fff');
+  return out;
+}
+const EM = /(\*{1,3})(?=[^\s*])([^]*?[^\s*])\1(?!\*)/g;
+function emSplit(t, off, fn) {
+  const re = new RegExp(EM.source, 'g'); let last = 0, m;
+  while ((m = re.exec(t))) {
+    if (m.index > last) fn(t.slice(last, m.index), off + last, false, false);
+    const L = m[1].length; fn(m[2], off + m.index + L, L >= 2, L !== 2);
+    last = m.index + m[0].length;
+  }
+  if (last < t.length) fn(t.slice(last), off + last, false, false);
+}
+const LI = /^( *)(-|\d{1,9}[.)]) (.*)$/;
+function blockInfo(lines) {
+  const n = lines.length, out = new Array(n), endsTick = t => /``\s*$/.test(t), rtrim = t => t.replace(/\s+$/, '');
+  for (let i = 0; i < n; i++) {
+    const t = lines[i].text; let m;
+    if (t.startsWith('``')) {
+      if (t.length >= 4 && endsTick(t.slice(2))) { out[i] = { kind: 'code', pos: 'single', start: 2, end: rtrim(t).length - 2, from: i, to: i }; continue; }
+      let j = i + 1; while (j < n && !endsTick(lines[j].text)) j++;
+      if (j < n) {
+        for (let k = i; k <= j; k++) { const tk = lines[k].text; out[k] = { kind: 'code', pos: k === i ? 'first' : k === j ? 'last' : 'mid', start: k === i ? 2 : 0, end: k === j ? Math.max(k === i ? 2 : 0, rtrim(tk).length - 2) : tk.length, from: i, to: j }; }
+        i = j; continue;
+      }
+    }
+    if (/^-{3,}\s*$/.test(t)) out[i] = { kind: 'hr' };
+    else if (/^>( |$)/.test(t)) out[i] = { kind: 'quote', start: Math.min(2, t.length), end: t.length };
+    else if ((m = LI.exec(t))) out[i] = { kind: m[2] === '-' ? 'ul' : 'ol', lvl: Math.min(6, Math.floor(m[1].length / 2)), start: m[1].length + m[2].length + 1, end: t.length, n: parseInt(m[2], 10) };
+    else out[i] = { kind: 'p' };
+  }
+  let cnt = [];
+  out.forEach((b, i) => {
+    if (b.kind === 'quote') { b.first = !(out[i - 1] && out[i - 1].kind === 'quote'); b.last = !(out[i + 1] && out[i + 1].kind === 'quote'); }
+    if (b.kind === 'ul' || b.kind === 'ol') {
+      cnt = cnt.slice(0, b.lvl + 1);
+      if (b.kind === 'ol') { b.num = cnt[b.lvl] != null ? cnt[b.lvl] + 1 : b.n; cnt[b.lvl] = b.num; } else cnt[b.lvl] = null;
+    } else cnt = [];
+  });
+  return out;
+}
+const plainOf = segs => segs.map(s => s.t === 'text' ? s.text : s.t === 'ent' ? resolveEntity(s.name) : (s.on ? '[x]' : '[ ]') + (s.mr === '10px' ? ' ' : '')).join('');
+function cleanSegs(text, start, end) {
+  const out = [], push = (t, off) => t && emSplit(t, off, (tt, o, b, it) => { const k = out.length; splitEnt(out, tt, o, '#fff', false); for (let j = k; j < out.length; j++) { out[j].b = b; out[j].i = it; } });
+  const body = text.slice(start, end == null ? text.length : end);
+  let last = 0, m; RX.lastIndex = 0;
+  while ((m = RX.exec(body))) {
+    push(body.slice(last, m.index), start + last);
+    if (m[1]) {
+      const lead = m[2].length - m[2].replace(/^\s+/, '').length, data = m[2].trim();
+      out.push({ t: 'box', on: m[1] === 'True', off: start + m.index + 1, word: m[1], mr: data ? '10px' : '0px' });
+      push(data, start + m.index + 2 + m[1].length + 1 + lead);
+    } else out.push({ t: 'box', on: m[3] === 'True', off: start + m.index, word: m[3], mr: '0px' });
+    last = m.index + m[0].length;
+  }
+  push(body.slice(last), start + last);
+  return out;
+}
+
+const W0 = 577;
+let _uid = 1000;
+const uid = p => p + (++_uid);
+const mkLines = arr => arr.map(text => ({ id: uid('l'), text }));
+const mkSheet = (name, lines, entities) => ({ id: uid('s'), name, lines: mkLines(lines || ['']), width: W0, entities: entities || [] });
+
+class Component extends DCLogic {
+  state = (() => {
+    const mkTable = (name, cols, rows) => {
+      const t = newEnt('table', name);
+      t.cols = cols.map(([title, op]) => ({ id: uid('c'), title, op: op || null }));
+      t.rows = rows.map(r => { const cells = {}; t.cols.forEach((c, i) => { cells[c.id] = r[i]; }); return { id: uid('r'), cells }; });
+      return t;
+    };
+    const sep = title => ({ id: uid('e'), type: 'sep', title });
+    const guiaEnt = [
+      sep('Expresión'),
+      newEnt('expr', 'Precio', { desc: 'Precio por unidad', expr: '12,5' }),
+      newEnt('expr', 'Subtotal', { desc: 'Precio por unidades', expr: 'Precio * Unidades' }),
+      sep('Interruptor'),
+      newEnt('toggle', 'Envio', { desc: 'Envío a domicilio', on: true, expr: '4,95' }),
+      sep('Lógica'),
+      newEnt('logic', 'Descuento', { desc: '10 % si pasa de 50', a: 'Subtotal', cmp: '>=', b: '50', out: 'Subtotal * 0,1' }),
+      newEnt('toggle', 'Plan_Estatico', { desc: 'Plan Estático', on: false }),
+      newEnt('toggle', 'Plan_Basico', { desc: 'Plan Básico', on: true }),
+      newEnt('toggle', 'Plan_Completo', { desc: 'Plan Completo', on: false }),
+      newEnt('logic', 'Plan', { desc: 'Plan en uso', a: 'Plan_Estatico', cmp: '=', b: 'True', out: 'Estático', alts: [{ id: uid('b'), a: 'Plan_Basico', cmp: '=', b: 'True', out: 'Básico' }, { id: uid('b'), a: 'Plan_Completo', cmp: '=', b: 'True', out: 'Completo' }], els: 'Ninguno' }),
+      sep('Deslizador'),
+      newEnt('slider', 'Unidades', { desc: 'Unidades compradas', value: 4, min: '1', max: '10', decimals: false }),
+      sep('Porcentaje'),
+      newEnt('pct', 'IVA', { desc: 'IVA del subtotal', mode: 'part', pct: '21', total: 'Subtotal' }),
+      sep('Tabla'),
+      mkTable('Compra', [['Hecho'], ['Producto'], ['Importe', 'sum']], [['[True]', 'Pedido', '=Subtotal'], ['[True]', 'Envío', '=Envio'], ['[False]', 'Envoltorio', '3'], ['[True]', 'IVA', '=IVA']])
+    ];
+    const viaje = [
+      sep('Gastos'),
+      mkTable('Gastos', [['Pagado'], ['Concepto'], ['Importe', 'sum']], [['[True]', 'Vuelos', '180'], ['[True]', 'Hotel', '240'], ['[False]', 'Cena de despedida', '60'], ['[True]', 'Transporte', '=Taxi']]),
+      newEnt('expr', 'Taxi', { desc: 'Taxis por trayecto', expr: '12 * 3' }),
+      newEnt('toggle', 'Seguro', { desc: 'Seguro de viaje', on: true, expr: '25' }),
+      sep('Reparto'),
+      newEnt('slider', 'Personas', { desc: 'Personas que pagan', value: 3, min: '1', max: '8', decimals: false }),
+      newEnt('expr', 'Por_Persona', { desc: 'Cada uno paga', expr: '(Gastos + Seguro) / Personas' }),
+      newEnt('logic', 'En_Presupuesto', { desc: 'Máximo 200 por persona', a: 'Por_Persona', cmp: '<=', b: '200', out: '' }),
+      sep('Extras'),
+      newEnt('pct', 'Propina', { desc: 'Propina de la cena', mode: 'part', pct: '10', total: '60', part: '' }),
+      newEnt('pct', 'Peso_Hotel', { desc: 'Peso del hotel en el total', mode: 'pct', part: '240', total: 'Gastos', pct: '', decimals: false })
+    ];
+    const sheets = [mkSheet('Guía de formato MKD', [
+      '# Título de nivel 1',
+      '## Título de nivel 2',
+      '### Título de nivel 3',
+      'Texto normal con **negrita**, *cursiva* y ***negrita en cursiva***.',
+      '---',
+      '> Esto es una anotación.',
+      '> Varias líneas seguidas forman un solo bloque.',
+      '## Listas',
+      '- Elemento de lista',
+      '- Otro elemento',
+      '  - Subelemento con **negrita**',
+      '  - Otro subelemento',
+      '- De vuelta al primer nivel',
+      '3. La numeración empieza en el primer número',
+      '1. y sigue sola aunque escribas otro',
+      '1. tercer paso',
+      '## Casillas',
+      '[True] Casilla marcada',
+      '[False] Casilla sin marcar',
+      '([True] Casilla con texto agrupado)',
+      '## Cuadros copiables',
+      '``Una línea lista para copiar``',
+      '``',
+      'Bloque de varias líneas.',
+      'Las menciones se copian con su valor: =Subtotal',
+      '``'
+    ]), mkSheet('Guía de entidades', [
+      '# Guía de entidades',
+      'Las entidades viven en el panel derecho y se añaden desde la barra lateral. Cada una tiene un **nombre único** y produce un valor que puedes citar en cualquier hoja escribiendo un igual delante de su nombre: por ejemplo, el subtotal vale *=Subtotal*.',
+      '> Activa la vista sucia con el interruptor superior para editar nombres, descripciones y fórmulas. El botón de función alterna entre ver las entradas o la salida.',
+      '## Expresión',
+      'Calcula operaciones con suma, resta, multiplicación, división y paréntesis. Admite números y otras entidades por su nombre. Aquí, Precio por Unidades da **=Subtotal**.',
+      '## Interruptor',
+      'Una casilla que vale True o False. Si le das una fórmula, devuelve ese valor cuando está activa y 0 cuando no. El envío suma ahora **=Envio**.',
+      '## Lógica',
+      'Compara dos datos (igual, distinto, menor, mayor, menor o igual, mayor o igual). Sin salida devuelve True o False; con salida, devuelve ese valor si se cumple y, si no, el de la fila «si no» (0 por defecto). El descuento es **=Descuento**.',
+      'Con el botón + añades casos «si no, si»: gana el primero que se cumple. Haz clic en un caso para cambiar su comparación. Las salidas admiten texto, números, fórmulas u otras entidades; usa comillas si un texto coincide con un nombre. Marca otro plan y el texto cambia solo.',
+      'Plan en uso: **=Plan**',
+      '## Deslizador',
+      'Elige un valor arrastrando entre un mínimo y un máximo, que también pueden ser fórmulas. El icono de comillas activa o quita los decimales. Ahora hay **=Unidades** unidades: muévelo y mira cómo cambia todo.',
+      '## Porcentaje',
+      'Resuelve el hueco que elijas en la frase «El A% de B es X»: la parte, el porcentaje o el total. El IVA del subtotal es **=IVA**.',
+      '## Tabla',
+      'Filas y columnas con texto, números, casillas o menciones. Una columna puede sumar, restar, multiplicar o dividir, y su resultado es el valor de la tabla. Las filas con una casilla en False se tachan y no cuentan. La compra suma **=Compra**.',
+      '## Separador',
+      'Un título entre líneas que ordena el panel en secciones. No produce ningún valor.',
+      '## Referencias entre ventanas',
+      'Para citar una entidad de otra nota, escribe su ruta entre paréntesis tras el igual. La nota y la hoja van con su nombre original, con espacios si los tienen; al final va el nombre de la entidad. El precio de esta guía vale =(Conoce NoteApp / Guía de entidades / Precio).',
+      'Para la Agenda, empieza la ruta con la palabra Agenda: el vuelo sale el **=(Agenda / Viajes / Lisboa / Vuelo_Lisboa)**.'
+    ], guiaEnt), mkSheet('Demostración', [
+      '# Viaje a Lisboa',
+      'Llevamos gastados =Gastos euros entre **=Personas personas**, así que cada uno pone *=Por_Persona* euros.',
+      '¿Seguimos dentro del presupuesto? **=En_Presupuesto**',
+      '## Pendientes',
+      '([True] Reservar vuelos)',
+      '([True] Pagar el hotel)',
+      '([False] Reservar la cena de despedida)',
+      'Seguro contratado: [True]',
+      '---',
+      '## Resumen para el grupo',
+      '> El hotel supone el =Peso_Hotel % del gasto total.',
+      '> Si añadimos la cena, la propina sería de =Propina euros.',
+      'Faltan =(Agenda / Viajes / Lisboa / Faltan_Vuelo) días para el vuelo: **=(Agenda / Viajes / Lisboa / Aviso_Maleta)**',
+      '``',
+      'Total del viaje: =Gastos euros',
+      'Seguro: =Seguro euros',
+      'Por persona: =Por_Persona euros',
+      '``'
+    ], viaje)];
+    const notes = [{ id: uid('n'), name: 'Conoce NoteApp', sheets, activeSheet: sheets[0].id }];
+    const inDays = k => { const d = new Date(); d.setDate(d.getDate() + k); return ymd(d); };
+    const lis = mkSheet('Lisboa', [''], [
+      sep('Vuelo'),
+      newEnt('date', 'Vuelo_Lisboa', { desc: 'Salida del vuelo', date: inDays(12), time: '07:45' }),
+      newEnt('count', 'Faltan_Vuelo', { desc: 'Cuenta atrás del vuelo', target: 'Vuelo_Lisboa', unit: 'd' }),
+      newEnt('notif', 'Aviso_Checkin', { desc: 'Check-in online', target: 'Vuelo_Lisboa', d: '1', msg: 'Haz el check-in y descarga la tarjeta de embarque.' }),
+      sep('Equipaje'),
+      { id: uid('e'), type: 'text', lines: mkLines(['## Antes de salir', '- Pasaporte y DNI', '- Cargador y adaptador', 'Faltan **=Faltan_Vuelo días**: =Aviso_Maleta']) },
+      newEnt('toggle', 'Maleta_Hecha', { desc: 'Maleta preparada', on: false }),
+      newEnt('logic', 'Aviso_Maleta', { desc: 'Recordatorio', a: 'Maleta_Hecha', cmp: '=', b: 'True', out: 'Todo listo', alts: [{ id: uid('b'), a: 'Faltan_Vuelo', cmp: '<=', b: '2', out: '¡Haz la maleta!' }], els: 'Hay tiempo' }),
+      newEnt('logic', 'Presupuesto', { desc: 'Estado del presupuesto', a: '=(Conoce NoteApp / Demostración / En_Presupuesto)', cmp: '=', b: 'True', out: 'Dentro del presupuesto', els: 'Revisar gastos' })
+    ]), pag = mkSheet('Pagos', [''], [
+      newEnt('date', 'Pago_Hotel', { desc: 'Límite para pagar el hotel', date: inDays(4), time: '23:59' }),
+      newEnt('count', 'Plazo_Hotel', { desc: 'Tiempo para pagar el hotel', target: 'Pago_Hotel', unit: 'txt' }),
+      newEnt('notif', 'Aviso_Pago', { desc: 'Pagar el hotel', target: 'Pago_Hotel', d: '', h: '12' })
+    ]);
+    const anotes = [{ id: uid('n'), name: 'Viajes', sheets: [lis, pag], activeSheet: lis.id }];
+    return { other: { notes: anotes, activeNote: anotes[0].id }, calView: {}, now: Date.now(), lsel: {}, copied: null, entMenu: null, field: null, colMenu: null, menu: false, mode: 'notas', notes, activeNote: notes[0].id, editing: null, draft: '', dragging: false, clean: true, focusId: null };
+  })();
+  panelRef = React.createRef();
+  taRef = React.createRef();
+  componentDidMount() {
+    this._down = e => {
+      const a = document.activeElement;
+      if (this.state.editing && a && a.tagName === 'INPUT' && e.target !== a) a.blur();
+      if (this.state.menu && !(e.target.closest && e.target.closest('[data-menu]'))) this.setState({ menu: false });
+      if (this.state.colMenu && !(e.target.closest && e.target.closest('[data-colmenu]'))) this.setState({ colMenu: null });
+      if (this.state.entMenu && !(e.target.closest && e.target.closest('[data-entmenu]'))) this.setState({ entMenu: null });
+    };
+    document.addEventListener('mousedown', this._down, true);
+    this._key = e => { if (e.key === 'Escape' && (this.state.menu || this.state.entMenu)) this.setState({ menu: false, entMenu: null }); };
+    document.addEventListener('keydown', this._key);
+    this._last = Date.now(); this._tick = setInterval(() => { const s = this.state; this.checkNotifs(s); if (s.mode === 'agenda' || s.other.notes.some(n => n.sheets.some(x => (x.entities || []).some(e => e.type === 'count')))) this.setState({ now: Date.now() }); }, 1000);
+  }
+  componentWillUnmount() { clearInterval(this._tick); document.removeEventListener('mousedown', this._down, true); document.removeEventListener('keydown', this._key); }
+  componentDidUpdate() {
+    const ta = this.taRef.current;
+    if (ta && this._caret != null) {
+      const c = Math.min(this._caret, ta.value.length);
+      this._caret = null;
+      ta.focus(); ta.setSelectionRange(c, c);
+    }
+  }
+  curNote(s) { return s.notes.find(n => n.id === s.activeNote); }
+  curSheet(s) { const n = this.curNote(s); return n && n.sheets.find(x => x.id === n.activeSheet); }
+  mapSheet(s, fn) {
+    return s.notes.map(n => n.id !== s.activeNote ? n : { ...n, sheets: n.sheets.map(x => x.id !== n.activeSheet ? x : fn(x)) });
+  }
+  focusLine(id, caret) { this._caret = caret; this.setState({ focusId: id }, () => this.componentDidUpdate()); }
+  setLines(lines, focusId, caret, entId) {
+    this._caret = caret;
+    this.setState(s => ({ notes: this.mapSheet(s, x => entId ? { ...x, entities: (x.entities || []).map(e => e.id === entId ? { ...e, lines } : e) } : { ...x, lines }), focusId: focusId === undefined ? s.focusId : focusId }));
+  }
+  addText() {
+    const ln = mkLines([''])[0];
+    this.setState(s => { if (!this.entsOf(s)) return null; return this.mapEnts(s, a => a.concat({ id: uid('e'), type: 'text', lines: [ln] })); }, () => { if (!this.state.clean) this.focusLine(ln.id, 0); });
+  }
+  askPerm() { try { if (window.Notification && Notification.permission === 'default') Notification.requestPermission(); } catch (_) {} }
+  fireNotif(e, i) {
+    const ot = offTxt(e), title = (e.desc || '').trim() || e.name, body = (e.msg || '').trim() || (i ? (ot ? 'Quedan ' + ot : 'Ha llegado la fecha') : 'Sin fecha asignada'), when = i ? fmt(dt(i.tgt)) : '', id = uid('t');
+    this.setState(st => ({ toasts: (st.toasts || []).concat({ id, title, body, when }).slice(-4) }));
+    setTimeout(() => this.setState(st => ({ toasts: (st.toasts || []).filter(t => t.id !== id) })), 12000);
+    try { if (window.Notification && Notification.permission === 'granted') new Notification(title, { body: body + (when ? ' · ' + when : '') }); } catch (_) {}
+  }
+  checkNotifs(s) {
+    const now = Date.now(), last = this._last || now; this._last = now;
+    const ns = []; (s.mode === 'agenda' ? s.notes : s.other.notes).forEach(n => n.sheets.forEach(x => (x.entities || []).forEach(e => { if (e.type === 'notif') ns.push(e); })));
+    if (!ns.length) return;
+    NOW = now; const W = makeWorld(s);
+    ns.forEach(e => { const i = notifInfo(e, W.gA); if (i && i.fire > last && i.fire <= now) this.fireNotif(e, i); });
+  }
+  setWidth(w) { this.setState(s => ({ notes: this.mapSheet(s, x => ({ ...x, width: w })) })); }
+  commit(kind, id) {
+    this.setState(s => {
+      if (!s.editing || s.editing.kind !== kind || s.editing.id !== id) return null;
+      let v = s.draft.trim().slice(0, 22);
+      if (kind === 'ent') {
+        v = v.replace(/\s+/g, '_').replace(new RegExp('[^' + ID_CH + ']', 'g'), '');
+        if (/^\d/.test(v)) v = ('_' + v).slice(0, 22);
+        if (v) v = this.uniqueName(v, s, id);
+      }
+      if (!v) return { editing: null };
+      const mapEnts = f => s.notes.map(n => ({ ...n, sheets: n.sheets.map(x => ({ ...x, entities: (x.entities || []).map(f) })) }));
+      let notes;
+      if (kind === 'note') notes = s.notes.map(n => n.id === id ? { ...n, name: v } : n);
+      else if (kind === 'sheet') notes = s.notes.map(n => ({ ...n, sheets: n.sheets.map(x => x.id === id ? { ...x, name: v } : x) }));
+      else if (kind === 'ent') notes = mapEnts(e => e.id === id ? { ...e, name: v } : e);
+      else notes = mapEnts(e => e.type !== 'table' ? e : { ...e, cols: e.cols.map(c => c.id === id ? { ...c, title: v } : c) });
+      return { notes, editing: null };
+    });
+  }
+  allEnts(s) { return s.notes.flatMap(n => n.sheets.flatMap(x => (x.entities || []).filter(e => !NOVAL(e.type)))); }
+  entsOf(s) { const sh = this.curSheet(s); return sh ? (sh.entities || []) : null; }
+  mapEnts(s, fn) { return { notes: this.mapSheet(s, x => ({ ...x, entities: fn(x.entities || []) })) }; }
+  addSep() {
+    this.setState(s => {
+      if (!this.entsOf(s)) return null;
+      const e = { id: uid('e'), type: 'sep', title: 'Sección' };
+      return this.mapEnts(s, a => a.concat(e));
+    });
+  }
+  uniqueName(base, s, skipId) {
+    const taken = new Set(this.allEnts(s).filter(e => e.id !== skipId).map(e => e.name));
+    if (!taken.has(base)) return base;
+    for (let k = 2; ; k++) { const suf = '_' + k, nm = base.slice(0, 22 - suf.length) + suf; if (!taken.has(nm)) return nm; }
+  }
+  updEnt(id, fn) { this.setState(s => this.mapEnts(s, a => a.map(e => e.id === id ? fn(e) : e))); }
+  addEnt(type) {
+    this.setState(s => {
+      if (!this.entsOf(s)) return null;
+      const ag = s.mode === 'agenda', all = this.allEnts(s), base = ag && type === 'toggle' ? 'Casilla' : ENT_BASE[type]; let k = 1;
+      while (all.some(e => e.name === base + '_' + k)) k++;
+      const e = newEnt(type, base + '_' + k, ag && type === 'toggle' ? { desc: 'Casilla' } : null);
+      return this.mapEnts(s, a => a.concat(e));
+    });
+  }
+  removeEnt(id) { this.setState(s => ({ entMenu: null, field: null, colMenu: null, ...this.mapEnts(s, a => a.filter(e => e.id !== id)) })); }
+  duplicateEnt(id) {
+    this.setState(s => {
+      const list = this.entsOf(s); if (!list) return { entMenu: null };
+      const k = list.findIndex(e => e.id === id); if (k < 0) return { entMenu: null };
+      const src = list[k], copy = JSON.parse(JSON.stringify(src));
+      copy.id = uid('e'); if (copy.type === 'text') copy.lines = copy.lines.map(l => ({ ...l, id: uid('l') })); if (!NOVAL(copy.type)) copy.name = this.uniqueName(src.name, s, null);
+      if (copy.type === 'table') {
+        const map = {}; copy.cols = copy.cols.map(c => { const nid = uid('c'); map[c.id] = nid; return { ...c, id: nid }; });
+        copy.rows = copy.rows.map(r => { const cells = {}; Object.keys(r.cells).forEach(cid => { if (map[cid]) cells[map[cid]] = r.cells[cid]; }); return { id: uid('r'), cells }; });
+      }
+      return { entMenu: null, ...this.mapEnts(s, a0 => { const a = a0.slice(); a.splice(k + 1, 0, copy); return a; }) };
+    });
+  }
+  updBr(eid, bid, patch) { this.updEnt(eid, x => bid === 'main' ? { ...x, ...patch } : { ...x, alts: (x.alts || []).map(a => a.id === bid ? { ...a, ...patch } : a) }); }
+  addBr(eid) { const b = { id: uid('b'), a: '', cmp: '=', b: '', out: '' }; this.updEnt(eid, x => ({ ...x, alts: (x.alts || []).concat(b) })); this.setState(st => ({ lsel: { ...(st.lsel || {}), [eid]: b.id } })); }
+  rmBr(eid, bid) { this.setState({ field: null }); this.updEnt(eid, x => ({ ...x, alts: (x.alts || []).filter(a => a.id !== bid) })); }
+  clearCal(id) { this.setState(st => { const cv = { ...(st.calView || {}) }; delete cv[id + ':0']; delete cv[id + ':1']; return { calView: cv, rangePick: { ...(st.rangePick || {}), [id]: false }, calPrev: { ...(st.calPrev || {}), [id]: null } }; }); }
+  setAlign(eid, cid, al) { this.updEnt(eid, t => ({ ...t, cols: t.cols.map(c => c.id === cid ? { ...c, align: al } : c) })); }
+  moveEnt(id, d) {
+    this.setState(s => this.mapEnts(s, a0 => {
+      const a = a0.slice(), i = a.findIndex(e => e.id === id), j = i + d;
+      if (i < 0 || j < 0 || j >= a.length) return a0;
+      const t = a[i]; a[i] = a[j]; a[j] = t; return a;
+    }));
+  }
+  setCell(eid, rid, cid, val) { this.updEnt(eid, t => ({ ...t, rows: t.rows.map(r => r.id !== rid ? r : { ...r, cells: { ...r.cells, [cid]: val } }) })); }
+  toggleCell(eid, rid, cid) { this.updEnt(eid, t => ({ ...t, rows: t.rows.map(r => r.id !== rid ? r : { ...r, cells: { ...r.cells, [cid]: (r.cells[cid] || '').replace(/\[(True|False)\]/, (m, w) => w === 'True' ? '[False]' : '[True]') } }) })); }
+  addRow(eid, at) { this.updEnt(eid, t => { const rows = t.rows.slice(); rows.splice(at, 0, { id: uid('r'), cells: {} }); return { ...t, rows }; }); }
+  addCol(eid, at) { this.updEnt(eid, t => { const cols = t.cols.slice(); cols.splice(at, 0, { id: uid('c'), title: 'Título', op: null }); return { ...t, cols }; }); }
+  removeCol(eid, cid) { this.setState({ colMenu: null }); this.updEnt(eid, t => t.cols.length < 2 ? t : { ...t, cols: t.cols.filter(c => c.id !== cid) }); }
+  setOp(eid, cid, op) { this.updEnt(eid, t => ({ ...t, cols: t.cols.map(c => c.id === cid ? { ...c, op: c.op === op ? null : op } : { ...c, op: null }) })); }
+  slideTo(x) {
+    const sl = this._sl; if (!sl) return;
+    const f = Math.min(1, Math.max(0, (x - sl.rect.left) / sl.rect.width));
+    let v = sl.lo + f * (sl.hi - sl.lo); v = sl.dec ? Math.round(v * 10) / 10 : Math.round(v);
+    this.updEnt(sl.id, e => e.value === v ? e : { ...e, value: v });
+  }
+  field(key, value, segs, set, o) {
+    o = o || {};
+    const focused = this.state.field === key, align = o.align || 'right';
+    return {
+      value, segs: value ? segs : [{ text: o.ph || '', color: DIM }],
+      hlVis: focused ? 'hidden' : 'visible', inOp: focused ? 1 : 0,
+      justify: align === 'right' ? 'flex-end' : align === 'center' ? 'center' : 'flex-start', align,
+      deco: o.deco || 'none',
+      onFocus: () => this.setState({ field: key }),
+      onBlur: () => this.setState(st => st.field === key ? { field: null } : null),
+      onChange: ev => set(ev.target.value),
+      onKey: ev => { if (ev.key === 'Enter' || ev.key === 'Escape') ev.target.blur(); }
+    };
+  }
+  entView(e, idx, list, get, dirty) {
+    const s = this.state, t = e.type;
+    if (t === 'sep') return {
+      id: e.id, isSep: true, entDirty: false, title: e.title || '', titleSizer: e.title || 'Título',
+      sepStatic: !dirty && !!e.title, sepMl: '0',
+      onTitle: ev => { const d = ev.target.value.slice(0, 40); this.updEnt(e.id, x => ({ ...x, title: d })); },
+      up: () => this.moveEnt(e.id, -1), down: () => this.moveEnt(e.id, 1),
+      upColor: idx > 0 ? '#7a7a7a' : '#3a3a3a', downColor: idx < list.length - 1 ? '#7a7a7a' : '#3a3a3a',
+      menuOpen: s.entMenu === e.id, menuDot: s.entMenu === e.id ? '#a6a6a6' : '#7a7a7a',
+      toggleMenu: () => this.setState(st => ({ entMenu: st.entMenu === e.id ? null : e.id })),
+      duplicate: () => this.duplicateEnt(e.id), remove: () => this.removeEnt(e.id)
+    };
+    if (t === 'text') {
+      const src = e.lines && e.lines.length ? e.lines : [{ id: e.id + 'l', text: '' }];
+      return {
+        id: e.id, isSep: false, isText: true, entDirty: false, lines: this.mkdLines(src, e.id, dirty && e.fx === false), boxCursor: dirty && e.fx !== false ? 'text' : 'default',
+        fxColor: e.fx !== false ? '#008000' : '#5a5a5a', fxOn: e.fx !== false, fxTitle: e.fx !== false ? 'Mostrando texto sucio' : 'Mostrando salida en texto limpio',
+        toggleFx: () => { this.setState({ focusId: null }); this.updEnt(e.id, x => ({ ...x, fx: x.fx === false })); },
+        boxDown: ev => { if (!dirty || e.fx === false || (ev.target.closest && ev.target.closest('[data-line]'))) return; ev.preventDefault(); const l = src[src.length - 1]; this.focusLine(l.id, l.text.length); },
+        up: () => this.moveEnt(e.id, -1), down: () => this.moveEnt(e.id, 1),
+        upColor: idx > 0 ? '#7a7a7a' : '#3a3a3a', downColor: idx < list.length - 1 ? '#7a7a7a' : '#3a3a3a',
+        menuOpen: s.entMenu === e.id, menuDot: s.entMenu === e.id ? '#a6a6a6' : '#7a7a7a',
+        toggleMenu: () => this.setState(st => ({ entMenu: st.entMenu === e.id ? null : e.id })),
+        duplicate: () => this.duplicateEnt(e.id), remove: () => this.removeEnt(e.id)
+      };
+    }
+    const v = {
+      isSep: false, entDirty: dirty,
+      id: e.id, icon: ENT_ICON[t], desc: e.desc, descSizer: e.desc || '\u00a0',
+      isSlider: t === 'slider', isTable: t === 'table', hasDec: t === 'slider' || t === 'pct',
+      exprClean: !dirty && t === 'expr', isLogic: t === 'logic', logicHeadClean: !dirty && t === 'logic', exprDirty: dirty && t === 'expr',
+      toggleClean: !dirty && t === 'toggle', toggleDirty: dirty && t === 'toggle',
+      sliderClean: !dirty && t === 'slider', sliderDirty: dirty && t === 'slider',
+      pctClean: !dirty && t === 'pct', pctDirty: dirty && t === 'pct',
+      nm: this.makeTab('ent', e.id, e.name, false, false),
+      isDate: t === 'date', isCount: t === 'count', isNotif: t === 'notif', isText: false, headClean: !dirty, hasFx: t !== 'date' && t !== 'count' && t !== 'notif',
+      up: () => this.moveEnt(e.id, -1), down: () => this.moveEnt(e.id, 1),
+      upColor: idx > 0 ? '#7a7a7a' : '#3a3a3a', downColor: idx < list.length - 1 ? '#7a7a7a' : '#3a3a3a',
+      showIn: e.fx !== false, showOut: e.fx === false,
+      fxColor: e.fx !== false ? '#008000' : '#5a5a5a',
+      fxTitle: e.fx !== false ? 'Mostrando datos de entrada' : 'Mostrando salida',
+      toggleFx: () => this.updEnt(e.id, x => ({ ...x, fx: x.fx === false })),
+      menuOpen: s.entMenu === e.id, menuDot: s.entMenu === e.id ? '#a6a6a6' : '#7a7a7a',
+      toggleMenu: () => this.setState(st => ({ entMenu: st.entMenu === e.id ? null : e.id })),
+      duplicate: () => this.duplicateEnt(e.id), remove: () => this.removeEnt(e.id),
+      onDesc: ev => { const d = ev.target.value.slice(0, 40); this.updEnt(e.id, x => ({ ...x, desc: d })); }
+    };
+    const setExpr = val => this.updEnt(e.id, x => ({ ...x, expr: val }));
+    if (t === 'expr') {
+      v.out = fmt(entOut(e, get));
+      { const sb = substSegs(e.expr, get); v.subst = sb.segs; v.hasSubst = sb.show; }
+      v.fx = this.field(e.id + ':expr', e.expr, hlExpr(e.expr), setExpr, { ph: 'Expresión' });
+    } else if (t === 'toggle') {
+      v.out = fmt(toggleShown(e, get)); v.on = e.on;
+      { const sb = substSegs(e.expr, get); v.subst = sb.segs; v.hasSubst = sb.show; }
+      v.boxBg = e.on ? '#2b3c2b' : '#2a2a2a'; v.rowBg = v.boxBg; v.valBg = e.on ? '#1d2a1d' : '#1c1c1c';
+      v.chkBg = e.on ? '#008000' : 'transparent';
+      v.onToggle = () => this.updEnt(e.id, x => ({ ...x, on: !x.on }));
+      v.fx = this.field(e.id + ':expr', e.expr, hlExpr(e.expr), setExpr, { ph: e.on ? 'True' : 'False' });
+    } else if (t === 'logic') {
+      const showIn = dirty && e.fx !== false, brs = logicBranches(e), multi = brs.length > 1, ev = logicEval(e, get);
+      const anyOut = brs.some(b => (b.out || '').trim()), hasEls = !!(e.els || '').trim(), elsDef = anyOut ? '0' : 'False';
+      const selId = (s.lsel || {})[e.id], sel = brs.find(b => b.id === selId) || brs[0], cmp = sel.cmp || '=';
+      v.out = fmt(ev.val); v.outTxt = v.out;
+      v.cmpLabel = multi ? 'Comparación del caso ' + (brs.indexOf(sel) + 1) : 'Comparación';
+      v.cmps = CMPS.map(c => ({ label: c[1], title: c[2], on: cmp === c[0], bg: cmp === c[0] ? '#008000' : 'transparent', color: cmp === c[0] ? '#fff' : '#a6a6a6', fw: cmp === c[0] ? 600 : 400, onClick: () => this.updBr(e.id, sel.id, { cmp: c[0] }) }));
+      const P = p => ({ isLead: false, isWord: false, isField: false, isVal: false, isDel: false, isAdd: false, col: 'auto', ...p });
+      const w = t2 => P({ isWord: true, text: t2 });
+      const lead = (text, on) => P({ isLead: true, text, color: on ? (dirty ? '#008000' : '#fff') : '#a6a6a6', fw: on ? 600 : 400 });
+      const valSegs = (src, dflt) => {
+        if (!(src || '').trim()) return [{ text: dflt, color: '#008000' }];
+        const ov = outVal(src, get), val = fmt(ov), sb = substSegs(src, get);
+        return dirty && sb.show && !(ov && ov.t === 'text') ? sb.segs.concat({ text: ' = ', color: '#fff' }, { text: val, color: '#008000' }) : [{ text: val, color: '#008000' }];
+      };
+      const slot = (key, src, set, dflt, ph, label, col) => showIn
+        ? P({ isField: true, col: col || 'auto', label, f: this.field(key, src || '', hlOut(src || '', get), set, { align: 'right', ph }) })
+        : P({ isVal: true, col: col || 'auto', label, segs: valSegs(src, dflt) });
+      const rows = brs.map((br, i) => {
+        const sym = (CMPS.find(c => c[0] === (br.cmp || '=')) || CMPS[0])[1], on = multi && (dirty ? br.id === sel.id : ev.hit === br.id);
+        const sl = (k, dflt, ph) => slot(e.id + ':' + br.id + ':' + k, br[k], val => this.updBr(e.id, br.id, { [k]: val }), dflt, ph, LOGIC_SLOTS[k]);
+        const parts = [lead(i ? 'si no, si' : 'Si', on), sl('a', 'ND', 'Dato A'), w(sym), sl('b', 'ND', 'Dato B'), w('entonces'), sl('out', 'True', 'True')];
+        if (showIn && i) parts.push(P({ isDel: true, onClick: () => this.rmBr(e.id, br.id) }));
+        return { parts, onDown: () => { if (dirty && (this.state.lsel || {})[e.id] !== br.id) this.setState(st => ({ lsel: { ...(st.lsel || {}), [e.id]: br.id } })); } };
+      });
+      const els = col => slot(e.id + ':els', e.els, val => this.updEnt(e.id, x => ({ ...x, els: val })), elsDef, elsDef, LOGIC_SLOTS.els, col);
+      if (showIn) rows.push({ parts: [lead('si no,', false), els('2 / 7'), P({ isAdd: true, onClick: () => this.addBr(e.id) })], onDown: null });
+      else if (multi) rows.push({ parts: [lead('si no,', !dirty && ev.hit === 'else'), els('2 / -1')], onDown: null });
+      else if (anyOut || hasEls) rows[0].parts.push(w('si no,'), els());
+      const n = Math.max.apply(null, rows.map(r => r.parts.length)), compact = !showIn && rows.length > 1;
+      v.lgrid = showIn ? 'auto minmax(56px,1fr) auto minmax(56px,1fr) auto minmax(56px,1fr) 22px' : Array(n).fill('auto').join(' ');
+      v.lrowH = compact ? '28px' : '41px'; v.lpad = compact ? '6px 6px 11px 10px' : '0 6px 5px 10px';
+      v.lrows = rows;
+    } else if (t === 'date') {
+      v.outTxt = fmt(entOut(e, get)); v.isRange = !!e.range; v.tRange = !!e.trange;
+      const seg = (cur, opts, key) => opts.map(k => ({ label: k[1], title: k[2], on: cur === k[0], bg: cur === k[0] ? '#008000' : 'transparent', color: cur === k[0] ? '#fff' : '#a6a6a6', fw: cur === k[0] ? 600 : 400,
+        onClick: () => { this.clearCal(e.id); this.updEnt(e.id, x => ({ ...x, [key]: k[0], date2: x.date2 && x.date2 >= x.date ? x.date2 : x.date, timeEnd: x.timeEnd || x.time })); } }));
+      v.kinds = seg(!!e.range, [[false, 'Fecha', 'Una fecha'], [true, 'Desde – hasta', 'Un periodo con fecha de inicio y de fin']], 'range');
+      v.tkinds = seg(!!e.trange, [[false, 'Hora', 'Una hora de inicio'], [true, 'Desde – hasta', 'Un horario con hora de inicio y de fin']], 'trange');
+      v.wdays = ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(x => ({ t: x }));
+      const today = ymd(new Date(NOW)), d0 = e.date || today, d1 = e.range ? (e.date2 && e.date2 >= d0 ? e.date2 : d0) : d0;
+      const two = d0.slice(0, 7) !== d1.slice(0, 7), pickEnd = !!e.range && !!(s.rangePick || {})[e.id];
+      const pv = pickEnd ? (s.calPrev || {})[e.id] : null, vEnd = pv && pv >= d0 ? pv : null, rp = s.ripple && s.ripple.id === e.id ? s.ripple : null;
+      const ripple = k => { const n = (this._rn = (this._rn || 0) + 1); this.setState({ ripple: { id: e.id, k, n } }); clearTimeout(this._rt); this._rt = setTimeout(() => this.setState(st => st.ripple && st.ripple.n === n ? { ripple: null } : null), 750); };
+      const setPrev = k => this.setState(st => ({ calPrev: { ...(st.calPrev || {}), [e.id]: k } }));
+      const click = k => { if (!e.range) this.updEnt(e.id, x => ({ ...x, date: k })); else if (pickEnd) setPrev(k); };
+      const dbl = k => {
+        if (!e.range) return;
+        if (!pickEnd || k < d0) { this.updEnt(e.id, x => ({ ...x, date: k, date2: k })); setPrev(null); this.setState(st => ({ rangePick: { ...(st.rangePick || {}), [e.id]: true } })); }
+        else { this.updEnt(e.id, x => ({ ...x, date2: k })); setPrev(null); this.clearCal(e.id); }
+        ripple(k);
+      };
+      v.calLeave = () => { if (pv) setPrev(null); };
+      v.hasHint = !!e.range; v.hint = pickEnd ? (vEnd ? 'Vista previa · doble clic para fijar la fecha de fin' : 'Doble clic en la fecha de fin · un clic para previsualizar') : 'Doble clic en una fecha para marcar el inicio';
+      const longOf = k => { const p = k.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); };
+      const T = { time: e.time || '00:00', onTime: ev => { const val = ev.target.value; if (val) this.updEnt(e.id, x => ({ ...x, time: val })); },
+        timeEnd: e.timeEnd || e.time || '00:00', onTimeEnd: ev => { const val = ev.target.value; if (val) this.updEnt(e.id, x => ({ ...x, timeEnd: val })); },
+        goToday: () => { const k = ymd(new Date()); this.clearCal(e.id); this.updEnt(e.id, x => ({ ...x, date: k, date2: x.date2 && x.date2 >= k ? x.date2 : k })); } };
+      const cal = (idx, base, extra) => {
+        const vkey = e.id + ':' + idx, vm = (s.calView || {})[vkey] || base.slice(0, 7), Y = +vm.slice(0, 4), M = +vm.slice(5, 7);
+        const shift = k => () => this.setState(st => ({ calView: { ...(st.calView || {}), [vkey]: ymd(new Date(Y, M - 1 + k, 1)).slice(0, 7) } }));
+        const off = (new Date(Y, M - 1, 1).getDay() + 6) % 7;
+        let days = Array.from({ length: 42 }, (_, i) => {
+          const dd = new Date(Y, M - 1, 1 - off + i), k = ymd(dd), inM = dd.getMonth() === M - 1, isT = k === today;
+          const end = vEnd || d1, edge = k === d0 || (e.range && !vEnd && k === d1), pEdge = !!vEnd && k === vEnd && k !== d0, mid = e.range && k > d0 && k < end;
+          const rip = rp && rp.k === k ? React.createElement('span', { key: 'r' + rp.n, 'aria-hidden': true, style: { position: 'absolute', inset: 0, borderRadius: 6, boxShadow: '0 0 0 1.5px #008000', animation: 'dcRipple .65s cubic-bezier(.2,.6,.3,1) forwards', pointerEvents: 'none' } }) : null;
+          return { n: dd.getDate(), sel: edge, inM, rippleEl: rip, tip: e.range ? (pickEnd ? 'Doble clic: fecha de fin' : 'Doble clic: fecha de inicio') : '',
+            bg: edge ? '#008000' : 'transparent', color: edge ? '#fff' : pEdge || mid ? '#008000' : inM ? '#fff' : '#555', fw: edge || pEdge || mid || isT ? 700 : 400,
+            ring: pEdge ? 'inset 0 0 0 1.5px #008000' : isT && !edge ? 'inset 0 0 0 1.5px #4a4a4a' : 'none', onClick: () => click(k), onDbl: () => dbl(k) };
+        });
+        if (!days[35].inM) days = days.slice(0, 35);
+        return { ...T, days, prevMonth: shift(-1), nextMonth: shift(1), hasLabel: false, label: '', hasTimes: true, hasStart: true, hasEnd: false, hasBoth: false, hasToday: true, timeLbl: 'Hora',
+          monthTxt: cap(new Date(Y, M - 1, 1).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })), ...extra };
+      };
+      const tr = !!e.trange, sameDay = d0 === d1;
+      if (!two) {
+        const long = !e.range || sameDay ? cap(longOf(d0)) : 'Del ' + longOf(d0).replace(/ de \d{4}$/, '') + ' al ' + longOf(d1);
+        v.cals = [cal(0, d0, { longDate: long, hasEnd: tr, hasBoth: tr, timeLbl: tr ? 'Horario' : 'Hora' })];
+      } else {
+        v.cals = [cal(0, d0, { hasLabel: true, label: 'Inicio', longDate: cap(longOf(d0)), timeLbl: 'Hora de inicio' }),
+          cal(1, d1, { hasLabel: true, label: 'Fin', longDate: cap(longOf(d1)), hasTimes: tr, hasStart: false, hasEnd: tr, hasToday: false, timeLbl: 'Hora de fin' })];
+      }
+    } else if (t === 'count') {
+      const c = countInfo(e, get), unit = e.unit || 'd', o = entOut(e, get), ref = e.ref || 'start';
+      v.outTxt = o ? fmt(o) + (o.unit ? UNIT_SFX[o.unit] : '') : 'ND';
+      v.refs = [['start', 'Hoy → inicio', 'Desde hoy hasta el inicio del evento'], ['end', 'Hoy → fin', 'Desde hoy hasta el final del evento'], ['span', 'Inicio → fin', 'Desde el inicio hasta el final del evento']].map(r => ({ label: r[1], title: r[2], on: ref === r[0],
+        bg: ref === r[0] ? '#008000' : 'transparent', color: ref === r[0] ? '#fff' : '#a6a6a6', fw: ref === r[0] ? 600 : 400, onClick: () => this.updEnt(e.id, x => ({ ...x, ref: r[0] })) }));
+      v.units = [['d', 'Días', 'Salida en días; si no quedan, pasa a horas, minutos y segundos'], ['h', 'Horas', 'Salida en horas; si no quedan, pasa a minutos y segundos'], ['m', 'Min', 'Salida en minutos; si no quedan, pasa a segundos'], ['txt', 'Texto', 'Salida como texto completo']].map(u => ({ label: u[1], title: u[2], on: unit === u[0],
+        bg: unit === u[0] ? '#008000' : 'transparent', color: unit === u[0] ? '#fff' : '#a6a6a6', fw: unit === u[0] ? 600 : 400, onClick: () => this.updEnt(e.id, x => ({ ...x, unit: u[0] })) }));
+      const leadDef = !c ? 'Hasta' : c.span ? 'Duración del evento' : ref === 'end' ? (c.past ? 'Terminó el' : 'Termina el') : c.past ? 'Han pasado desde' : 'Faltan para';
+      v.leadDef = leadDef; v.leadTxt = e.lead || ''; v.lead = e.lead || leadDef; v.leadSizer = e.lead || leadDef;
+      v.onLead = ev => { const d = ev.target.value.slice(0, 40); this.updEnt(e.id, x => ({ ...x, lead: d })); };
+      const src = e.target || '';
+      v.ft = this.field(e.id + ':target', src, hlExpr(src), val => this.updEnt(e.id, x => ({ ...x, target: val })), { align: 'left', ph: 'Fecha: Vuelo_Lisboa, Ahora + 3 o una ruta' });
+      v.tSegs = c ? [{ text: fmt(c.shown), color: '#008000', fw: 600 }] : [{ text: 'Sin fecha', color: DIM, fw: 400 }];
+      const a = c ? Math.abs(c.diff) : 0, col = !c ? DIM : c.past ? '#8a8a8a' : '#008000';
+      v.tiles = [[Math.floor(a / 864e5), 'días'], [pad2(Math.floor(a / 36e5) % 24), 'horas'], [pad2(Math.floor(a / 6e4) % 60), 'minutos'], [pad2(Math.floor(a / 1e3) % 60), 'segundos']].map(x => ({ v: c ? String(x[0]) : '–', l: x[1], color: col }));
+    } else if (t === 'notif') {
+      const i = notifInfo(e, get), mode = e.mode === 'manual' ? 'manual' : 'ent';
+      const sg = (cur, opts, key) => opts.map(k => ({ label: k[1], title: k[2], on: cur === k[0], bg: cur === k[0] ? '#008000' : 'transparent', color: cur === k[0] ? '#fff' : '#a6a6a6', fw: cur === k[0] ? 600 : 400, onClick: () => this.updEnt(e.id, x => ({ ...x, [key]: k[0] })) }));
+      v.nkinds = sg(mode, [['ent', 'Entidad', 'Fecha tomada de una entidad, una ruta o una fórmula'], ['manual', 'Manual', 'Fecha y hora escritas a mano']], 'mode');
+      v.hasRefSeg = mode === 'ent' && !!i && i.range;
+      v.nrefs = sg(i ? i.ref : 'start', [['start', 'Desde', 'Avisar respecto al inicio del periodo'], ['end', 'Hasta', 'Avisar respecto al final del periodo']], 'ref');
+      v.outTxt = !i ? 'ND' : NOW < i.fire ? 'en ' + durTxt(i.fire - NOW) : NOW < i.tgt ? 'Avisado' : 'Pasado';
+      v.outColor = i && NOW < i.fire ? '#008000' : '#8a8a8a';
+      v.offs = [['d', 'días', 'Días'], ['h', 'h', 'Horas'], ['m', 'min', 'Minutos']].map(k => ({ value: e[k[0]] || '', unit: k[1], label: k[2], onChange: ev => { const d = ev.target.value.replace(/\D/g, '').slice(0, 3); this.updEnt(e.id, x => ({ ...x, [k[0]]: d })); } }));
+      v.isManual = dirty && mode === 'manual'; v.isEntField = dirty && mode === 'ent';
+      v.ndate = e.date || ''; v.ntime = e.time || '09:00';
+      v.onDate = ev => { const d = ev.target.value; if (d) this.updEnt(e.id, x => ({ ...x, date: d })); };
+      v.onTime = ev => { const d = ev.target.value; if (d) this.updEnt(e.id, x => ({ ...x, time: d })); };
+      const src = e.target || '';
+      v.ft = this.field(e.id + ':target', src, hlExpr(src), val => this.updEnt(e.id, x => ({ ...x, target: val })), { align: 'left', ph: 'Fecha: Vuelo_Lisboa o una ruta' });
+      v.tgtTxt = i ? '= ' + fmt(dt(i.tgt)) : 'Sin fecha'; v.tgtColor = i ? '#008000' : DIM;
+      v.msg = e.msg || ''; v.hasMsgClean = !dirty && !!(e.msg || '').trim();
+      v.onMsg = ev => { const d = ev.target.value.slice(0, 120); this.updEnt(e.id, x => ({ ...x, msg: d })); };
+      v.test = () => { this.askPerm(); this.fireNotif(e, i); };
+      const G = (text, fw) => ({ text, color: '#008000', fw: fw || 600 }), Gr = text => ({ text, color: '#a6a6a6', fw: 400 }), ot = offTxt(e);
+      v.cparts = !i ? [Gr('Avisar'), ot ? G(ot) : null, Gr(ot ? 'antes de' : 'el'), { text: 'Sin fecha', color: DIM, fw: 400 }].filter(Boolean)
+        : [Gr('Avisar'), ot ? G(ot) : null, Gr(ot ? 'antes de' : 'el'), G(fmt(dt(i.tgt))), i.range ? Gr(i.ref === 'end' ? '(fin del periodo)' : '(inicio del periodo)') : null].filter(Boolean);
+    } else if (t === 'pct') {
+      const mode = e.mode || 'part', o = pctOut(e, get), showIn = dirty && e.fx !== false;
+      v.out = fmt(o); v.outTxt = o ? v.out + (mode === 'pct' ? ' %' : '') : 'ND';
+      v.decimals = e.decimals !== false;
+      v.decIcon = v.decimals ? 'assets/cita-cuadrada.svg' : 'assets/cita-cuadrada-off.svg';
+      v.decColor = v.decimals ? '#008000' : '#5a5a5a';
+      v.toggleDec = () => this.updEnt(e.id, x => ({ ...x, decimals: x.decimals === false }));
+      v.modes = PCT_MODES.map(m => ({ label: m[1], title: 'Calcular ' + PCT_SLOTS[m[0]].toLowerCase() + ': ' + m[2], on: mode === m[0],
+        bg: mode === m[0] ? '#008000' : 'transparent', color: mode === m[0] ? '#fff' : '#a6a6a6', fw: mode === m[0] ? 600 : 400,
+        onClick: () => this.updEnt(e.id, x => ({ ...x, mode: m[0] })) }));
+      const slot = k => {
+        if (k === mode) return { isOut: true, text: v.out, flex: showIn ? '1 1 0' : 'none', h: showIn ? '34px' : '28px', justify: showIn ? 'flex-end' : 'center' };
+        const src = e[k] || '';
+        if (showIn) return { isField: true, label: PCT_SLOTS[k], f: this.field(e.id + ':' + k, src, hlExpr(src), val => this.updEnt(e.id, x => ({ ...x, [k]: val })), { align: 'right', ph: PCT_SLOTS[k] }) };
+        if (dirty) { const sb = substSegs(src, get); return { isVal: true, label: PCT_SLOTS[k], segs: sb.show ? sb.segs.concat({ text: ' = ', color: '#fff' }, { text: fmt(evalExpr(src, get)), color: '#008000' }) : [{ text: fmt(evalExpr(src, get)), color: '#008000' }] }; }
+        return { isVal: true, label: PCT_SLOTS[k], segs: [{ text: fmt(evalExpr(src, get)), color: '#008000' }] };
+      };
+      const w = t2 => ({ isWord: true, text: t2 });
+      v.sent = [w('El'), slot('pct'), w('% de'), slot('total'), w('es'), slot('part')].map(p => ({ isWord: false, isField: false, isVal: false, isOut: false, ...p }));
+    } else if (t === 'slider') {
+      const r = sliderRange(e, get), lo = r[0], hi = r[1], val = sliderVal(e, get), f = (val - lo) / (hi - lo);
+      v.out = fmt(num(val)); v.decimals = e.decimals;
+      v.minTxt = fmt(num(e.decimals ? lo : Math.round(lo))); v.maxTxt = fmt(num(e.decimals ? hi : Math.round(hi)));
+      v.fillW = 'calc(' + (f * 100).toFixed(2) + '% - ' + (f * 4).toFixed(1) + 'px)';
+      v.decIcon = e.decimals ? 'assets/cita-cuadrada.svg' : 'assets/cita-cuadrada-off.svg';
+      v.decColor = e.decimals ? '#008000' : '#5a5a5a';
+      v.toggleDec = () => this.updEnt(e.id, x => ({ ...x, decimals: !x.decimals }));
+      v.fMin = this.field(e.id + ':min', e.min, hlExpr(e.min), val2 => this.updEnt(e.id, x => ({ ...x, min: val2 })), { align: 'left', ph: '0' });
+      v.fMax = this.field(e.id + ':max', e.max, hlExpr(e.max), val2 => this.updEnt(e.id, x => ({ ...x, max: val2 })), { align: 'right', ph: '100' });
+      v.slDown = ev => { ev.preventDefault(); ev.currentTarget.setPointerCapture(ev.pointerId); this._sl = { id: e.id, rect: ev.currentTarget.getBoundingClientRect(), lo, hi, dec: e.decimals }; this.slideTo(ev.clientX); };
+      v.slMove = ev => { if (this._sl) this.slideTo(ev.clientX); };
+      v.slUp = () => { this._sl = null; };
+    } else if (t === 'table') {
+      const ed = dirty && e.fx !== false;
+      v.tblEdit = ed;
+      const autoAligns = e.cols.map(c => colAlign(c, e.rows));
+      const hasLeft = autoAligns.includes('left');
+      const aligns = e.cols.map((c, ci) => c.align || autoAligns[ci]);
+      const just = a => a === 'right' ? 'flex-end' : a === 'center' ? 'center' : 'flex-start';
+      v.grid = autoAligns.map((a, ai) => a === 'center' ? Math.max(84, Math.ceil(textW(ed ? (e.cols[ai].op ? e.name : 'No Entidad') : e.cols[ai].title) + 34)) + 'px' : a === 'right' ? (hasLeft ? 'minmax(90px,0.5fr)' : 'minmax(90px,1fr)') : 'minmax(80px,1fr)').join(' ');
+      const cm = s.colMenu;
+      v.cols = e.cols.map((c, ci) => {
+        const open = !!cm && cm.ent === e.id && cm.col === c.id, last = ci === e.cols.length - 1;
+        return {
+          label: ed ? (c.op ? e.name : 'No Entidad') : c.title, justify: just(aligns[ci]), bar: c.op ? '#008000' : 'transparent',
+          isLast: last, addLeft: () => this.addCol(e.id, ci), addRight: () => this.addCol(e.id, ci + 1),
+          openMenu: () => this.setState(st => ({ colMenu: open ? null : { ent: e.id, col: c.id } })),
+          dotColor: open ? '#a6a6a6' : '#7a7a7a', menuOpen: open,
+          mLeft: last && e.cols.length > 1 ? 'auto' : ci === 0 ? '0' : '50%', mRight: last && e.cols.length > 1 ? '-10px' : 'auto', mTf: (last && e.cols.length > 1) || ci === 0 ? 'none' : 'translateX(-50%)',
+          menu: open ? {
+            title: this.makeTab('col', c.id, c.title, false, false),
+            remove: () => this.removeCol(e.id, c.id), noRemove: e.cols.length < 2, rmOp: e.cols.length < 2 ? 0.35 : 1, rmCursor: e.cols.length < 2 ? 'default' : 'pointer',
+            ops: OPS.map(op => ({ label: op[1], bg: c.op === op[0] ? '#1d2b1d' : 'transparent', fw: c.op === op[0] ? 700 : 400, onClick: () => this.setOp(e.id, c.id, op[0]) })),
+            pills: [['left', 'Izquierda'], ['center', 'Centro'], ['right', 'Derecha']].map(p => ({ bg: aligns[ci] === p[0] ? '#008000' : '#444', title: 'Alinear: ' + p[1], onClick: () => this.setAlign(e.id, c.id, p[0]) }))
+          } : { title: {}, ops: [], pills: [] }
+        };
+      });
+      v.rows = e.rows.map((r, ri) => {
+        const act = rowActive(r, e.cols);
+        return {
+          border: ed || ri < e.rows.length - 1 ? '1px solid #555' : '0',
+          cells: e.cols.map((c, ci) => {
+            const raw = r.cells[c.id] || '', info = cellInfo(raw, get);
+            const deco = !act && info.kind !== 'box' ? 'line-through' : 'none';
+            const base = { justify: just(aligns[ci]), bl: ci ? '1px solid #555' : '0', pad: ed ? '0 4px' : '0 14px', isBox: false, isText: false, isField: false };
+            if (ed) return { ...base, isField: true, f: this.field(e.id + ':' + r.id + ':' + c.id, raw, hlCell(raw), val => this.setCell(e.id, r.id, c.id, val), { align: aligns[ci], deco }) };
+            if (info.kind === 'box') return { ...base, isBox: true, chkBg: info.on ? '#008000' : 'transparent', onToggle: () => this.toggleCell(e.id, r.id, c.id) };
+            const green = info.kind === 'num' || info.kind === 'ref';
+            return { ...base, isText: true, text: info.kind === 'text' ? info.text : info.kind === 'empty' ? '' : fmt(info.val), color: green ? '#008000' : '#fff', fw: green ? 500 : 400, deco };
+          })
+        };
+      });
+      v.showTotal = dirty && !ed;
+      { const outV = fmt(entOut(e, get)), opName = { sum: 'Suma', sub: 'Resta', mul: 'Multiplicación', div: 'División' };
+        v.totals = e.cols.map((c, ci) => ({ justify: just(aligns[ci]), label: c.op ? opName[c.op] + '  =  ' : '', text: c.op ? outV : '' })); }
+      v.rowAdders = ed ? Array.from({ length: e.rows.length + 1 }, (_, i) => ({ top: (40 + i * 51) + 'px', onClick: () => this.addRow(e.id, i) })) : [];
+    }
+    return v;
+  }
+  select(kind, id) {
+    if (kind === 'note') this.setState({ activeNote: id, focusId: null });
+    else this.setState(s => ({ focusId: null, notes: s.notes.map(n => n.id !== s.activeNote ? n : { ...n, activeSheet: id }) }));
+  }
+  makeTab(kind, id, name, active, isSheet) {
+    const s = this.state;
+    const editing = !!s.editing && s.editing.kind === kind && s.editing.id === id;
+    const val = editing ? s.draft : name;
+    return {
+      text: val,
+      display: val || '\u00a0',
+      readOnly: !editing,
+      weight: active ? 600 : 400,
+      color: active ? '#008000' : '#a6a6a6',
+      bg: isSheet && active ? '#1c1c1c' : 'transparent',
+      cursor: editing ? 'text' : 'pointer',
+      underline: editing ? 'inset 0 -2px 0 #008000' : 'none',
+      onDown: e => { if (!editing && e.detail < 2) e.preventDefault(); },
+      onClick: () => { if (!editing && !active && (kind === 'note' || kind === 'sheet')) this.select(kind, id); },
+      onDbl: e => {
+        if (editing) return;
+        const el = e.target;
+        this.setState({ editing: { kind, id }, draft: name }, () => { el.focus(); el.select(); });
+      },
+      onChange: e => { if (editing) this.setState({ draft: e.target.value.slice(0, 22) }); },
+      onKey: e => {
+        if (!editing) return;
+        if (e.key === 'Enter') e.target.blur();
+        else if (e.key === 'Escape') { this.setState({ editing: null }); e.target.blur(); }
+      },
+      onBlur: e => { try { e.target.setSelectionRange(0, 0); } catch (_) {} window.getSelection && window.getSelection().removeAllRanges(); this.commit(kind, id); }
+    };
+  }
+  copyText(t, key) {
+    const done = () => { this.setState({ copied: key }); clearTimeout(this._ct); this._ct = setTimeout(() => this.setState({ copied: null }), 1400); };
+    const fb = () => { const ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (_) {} ta.remove(); done(); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fb); else fb();
+  }
+  offsetFromPoint(lineEl, x, y, fallback) {
+    let node, off;
+    if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(x, y); if (r) { node = r.startContainer; off = r.startOffset; } }
+    else if (document.caretPositionFromPoint) { const p = document.caretPositionFromPoint(x, y); if (p) { node = p.offsetNode; off = p.offset; } }
+    if (!node || !lineEl.contains(node)) return fallback;
+    const el = node.nodeType === 3 ? node.parentElement : node;
+    const span = el && el.closest('[data-off]');
+    if (!span || !lineEl.contains(span)) return fallback;
+    return +span.getAttribute('data-off') + (node.nodeType === 3 ? off : 0);
+  }
+  lineHandlers(ln, idx, lines, entId) {
+    const s = this.state, setL = (l, f, c) => this.setLines(l, f, c, entId);
+    return {
+      onDown: e => {
+        if (s.clean) return;
+        if (s.focusId === ln.id && e.target.tagName === 'TEXTAREA') return;
+        e.preventDefault(); e.stopPropagation();
+        this.focusLine(ln.id, this.offsetFromPoint(e.currentTarget, e.clientX, e.clientY, ln.text.length));
+      },
+      onChange: e => { const text = e.target.value.replace(/\n/g, ' '); setL(lines.map(l => l.id === ln.id ? { ...l, text } : l)); },
+      onBlur: () => this.setState(st => st.focusId === ln.id ? { focusId: null } : null),
+      onPaste: e => {
+        const t = (e.clipboardData || window.clipboardData).getData('text/plain');
+        if (!/\n/.test(t)) return;
+        e.preventDefault();
+        const ta = e.target, a = ta.selectionStart, b = ta.selectionEnd;
+        const parts = t.replace(/\r/g, '').split('\n');
+        const before = ln.text.slice(0, a), after = ln.text.slice(b);
+        const made = parts.map((p, k) => ({ id: k === 0 ? ln.id : uid('l'), text: p }));
+        made[0].text = before + made[0].text;
+        const lastLen = made[made.length - 1].text.length;
+        made[made.length - 1].text += after;
+        setL(lines.slice(0, idx).concat(made, lines.slice(idx + 1)), made[made.length - 1].id, lastLen);
+      },
+      onKey: e => {
+        const ta = e.target, a = ta.selectionStart, b = ta.selectionEnd, len = ln.text.length;
+        const lh = parseFloat(getComputedStyle(ta).lineHeight) || 25;
+        const oneRow = ta.offsetHeight < lh * 1.5;
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          const nl = { id: uid('l'), text: ln.text.slice(b) };
+          const next = lines.slice(); next.splice(idx, 1, { ...ln, text: ln.text.slice(0, a) }, nl);
+          setL(next, nl.id, 0);
+        } else if (e.key === 'Backspace' && a === 0 && b === 0 && idx > 0) {
+          e.preventDefault();
+          const prev = lines[idx - 1], next = lines.slice();
+          next.splice(idx - 1, 2, { ...prev, text: prev.text + ln.text });
+          setL(next, prev.id, prev.text.length);
+        } else if (e.key === 'Delete' && a === len && b === len && idx < lines.length - 1) {
+          e.preventDefault();
+          const nx = lines[idx + 1], next = lines.slice();
+          next.splice(idx, 2, { ...ln, text: ln.text + nx.text });
+          setL(next, ln.id, len);
+        } else if (e.key === 'ArrowUp' && idx > 0 && a === b && (oneRow || a === 0)) {
+          e.preventDefault(); this.focusLine(lines[idx - 1].id, a);
+        } else if (e.key === 'ArrowDown' && idx < lines.length - 1 && a === b && (oneRow || a === len)) {
+          e.preventDefault(); this.focusLine(lines[idx + 1].id, a);
+        } else if (e.key === 'Escape') ta.blur();
+      }
+    };
+  }
+  mkdLines(src, entId, out) {
+    const s = this.state, cleanV = s.clean || !!out;
+    const blocks = cleanV ? blockInfo(src) : null;
+    const isList = b => !!b && (b.kind === 'ul' || b.kind === 'ol');
+    let prevHead = false, prevB = null;
+    const lines = src.map((ln, idx) => {
+      const focused = !s.clean && s.focusId === ln.id;
+      const b = blocks ? blocks[idx] : { kind: 'p' };
+      const p = b.kind === 'p' ? parseLine(ln.text) : { level: 0, start: 0 }, head = p.level > 0;
+      let [fs, lh] = head ? (HEAD[p.level] || ['16px', '25px']) : ['16px', '25px'];
+      const cont = !!prevB && ((b.kind === 'code' && prevB.kind === 'code' && prevB.from === b.from) || (b.kind === 'quote' && prevB.kind === 'quote'));
+      const mt = idx === 0 || cont ? '0px' : (blocks && isList(b) && isList(prevB)) ? '6px' : (head || prevHead) ? '25px' : '13px';
+      prevHead = head; prevB = b;
+      const v = { pad: '0px', bg: 'transparent', rad: '0px', bar: 'none', color: '#fff', isHr: false, hasMarker: false, marker: '', mkLeft: '0px', hasCopy: false, showText: true, onCopy: null, copyTitle: '', copyColor: '#8a8a8a' };
+      let segs;
+      if (!blocks) segs = rawSegs(ln.text);
+      else if (b.kind === 'hr') { segs = []; v.isHr = true; v.showText = false; }
+      else {
+        segs = cleanSegs(ln.text, b.kind === 'p' ? p.start : b.start, b.end);
+        if (b.kind === 'quote') {
+          Object.assign(v, { bg: '#242424', bar: 'inset 3px 0 0 #008000', color: '#cfcfcf', pad: (b.first ? '8px' : '0px') + ' 14px ' + (b.last ? '8px' : '0px') + ' 17px', rad: '0 ' + (b.first ? '6px' : '0') + ' ' + (b.last ? '6px' : '0') + ' 0' });
+        } else if (b.kind === 'code') {
+          const top = b.pos === 'single' || b.pos === 'first', bot = b.pos === 'single' || b.pos === 'last';
+          Object.assign(v, { bg: '#2a2a2a', pad: (top ? '9px' : '0px') + ' 44px ' + (bot ? '9px' : '0px') + ' 14px', rad: (top ? '7px 7px ' : '0 0 ') + (bot ? '7px 7px' : '0 0') });
+          if (!segs.length && b.pos !== 'single' && b.pos !== 'mid') lh = '0px';
+          if (top) {
+            const key = ln.id, copied = s.copied === key;
+            Object.assign(v, { hasCopy: true, copyTitle: copied ? 'Copiado' : 'Copiar', copyColor: copied ? '#008000' : '#8a8a8a',
+              onCopy: e => { e.stopPropagation(); const txt = []; for (let k = b.from; k <= b.to; k++) { const bk = blocks[k]; txt.push(plainOf(cleanSegs(src[k].text, bk.start, bk.end))); } while (txt.length > 1 && !txt[0]) txt.shift(); while (txt.length > 1 && !txt[txt.length - 1]) txt.pop(); this.copyText(txt.join('\n'), key); } });
+          }
+        } else if (isList(b)) {
+          const ind = b.lvl * 24;
+          Object.assign(v, { pad: '0 0 0 ' + (ind + 28) + 'px', hasMarker: true, mkLeft: ind + 'px', marker: b.kind === 'ul' ? '•' : b.num + '.' });
+        }
+      }
+      if (!ln.text && !focused && src.length === 1) segs = [{ t: 'text', text: 'Escribe aquí…', off: 0, color: DIM }];
+      segs = segs.map(sg => sg.t === 'text'
+        ? { isText: true, isBox: false, isEnt: false, text: sg.text, off: sg.off, color: sg.color, fw: sg.b ? 700 : 'inherit', fst: sg.i ? 'italic' : 'normal' }
+        : sg.t === 'ent'
+        ? { isText: false, isBox: false, isEnt: true, off: sg.off, off2: sg.off + 1, eq: sg.raw ? '=' : '', label: sg.raw ? (isPath(sg.name) ? sg.name.slice(1) : sg.name) : resolveEntity(sg.name), fw: focused ? 'inherit' : sg.b ? 800 : 600, fst: sg.i ? 'italic' : 'normal', title: sg.raw ? '' : isPath(sg.name) ? sg.name : '=' + sg.name }
+        : { isText: false, isBox: true, isEnt: false, on: sg.on, mr: sg.mr, bg: sg.on ? '#008000' : 'transparent',
+            onToggle: e => { e.preventDefault(); e.stopPropagation(); } });
+      return { id: ln.id, text: ln.text, focused, segs, fs, lh, mt, fw: head ? 700 : 400, ...v, ...this.lineHandlers(ln, idx, src, entId), ...(out ? { onDown: null } : null) };
+    });
+    return lines;
+  }
+  renderVals() {
+    const s = this.state;
+    const note = this.curNote(s);
+    const sheet = this.curSheet(s);
+    NOW = Date.now();
+    const W = makeWorld(s), get = W.gN, ag = s.mode === 'agenda';
+    RESOLVE = ag ? W.gA : W.gN;
+    const dirty = !s.clean;
+    const entList = sheet ? (sheet.entities || []) : [];
+    const tabs = s.notes.map(n => this.makeTab('note', n.id, n.name, n.id === s.activeNote, false));
+    const sheets = note ? note.sheets.map(x => this.makeTab('sheet', x.id, x.name, x.id === note.activeSheet, true)) : [];
+    const src = sheet ? sheet.lines : [];
+
+    const lines = this.mkdLines(src, null);
+
+    return {
+      tabs,
+      sheets,
+      lines,
+      hasSheet: !!sheet,
+      agendaEmpty: ag && !!sheet && !entList.length,
+      colMax: ag ? '860px' : 'none',
+      clockTxt: cap(new Date(NOW).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })) + ' · ' + new Date(NOW).toLocaleTimeString('es-ES'),
+      addDate: () => this.addEnt('date'),
+      addCount: () => this.addEnt('count'),
+      addCheck: () => this.addEnt('toggle'),
+      addNotif: () => { this.askPerm(); this.addEnt('notif'); },
+      addText: () => this.addText(),
+      toasts: (s.toasts || []).map(t => ({ ...t, close: () => this.setState(st => ({ toasts: (st.toasts || []).filter(x => x.id !== t.id) })) })),
+      dirty,
+      entGap: dirty ? '34px' : '27px',
+      entities: entList.map((e, i) => this.entView(e, i, entList, ag ? W.gA : W.gN, dirty)),
+      addExpr: () => this.addEnt('expr'),
+      addToggle: () => this.addEnt('toggle'),
+      addTable: () => this.addEnt('table'),
+      addSlider: () => this.addEnt('slider'),
+      addPct: () => this.addEnt('pct'),
+      addSep: () => this.addSep(),
+      addLogic: () => this.addEnt('logic'),
+      menuOpen: s.menu,
+      noNote: !note,
+      dotColor: s.menu ? '#a6a6a6' : '#7a7a7a',
+      sheetItemOpacity: sheet ? 1 : 0.4,
+      noteItemOpacity: note ? 1 : 0.4,
+      toggleMenu: () => this.setState(st => ({ menu: !st.menu })),
+      deleteSheet: () => this.setState(st => {
+        const n = this.curNote(st); if (!n || !n.activeSheet) return { menu: false };
+        const k = n.sheets.findIndex(x => x.id === n.activeSheet);
+        const rest = n.sheets.filter(x => x.id !== n.activeSheet);
+        const nx = rest[Math.min(k, rest.length - 1)];
+        return { menu: false, focusId: null, notes: st.notes.map(m => m.id !== n.id ? m : { ...m, sheets: rest, activeSheet: nx ? nx.id : null }) };
+      }),
+      deleteNote: () => this.setState(st => {
+        const k = st.notes.findIndex(m => m.id === st.activeNote); if (k < 0) return { menu: false };
+        const rest = st.notes.filter(m => m.id !== st.activeNote);
+        const nx = rest[Math.min(k, rest.length - 1)];
+        return { menu: false, focusId: null, editing: null, notes: rest, activeNote: nx ? nx.id : null };
+      }),
+      noSheet: !sheet,
+      addNote: () => { const n = { id: uid('n'), name: 'Nueva nota', sheets: [], activeSheet: null }; this.setState(st => ({ notes: st.notes.concat(n), activeNote: n.id, focusId: null })); },
+      addSheet: () => { if (!note) return; const x = mkSheet('Nueva hoja'); this.setState(st => ({ focusId: null, notes: st.notes.map(n => n.id !== st.activeNote ? n : { ...n, sheets: n.sheets.concat(x), activeSheet: x.id }) })); },
+      taRef: this.taRef,
+      clean: s.clean,
+      knobLeft: s.clean ? '16px' : '0px',
+      knobColor: s.clean ? '#008000' : '#8a8a8a',
+      toggleView: () => { const a = document.activeElement; if (a && a.tagName === 'TEXTAREA') a.blur(); this.setState(st => ({ clean: !st.clean, focusId: null, field: null, colMenu: null, entMenu: null })); },
+      panelCursor: s.clean ? 'default' : 'text',
+      panelRef: this.panelRef,
+      panelWidth: (sheet ? sheet.width : W0) + 'px',
+      handleColor: s.dragging ? '#008000' : 'transparent',
+      panelDown: e => {
+        if (s.clean) return;
+        if (e.target.dataset && e.target.dataset.handle) return;
+        if (e.target.closest && e.target.closest('[data-line]')) return;
+        if (e.nativeEvent.offsetX >= e.target.clientWidth) return;
+        e.preventDefault();
+        const last = src[src.length - 1];
+        if (last) this.focusLine(last.id, last.text.length);
+      },
+      resizeDown: e => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); this._rs = { x: e.clientX, w: this.panelRef.current.getBoundingClientRect().width }; this.setState({ dragging: true }); document.body.style.cursor = 'col-resize'; },
+      resizeMove: e => { if (!this._rs) return; const p = this.panelRef.current.parentElement.getBoundingClientRect().width; const w = Math.round(Math.max(200, Math.min(p - 440, this._rs.w + e.clientX - this._rs.x))); const cur = this.curSheet(this.state); if (cur && w !== cur.width) this.setWidth(w); },
+      resizeUp: () => { if (!this._rs) return; this._rs = null; this.setState({ dragging: false }); document.body.style.cursor = ''; },
+      resizeReset: () => this.setWidth(W0),
+      isNotas: s.mode === 'notas',
+      isAgenda: s.mode === 'agenda',
+      pillTop: s.mode === 'notas' ? '37px' : '0px',
+      toggleMode: () => this.setState(st => ({ mode: st.mode === 'notas' ? 'agenda' : 'notas', notes: st.other.notes, activeNote: st.other.activeNote, other: { notes: st.notes, activeNote: st.activeNote }, focusId: null, field: null, entMenu: null, colMenu: null, menu: false, editing: null }))
+    };
+  }
+}
+</script>
+</body>
+</html>
