@@ -122,11 +122,11 @@
       <sc-if value="{{ isNotas }}" hint-placeholder-val="{{ true }}"><section ref="{{ panelRef }}" onMouseDown="{{ panelDown }}" style="position:relative;flex:0 1 {{ panelWidth }};max-width:100%;min-width:min(200px,100%);background:#1c1c1c;border-radius:7px;padding:8px 2px 8px 0;cursor:{{ panelCursor }};">
         <div data-scroll="" style="height:100%;overflow-y:auto;overflow-x:hidden;padding:8px 20px 27px 22px;">
           <sc-for list="{{ lines }}" as="ln" hint-placeholder-count="4">
-            <div data-line="1" onMouseDown="{{ ln.onDown }}" style="position:relative;margin-top:{{ ln.mt }};padding:{{ ln.pad }};background:{{ ln.bg }};border-radius:{{ ln.rad }};box-shadow:{{ ln.bar }};font-size:{{ ln.fs }};line-height:{{ ln.lh }};font-weight:{{ ln.fw }};color:{{ ln.color }};">
+            <div data-line="1" onMouseDown="{{ ln.onDown }}" style="position:relative;margin-top:{{ ln.mt }};padding:{{ ln.pad }};background:{{ ln.bg }};border-radius:{{ ln.rad }};box-shadow:{{ ln.bar }};font-family:{{ ln.ff }};font-size:{{ ln.fs }};line-height:{{ ln.lh }};font-weight:{{ ln.fw }};color:{{ ln.color }};">
               <sc-if value="{{ ln.isHr }}" hint-placeholder-val="{{ false }}"><div style="height:25px;display:flex;align-items:center;"><span style="flex:1;height:2px;background:#3a3a3a;"></span></div></sc-if>
               <sc-if value="{{ ln.hasMarker }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:0;left:{{ ln.mkLeft }};width:20px;text-align:right;color:#008000;font-weight:600;">{{ ln.marker }}</span></sc-if>
-              <sc-if value="{{ ln.hasCopy }}" hint-placeholder-val="{{ false }}"><button onClick="{{ ln.onCopy }}" aria-label="Copiar contenido" title="{{ ln.copyTitle }}" style="position:absolute;top:8px;right:10px;z-index:1;width:22px;height:22px;padding:0;border:0;border-radius:5px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#1c1c1c;"><span style="width:15px;height:15px;background:{{ ln.copyColor }};mask:url(assets/clon.svg) center / contain no-repeat;-webkit-mask:url(assets/clon.svg) center / contain no-repeat;transition:background-color .15s;"></span></button></sc-if>
-              <sc-if value="{{ ln.showText }}" hint-placeholder-val="{{ true }}"><div style="white-space:pre-wrap;word-break:break-word;min-height:{{ ln.lh }};"><sc-for list="{{ ln.segs }}" as="sg" hint-placeholder-count="1"><sc-if value="{{ sg.isText }}" hint-placeholder-val="{{ true }}"><span data-off="{{ sg.off }}" style="color:{{ sg.color }};font-weight:{{ sg.fw }};font-style:{{ sg.fst }};">{{ sg.text }}</span></sc-if><sc-if value="{{ sg.isEnt }}" hint-placeholder-val="{{ false }}"><span title="{{ sg.title }}" style="background:#1d2b1d;box-shadow:0 0 0 4px #1d2b1d;border-radius:2px;"><span data-off="{{ sg.off }}" style="color:#fff;">{{ sg.eq }}</span><span data-off="{{ sg.off2 }}" style="color:#008000;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};">{{ sg.label }}</span></span></sc-if><sc-if value="{{ sg.isBox }}" hint-placeholder-val="{{ false }}"><span onMouseDown="{{ sg.onToggle }}" role="checkbox" aria-checked="{{ sg.on }}" style="display:inline-block;width:15px;height:15px;border-radius:3px;vertical-align:-2px;margin-right:{{ sg.mr }};background:{{ sg.bg }};box-shadow:inset 0 0 0 2px #008000;"></span></sc-if></sc-for>&#8203;</div></sc-if>
+              <sc-if value="{{ ln.hasCopy }}" hint-placeholder-val="{{ false }}"><button onClick="{{ ln.onCopy }}" aria-label="Copiar contenido" title="{{ ln.copyTitle }}" style="position:absolute;top:8px;right:10px;z-index:1;width:22px;height:22px;padding:0;border:0;border-radius:5px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#1c1c1c;"><span style="width:15px;height:15px;background:{{ ln.copyColor }};mask:url(assets/clon.svg) center / contain no-repeat;-webkit-mask:url(assets/clon.svg) center / contain no-repeat;transition:background-color .15s;"></span></button></sc-if><sc-if value="{{ ln.isRow }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:{{ ln.cols }};"><sc-for list="{{ ln.cells }}" as="c" hint-placeholder-count="2"><div style="min-width:0;padding:6px 12px;text-align:{{ c.align }};font-weight:{{ c.fw }};white-space:pre-wrap;word-break:break-word;"><sc-for list="{{ c.segs }}" as="sg" hint-placeholder-count="1"><sc-if value="{{ sg.isText }}" hint-placeholder-val="{{ true }}"><span data-off="{{ sg.off }}" style="color:{{ sg.color }};font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.text }}</span></sc-if><sc-if value="{{ sg.isLink }}" hint-placeholder-val="{{ false }}"><a href="{{ sg.href }}" target="_blank" rel="noopener noreferrer" data-off="{{ sg.off }}" style="color:#fff;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};text-decoration-color:#008000;text-decoration-thickness:2px;text-underline-offset:3px;cursor:pointer;">{{ sg.text }}</a></sc-if><sc-if value="{{ sg.isCode }}" hint-placeholder-val="{{ false }}"><code data-off="{{ sg.off }}" style="font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:0.88em;background:#333;color:#e6e6e6;padding:1px 5px;border-radius:4px;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.text }}</code></sc-if><sc-if value="{{ sg.isImg }}" hint-placeholder-val="{{ false }}"><img loading="lazy" src="{{ sg.src }}" alt="{{ sg.alt }}" title="{{ sg.alt }}" style="max-width:100%;max-height:420px;border-radius:6px;vertical-align:middle;"></sc-if><sc-if value="{{ sg.isEnt }}" hint-placeholder-val="{{ false }}"><span title="{{ sg.title }}" style="background:#1d2b1d;padding:{{ sg.pad }};border-radius:2px;"><span data-off="{{ sg.off }}" style="color:#fff;">{{ sg.eq }}</span><span data-off="{{ sg.off2 }}" style="color:#008000;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.label }}</span></span></sc-if><sc-if value="{{ sg.isBox }}" hint-placeholder-val="{{ false }}"><span onMouseDown="{{ sg.onToggle }}" role="checkbox" aria-checked="{{ sg.on }}" style="display:inline-block;width:15px;height:15px;border-radius:3px;vertical-align:-2px;margin-right:{{ sg.mr }};background:{{ sg.bg }};box-shadow:inset 0 0 0 2px #008000;"></span></sc-if></sc-for>&#8203;</div></sc-for></div></sc-if>
+              <sc-if value="{{ ln.showText }}" hint-placeholder-val="{{ true }}"><div style="white-space:pre-wrap;word-break:break-word;min-height:{{ ln.lh }};"><sc-for list="{{ ln.segs }}" as="sg" hint-placeholder-count="1"><sc-if value="{{ sg.isText }}" hint-placeholder-val="{{ true }}"><span data-off="{{ sg.off }}" style="color:{{ sg.color }};font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.text }}</span></sc-if><sc-if value="{{ sg.isLink }}" hint-placeholder-val="{{ false }}"><a href="{{ sg.href }}" target="_blank" rel="noopener noreferrer" data-off="{{ sg.off }}" style="color:#fff;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};text-decoration-color:#008000;text-decoration-thickness:2px;text-underline-offset:3px;cursor:pointer;">{{ sg.text }}</a></sc-if><sc-if value="{{ sg.isCode }}" hint-placeholder-val="{{ false }}"><code data-off="{{ sg.off }}" style="font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:0.88em;background:#333;color:#e6e6e6;padding:1px 5px;border-radius:4px;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.text }}</code></sc-if><sc-if value="{{ sg.isImg }}" hint-placeholder-val="{{ false }}"><img loading="lazy" src="{{ sg.src }}" alt="{{ sg.alt }}" title="{{ sg.alt }}" style="max-width:100%;max-height:420px;border-radius:6px;vertical-align:middle;"></sc-if><sc-if value="{{ sg.isEnt }}" hint-placeholder-val="{{ false }}"><span title="{{ sg.title }}" style="background:#1d2b1d;padding:{{ sg.pad }};border-radius:2px;"><span data-off="{{ sg.off }}" style="color:#fff;">{{ sg.eq }}</span><span data-off="{{ sg.off2 }}" style="color:#008000;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.label }}</span></span></sc-if><sc-if value="{{ sg.isBox }}" hint-placeholder-val="{{ false }}"><span onMouseDown="{{ sg.onToggle }}" role="checkbox" aria-checked="{{ sg.on }}" style="display:inline-block;width:15px;height:15px;border-radius:3px;vertical-align:-2px;margin-right:{{ sg.mr }};background:{{ sg.bg }};box-shadow:inset 0 0 0 2px #008000;"></span></sc-if></sc-for>&#8203;</div></sc-if>
               <sc-if value="{{ ln.focused }}" hint-placeholder-val="{{ false }}">
                 <textarea ref="{{ taRef }}" rows="1" spellCheck="false" value="{{ ln.text }}" onChange="{{ ln.onChange }}" onKeyDown="{{ ln.onKey }}" onPaste="{{ ln.onPaste }}" onBlur="{{ ln.onBlur }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;outline:none;resize:none;overflow:hidden;background:transparent;color:transparent;caret-color:#008000;font:inherit;line-height:inherit;letter-spacing:inherit;white-space:pre-wrap;word-break:break-word;"></textarea>
               </sc-if>
@@ -203,11 +203,11 @@
                 </sc-if>
                 <div onMouseDown="{{ e.boxDown }}" style="width:fit-content;min-width:min(220px,100%);max-width:100%;margin:0 auto;padding:12px 18px 14px;background:#1c1c1c;border-radius:7px;cursor:{{ e.boxCursor }};">
                   <sc-for list="{{ e.lines }}" as="ln" hint-placeholder-count="1">
-            <div data-line="1" onMouseDown="{{ ln.onDown }}" style="position:relative;margin-top:{{ ln.mt }};padding:{{ ln.pad }};background:{{ ln.bg }};border-radius:{{ ln.rad }};box-shadow:{{ ln.bar }};font-size:{{ ln.fs }};line-height:{{ ln.lh }};font-weight:{{ ln.fw }};color:{{ ln.color }};">
+            <div data-line="1" onMouseDown="{{ ln.onDown }}" style="position:relative;margin-top:{{ ln.mt }};padding:{{ ln.pad }};background:{{ ln.bg }};border-radius:{{ ln.rad }};box-shadow:{{ ln.bar }};font-family:{{ ln.ff }};font-size:{{ ln.fs }};line-height:{{ ln.lh }};font-weight:{{ ln.fw }};color:{{ ln.color }};">
               <sc-if value="{{ ln.isHr }}" hint-placeholder-val="{{ false }}"><div style="height:25px;display:flex;align-items:center;"><span style="flex:1;height:2px;background:#3a3a3a;"></span></div></sc-if>
               <sc-if value="{{ ln.hasMarker }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:0;left:{{ ln.mkLeft }};width:20px;text-align:right;color:#008000;font-weight:600;">{{ ln.marker }}</span></sc-if>
-              <sc-if value="{{ ln.hasCopy }}" hint-placeholder-val="{{ false }}"><button onClick="{{ ln.onCopy }}" aria-label="Copiar contenido" title="{{ ln.copyTitle }}" style="position:absolute;top:8px;right:10px;z-index:1;width:22px;height:22px;padding:0;border:0;border-radius:5px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#1c1c1c;"><span style="width:15px;height:15px;background:{{ ln.copyColor }};mask:url(assets/clon.svg) center / contain no-repeat;-webkit-mask:url(assets/clon.svg) center / contain no-repeat;transition:background-color .15s;"></span></button></sc-if>
-              <sc-if value="{{ ln.showText }}" hint-placeholder-val="{{ true }}"><div style="white-space:pre-wrap;word-break:break-word;min-height:{{ ln.lh }};"><sc-for list="{{ ln.segs }}" as="sg" hint-placeholder-count="1"><sc-if value="{{ sg.isText }}" hint-placeholder-val="{{ true }}"><span data-off="{{ sg.off }}" style="color:{{ sg.color }};font-weight:{{ sg.fw }};font-style:{{ sg.fst }};">{{ sg.text }}</span></sc-if><sc-if value="{{ sg.isEnt }}" hint-placeholder-val="{{ false }}"><span title="{{ sg.title }}" style="background:#1d2b1d;box-shadow:0 0 0 4px #1d2b1d;border-radius:2px;"><span data-off="{{ sg.off }}" style="color:#fff;">{{ sg.eq }}</span><span data-off="{{ sg.off2 }}" style="color:#008000;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};">{{ sg.label }}</span></span></sc-if><sc-if value="{{ sg.isBox }}" hint-placeholder-val="{{ false }}"><span onMouseDown="{{ sg.onToggle }}" role="checkbox" aria-checked="{{ sg.on }}" style="display:inline-block;width:15px;height:15px;border-radius:3px;vertical-align:-2px;margin-right:{{ sg.mr }};background:{{ sg.bg }};box-shadow:inset 0 0 0 2px #008000;"></span></sc-if></sc-for>&#8203;</div></sc-if>
+              <sc-if value="{{ ln.hasCopy }}" hint-placeholder-val="{{ false }}"><button onClick="{{ ln.onCopy }}" aria-label="Copiar contenido" title="{{ ln.copyTitle }}" style="position:absolute;top:8px;right:10px;z-index:1;width:22px;height:22px;padding:0;border:0;border-radius:5px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#1c1c1c;"><span style="width:15px;height:15px;background:{{ ln.copyColor }};mask:url(assets/clon.svg) center / contain no-repeat;-webkit-mask:url(assets/clon.svg) center / contain no-repeat;transition:background-color .15s;"></span></button></sc-if><sc-if value="{{ ln.isRow }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:{{ ln.cols }};"><sc-for list="{{ ln.cells }}" as="c" hint-placeholder-count="2"><div style="min-width:0;padding:6px 12px;text-align:{{ c.align }};font-weight:{{ c.fw }};white-space:pre-wrap;word-break:break-word;"><sc-for list="{{ c.segs }}" as="sg" hint-placeholder-count="1"><sc-if value="{{ sg.isText }}" hint-placeholder-val="{{ true }}"><span data-off="{{ sg.off }}" style="color:{{ sg.color }};font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.text }}</span></sc-if><sc-if value="{{ sg.isLink }}" hint-placeholder-val="{{ false }}"><a href="{{ sg.href }}" target="_blank" rel="noopener noreferrer" data-off="{{ sg.off }}" style="color:#fff;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};text-decoration-color:#008000;text-decoration-thickness:2px;text-underline-offset:3px;cursor:pointer;">{{ sg.text }}</a></sc-if><sc-if value="{{ sg.isCode }}" hint-placeholder-val="{{ false }}"><code data-off="{{ sg.off }}" style="font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:0.88em;background:#333;color:#e6e6e6;padding:1px 5px;border-radius:4px;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.text }}</code></sc-if><sc-if value="{{ sg.isImg }}" hint-placeholder-val="{{ false }}"><img loading="lazy" src="{{ sg.src }}" alt="{{ sg.alt }}" title="{{ sg.alt }}" style="max-width:100%;max-height:420px;border-radius:6px;vertical-align:middle;"></sc-if><sc-if value="{{ sg.isEnt }}" hint-placeholder-val="{{ false }}"><span title="{{ sg.title }}" style="background:#1d2b1d;padding:{{ sg.pad }};border-radius:2px;"><span data-off="{{ sg.off }}" style="color:#fff;">{{ sg.eq }}</span><span data-off="{{ sg.off2 }}" style="color:#008000;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.label }}</span></span></sc-if><sc-if value="{{ sg.isBox }}" hint-placeholder-val="{{ false }}"><span onMouseDown="{{ sg.onToggle }}" role="checkbox" aria-checked="{{ sg.on }}" style="display:inline-block;width:15px;height:15px;border-radius:3px;vertical-align:-2px;margin-right:{{ sg.mr }};background:{{ sg.bg }};box-shadow:inset 0 0 0 2px #008000;"></span></sc-if></sc-for>&#8203;</div></sc-for></div></sc-if>
+              <sc-if value="{{ ln.showText }}" hint-placeholder-val="{{ true }}"><div style="white-space:pre-wrap;word-break:break-word;min-height:{{ ln.lh }};"><sc-for list="{{ ln.segs }}" as="sg" hint-placeholder-count="1"><sc-if value="{{ sg.isText }}" hint-placeholder-val="{{ true }}"><span data-off="{{ sg.off }}" style="color:{{ sg.color }};font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.text }}</span></sc-if><sc-if value="{{ sg.isLink }}" hint-placeholder-val="{{ false }}"><a href="{{ sg.href }}" target="_blank" rel="noopener noreferrer" data-off="{{ sg.off }}" style="color:#fff;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};text-decoration-color:#008000;text-decoration-thickness:2px;text-underline-offset:3px;cursor:pointer;">{{ sg.text }}</a></sc-if><sc-if value="{{ sg.isCode }}" hint-placeholder-val="{{ false }}"><code data-off="{{ sg.off }}" style="font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:0.88em;background:#333;color:#e6e6e6;padding:1px 5px;border-radius:4px;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.text }}</code></sc-if><sc-if value="{{ sg.isImg }}" hint-placeholder-val="{{ false }}"><img loading="lazy" src="{{ sg.src }}" alt="{{ sg.alt }}" title="{{ sg.alt }}" style="max-width:100%;max-height:420px;border-radius:6px;vertical-align:middle;"></sc-if><sc-if value="{{ sg.isEnt }}" hint-placeholder-val="{{ false }}"><span title="{{ sg.title }}" style="background:#1d2b1d;padding:{{ sg.pad }};border-radius:2px;"><span data-off="{{ sg.off }}" style="color:#fff;">{{ sg.eq }}</span><span data-off="{{ sg.off2 }}" style="color:#008000;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.label }}</span></span></sc-if><sc-if value="{{ sg.isBox }}" hint-placeholder-val="{{ false }}"><span onMouseDown="{{ sg.onToggle }}" role="checkbox" aria-checked="{{ sg.on }}" style="display:inline-block;width:15px;height:15px;border-radius:3px;vertical-align:-2px;margin-right:{{ sg.mr }};background:{{ sg.bg }};box-shadow:inset 0 0 0 2px #008000;"></span></sc-if></sc-for>&#8203;</div></sc-if>
               <sc-if value="{{ ln.focused }}" hint-placeholder-val="{{ false }}">
                 <textarea ref="{{ taRef }}" rows="1" spellCheck="false" value="{{ ln.text }}" onChange="{{ ln.onChange }}" onKeyDown="{{ ln.onKey }}" onPaste="{{ ln.onPaste }}" onBlur="{{ ln.onBlur }}" style="position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;outline:none;resize:none;overflow:hidden;background:transparent;color:transparent;caret-color:#008000;font:inherit;line-height:inherit;letter-spacing:inherit;white-space:pre-wrap;word-break:break-word;"></textarea>
               </sc-if>
@@ -270,8 +270,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 const PINK = '#cc55cc', TOKEN = '#1a9a1a', DIM = '#5f5f5f';
-const HEAD = { 1: ['24px', '30px'], 2: ['20px', '27px'], 3: ['18px', '24px'] };
-const RX = /\(\[(True|False)\]([^)]*)\)|\[(True|False)\]/g;
+const HEAD = { 1: ['24px', '30px'], 2: ['20px', '27px'], 3: ['18px', '24px'], 4: ['17px', '24px'], 5: ['16px', '24px'], 6: ['15px', '22px'] };
 
 function parseLine(text) {
   const h = /^(#{1,6}) (.*)$/.exec(text);
@@ -549,57 +548,166 @@ function newEnt(type, name, extra) {
   if (type === 'table') { e.cols = [0, 1, 2].map(i => ({ id: uid('c'), title: 'Título', op: i === 2 ? 'sum' : null })); e.rows = [0, 1, 2].map(() => ({ id: uid('r'), cells: {} })); }
   return Object.assign(e, extra || {});
 }
-function splitEnt(out, t, off, color, raw) {
-  let last = 0, m; ENT.lastIndex = 0;
-  while ((m = ENT.exec(t))) {
-    if (m.index > last) out.push({ t: 'text', text: t.slice(last, m.index), off: off + last, color });
-    out.push({ t: 'ent', name: m[1] || m[2], off: off + m.index, raw });
-    last = m.index + m[0].length;
-  }
-  if (last < t.length) out.push({ t: 'text', text: t.slice(last), off: off + last, color });
+// ===== Formato MKD (Markdown adaptado a NoteApp) =====
+// Escapar: \ delante de un signo lo muestra tal cual. Código en frase: `x`. Bloque de código: `` o ```.
+// Línea copiable: 'x'. Bloque copiable: ''. Menciones: =Nombre sin nada pegado delante (salvo * o ~).
+const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+const ESC_CH = /[!-\/:-@\[-`{-~’‘]/;
+const BOX_W = { True: true, False: false, x: true, X: true, ' ': false };
+const isQ = c => c === "'" || c === '’' || c === '‘';
+function safeUrl(u, img) {
+  u = String(u || '').trim(); if (!u) return null;
+  if (/^www\./i.test(u)) u = 'https://' + u;
+  if (/^(https?:|mailto:)/i.test(u) || (img && /^data:image\//i.test(u))) return u;
+  return /^[a-z][a-z0-9+.-]*:/i.test(u) || /^\/\//.test(u) ? null : u;
 }
-function rawSegs(text) {
-  const out = [], push = (t, off, color) => t && (color === '#fff' ? splitEnt(out, t, off, color, true) : out.push({ t: 'text', text: t, off, color }));
-  let last = 0, m; RX.lastIndex = 0;
-  while ((m = RX.exec(text))) {
-    push(text.slice(last, m.index), last, '#fff');
-    if (m[1]) {
-      const tok = '[' + m[1] + ']', a = m.index;
-      push('(', a, PINK); push(tok, a + 1, TOKEN);
-      push(m[2], a + 1 + tok.length, '#fff');
-      push(')', a + m[0].length - 1, PINK);
-    } else push(m[0], m.index, TOKEN);
+// Analiza el texto entre a y b: qué signos se ocultan, cuáles son literales y dónde hay casillas, menciones, enlaces e imágenes.
+function mdScan(text, a, b) {
+  const n = text.length, cat = new Uint8Array(n); // 0 normal · 1 signo escapado · 2 oculto · 3 código
+  for (let i = a; i < b; i++) {
+    const c = text[i];
+    if (c === '\\' && i + 1 < b && ESC_CH.test(text[i + 1])) { cat[i] = 2; cat[i + 1] = 1; i++; continue; }
+    if (c === '`') {
+      let j = i; while (j < b && text[j] === '`') j++;
+      if (j - i === 1) {
+        let k = j, close = -1;
+        while (k < b) { if (text[k] === '`') { let r = k; while (r < b && text[r] === '`') r++; if (r - k === 1) { close = k; break; } k = r; } else k++; }
+        if (close > j) { cat[i] = 2; cat[close] = 2; for (let q = j; q < close; q++) cat[q] = 3; i = close; continue; }
+      }
+      i = j - 1;
+    }
+  }
+  let w = '';
+  for (let i = 0; i < n; i++) w += i < a || i >= b ? ' ' : cat[i] === 1 || cat[i] === 3 ? '' : cat[i] === 2 ? '' : text[i];
+  const atoms = [], taken = new Uint8Array(n), seg = w.slice(a, b);
+  const free = (s, e) => { for (let q = s; q < e; q++) if (taken[q]) return false; return true; };
+  const take = at => { for (let q = at.s; q < at.e; q++) taken[q] = 1; atoms.push(at); };
+  let m;
+  const LINK = /(!?)\[([^\[\]]*)\]\(([^()\s]*)\)/g;
+  while ((m = LINK.exec(seg))) {
+    const s = a + m.index, e = s + m[0].length, img = !!m[1], ls = s + m[1].length + 1, le = ls + m[2].length;
+    const url = safeUrl(text.slice(le + 2, e - 1), img);
+    if (!url || (!img && !m[2].trim())) continue;
+    take({ s, e, kind: img ? 'img' : 'link', url, ls, le });
+  }
+  const GRP = /\(\[(True|False|x|X| )\]([^)]*)\)/g;
+  while ((m = GRP.exec(seg))) {
+    const s = a + m.index, e = s + m[0].length; if (!free(s, e)) continue;
+    const ts = s + 1, te = ts + m[1].length + 2, data = m[2], lead = data.length - data.replace(/^\s+/, '').length, trail = data.length - data.replace(/\s+$/, '').length;
+    cat[s] = 2; cat[e - 1] = 2;
+    for (let q = te; q < te + lead; q++) cat[q] = 2;
+    if (data.trim()) for (let q = e - 1 - trail; q < e - 1; q++) cat[q] = 2;
+    take({ s: ts, e: te, kind: 'box', on: BOX_W[m[1]], mr: data.trim() ? '10px' : '0px', grp: true, ps: s, pe: e - 1 });
+  }
+  const BOX = /\[(True|False|x|X| )\]/g;
+  while ((m = BOX.exec(seg))) { const s = a + m.index, e = s + m[0].length; if (free(s, e)) take({ s, e, kind: 'box', on: BOX_W[m[1]], mr: '0px' }); }
+  const MEN = new RegExp(ENT.source, 'g');
+  while ((m = MEN.exec(seg))) {
+    const s = a + m.index, e = s + m[0].length, pc = s > a ? w[s - 1] : '';
+    if (pc && !/[\s*~]/.test(pc)) continue;
+    if (free(s, e)) take({ s, e, kind: 'ent', name: m[1] || m[2] });
+  }
+  atoms.sort((x, y) => x.s - y.s);
+  let w2 = '';
+  for (let i = 0; i < n; i++) w2 += taken[i] ? '' : w[i];
+  return { text, cat, atoms, w, w2 };
+}
+const FMT = /(\*{1,3})(?=[^\s*])([^]*?[^\s*])\1(?!\*)|~~(?=[^\s~])([^]*?[^\s~])~~/g;
+function mdFmt(sc, s, e, f, W, out) {
+  const re = new RegExp(FMT.source, 'g'), str = W.slice(s, e); let last = 0, m;
+  while ((m = re.exec(str))) {
+    if (m.index > last) mdLeaf(sc, s + last, s + m.index, f, out);
+    if (m[1]) { const L = m[1].length, is = s + m.index + L; mdFmt(sc, is, is + m[2].length, { ...f, b: f.b || L >= 2, i: f.i || L !== 2 }, W, out); }
+    else { const is = s + m.index + 2; mdFmt(sc, is, is + m[3].length, { ...f, s: true }, W, out); }
     last = m.index + m[0].length;
   }
-  push(text.slice(last), last, '#fff');
+  if (last < str.length) mdLeaf(sc, s + last, e, f, out);
+}
+function mdLeaf(sc, s, e, f, out) {
+  let i = s;
+  for (const at of sc.atoms) {
+    if (at.s < i || at.e > e) continue;
+    if (at.s > i) mdText(sc, i, at.s, f, out);
+    if (at.kind === 'link') { const k = out.length; mdFmt(sc, at.ls, at.le, f, sc.w, out); for (let j = k; j < out.length; j++) if (out[j].t === 'text') out[j].href = at.url; }
+    else if (at.kind === 'img') out.push({ t: 'img', src: at.url, alt: sc.text.slice(at.ls, at.le), off: at.s });
+    else if (at.kind === 'box') out.push({ t: 'box', on: at.on, off: at.s, mr: at.mr });
+    else out.push({ t: 'ent', name: at.name, off: at.s, b: f.b, i: f.i, s: f.s });
+    i = at.e;
+  }
+  if (i < e) mdText(sc, i, e, f, out);
+}
+function mdText(sc, s, e, f, out) {
+  let i = s;
+  while (i < e) {
+    if (sc.cat[i] === 2) { i++; continue; }
+    const code = sc.cat[i] === 3; let j = i + 1;
+    while (j < e && sc.cat[j] !== 2 && (sc.cat[j] === 3) === code) j++;
+    out.push({ t: code ? 'code' : 'text', text: sc.text.slice(i, j), off: i, b: f.b, i: f.i, s: f.s });
+    i = j;
+  }
+}
+// Vista sucia: el texto tal cual, coloreando casillas, menciones y la barra de escapar.
+function rawSegs(text) {
+  const sc = mdScan(text, 0, text.length), out = [], pink = new Set();
+  sc.atoms.forEach(at => { if (at.grp) { pink.add(at.ps); pink.add(at.pe); } });
+  const col = i => pink.has(i) ? PINK : sc.cat[i] === 2 && text[i] === '\\' ? DIM : '#fff';
+  const run = (s, e) => { let i = s; while (i < e) { const c = col(i); let j = i + 1; while (j < e && col(j) === c) j++; out.push({ t: 'text', text: text.slice(i, j), off: i, color: c }); i = j; } };
+  let i = 0;
+  for (const at of sc.atoms) {
+    if (at.s > i) run(i, at.s);
+    if (at.kind === 'box') out.push({ t: 'text', text: text.slice(at.s, at.e), off: at.s, color: TOKEN });
+    else if (at.kind === 'ent') out.push({ t: 'ent', name: at.name, off: at.s, raw: true });
+    else run(at.s, at.e);
+    i = at.e;
+  }
+  if (i < text.length) run(i, text.length);
   return out;
 }
-const EM = /(\*{1,3})(?=[^\s*])([^]*?[^\s*])\1(?!\*)/g;
-function emSplit(t, off, fn) {
-  const re = new RegExp(EM.source, 'g'); let last = 0, m;
-  while ((m = re.exec(t))) {
-    if (m.index > last) fn(t.slice(last, m.index), off + last, false, false);
-    const L = m[1].length; fn(m[2], off + m.index + L, L >= 2, L !== 2);
-    last = m.index + m[0].length;
+const LI = /^( *)(-|\*|\+|\d{1,9}[.)]) (.*)$/;
+const TSEP = /^\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
+function cellsOf(t) {
+  const cuts = [], r = t.replace(/\s+$/, '').length, cells = [];
+  for (let i = 0; i < r; i++) { if (t[i] === '\\') { i++; continue; } if (t[i] === '|') cuts.push(i); }
+  for (let k = 0; k < cuts.length; k++) {
+    const s = cuts[k] + 1, e = k + 1 < cuts.length ? cuts[k + 1] : r;
+    if (k + 1 === cuts.length && s >= r) break;
+    let x = s, y = e; while (x < y && /\s/.test(t[x])) x++; while (y > x && /\s/.test(t[y - 1])) y--;
+    cells.push({ s: x, e: y });
   }
-  if (last < t.length) fn(t.slice(last), off + last, false, false);
+  return cells;
 }
-const LI = /^( *)(-|\d{1,9}[.)]) (.*)$/;
 function blockInfo(lines) {
-  const n = lines.length, out = new Array(n), endsTick = t => /``\s*$/.test(t), rtrim = t => t.replace(/\s+$/, '');
+  const n = lines.length, out = new Array(n), rtrim = t => t.replace(/\s+$/, '');
+  const trail = (r, fn) => { let k = 0; while (k < r.length && fn(r[r.length - 1 - k])) k++; return k; };
+  const tick = c => c === '`';
   for (let i = 0; i < n; i++) {
     const t = lines[i].text; let m;
-    if (t.startsWith('``')) {
-      if (t.length >= 4 && endsTick(t.slice(2))) { out[i] = { kind: 'code', pos: 'single', start: 2, end: rtrim(t).length - 2, from: i, to: i }; continue; }
-      let j = i + 1; while (j < n && !endsTick(lines[j].text)) j++;
+    const fk = t.startsWith('``') ? 'code' : isQ(t[0]) && isQ(t[1]) ? 'copy' : null;
+    if (fk) {
+      const fl = fk === 'code' && t.startsWith('```') ? 3 : 2, is = fk === 'code' ? tick : isQ, r = rtrim(t), tl = trail(r, is);
+      if (r.length >= fl + 2 && tl >= 2 && r.length - tl >= fl) { out[i] = { kind: fk, pos: 'single', start: fl, end: r.length - Math.min(tl, fl), from: i, to: i }; continue; }
+      let j = i + 1; while (j < n && trail(rtrim(lines[j].text), is) < 2) j++;
       if (j < n) {
-        for (let k = i; k <= j; k++) { const tk = lines[k].text; out[k] = { kind: 'code', pos: k === i ? 'first' : k === j ? 'last' : 'mid', start: k === i ? 2 : 0, end: k === j ? Math.max(k === i ? 2 : 0, rtrim(tk).length - 2) : tk.length, from: i, to: j }; }
+        const lang = fl === 3 && /^[\w+#.-]*$/.test(t.slice(3).trim());
+        for (let k = i; k <= j; k++) {
+          const tk = lines[k].text, rk = rtrim(tk);
+          out[k] = { kind: fk, pos: k === i ? 'first' : k === j ? 'last' : 'mid', start: k === i ? (lang ? tk.length : fl) : 0, end: k === j ? Math.max(k === i ? fl : 0, rk.length - Math.min(trail(rk, is), fk === 'code' ? 3 : 2)) : tk.length, from: i, to: j };
+          if (k === i && lang) out[k].end = tk.length;
+        }
         i = j; continue;
       }
     }
-    if (/^-{3,}\s*$/.test(t)) out[i] = { kind: 'hr' };
-    else if (/^>( |$)/.test(t)) out[i] = { kind: 'quote', start: Math.min(2, t.length), end: t.length };
-    else if ((m = LI.exec(t))) out[i] = { kind: m[2] === '-' ? 'ul' : 'ol', lvl: Math.min(6, Math.floor(m[1].length / 2)), start: m[1].length + m[2].length + 1, end: t.length, n: parseInt(m[2], 10) };
+    if (isQ(t[0]) && !isQ(t[1])) { const r = rtrim(t); if (r.length >= 3 && isQ(r[r.length - 1])) { out[i] = { kind: 'copy', pos: 'single', start: 1, end: r.length - 1, from: i, to: i }; continue; } }
+    if (t[0] === '|' && i + 1 < n && TSEP.test(lines[i + 1].text) && lines[i + 1].text.includes('-')) {
+      const head = cellsOf(t), sep = lines[i + 1].text, ncol = Math.max(1, head.length);
+      const aligns = cellsOf(sep).map(c => { const x = sep.slice(c.s, c.e); return /^:.*:$/.test(x) ? 'center' : /:$/.test(x) ? 'right' : 'left'; });
+      let j = i + 2; while (j < n && lines[j].text[0] === '|') j++;
+      for (let k = i; k < j; k++) out[k] = k === i + 1 ? { kind: 'tsep', from: i, to: j - 1 } : { kind: 'trow', head: k === i, cells: k === i ? head : cellsOf(lines[k].text), ncol, aligns, last: k === j - 1, from: i, to: j - 1 };
+      i = j - 1; continue;
+    }
+    if (/^(-{3,}|\*{3,})\s*$/.test(t)) out[i] = { kind: 'hr' };
+    else if ((m = /^(>+)( |$)/.exec(t))) out[i] = { kind: 'quote', lvl: m[1].length, start: Math.min(m[0].length, t.length), end: t.length };
+    else if ((m = LI.exec(t))) out[i] = { kind: m[2] === '-' || m[2] === '*' || m[2] === '+' ? 'ul' : 'ol', lvl: Math.min(6, Math.floor(m[1].length / 2)), start: m[1].length + m[2].length + 1, end: t.length, n: parseInt(m[2], 10) };
     else out[i] = { kind: 'p' };
   }
   let cnt = [];
@@ -612,23 +720,26 @@ function blockInfo(lines) {
   });
   return out;
 }
-const plainOf = segs => segs.map(s => s.t === 'text' ? s.text : s.t === 'ent' ? resolveEntity(s.name) : (s.on ? '[x]' : '[ ]') + (s.mr === '10px' ? ' ' : '')).join('');
+const plainOf = segs => segs.map(s => s.t === 'text' || s.t === 'code' ? s.text : s.t === 'ent' ? resolveEntity(s.name) : s.t === 'box' ? (s.on ? '[x]' : '[ ]') + (s.mr === '10px' ? ' ' : '') : s.t === 'img' ? s.alt : '').join('');
 function cleanSegs(text, start, end) {
-  const out = [], push = (t, off) => t && emSplit(t, off, (tt, o, b, it) => { const k = out.length; splitEnt(out, tt, o, '#fff', false); for (let j = k; j < out.length; j++) { out[j].b = b; out[j].i = it; } });
-  const body = text.slice(start, end == null ? text.length : end);
-  let last = 0, m; RX.lastIndex = 0;
-  while ((m = RX.exec(body))) {
-    push(body.slice(last, m.index), start + last);
-    if (m[1]) {
-      const lead = m[2].length - m[2].replace(/^\s+/, '').length, data = m[2].trim();
-      out.push({ t: 'box', on: m[1] === 'True', off: start + m.index + 1, word: m[1], mr: data ? '10px' : '0px' });
-      push(data, start + m.index + 2 + m[1].length + 1 + lead);
-    } else out.push({ t: 'box', on: m[3] === 'True', off: start + m.index, word: m[3], mr: '0px' });
-    last = m.index + m[0].length;
-  }
-  push(body.slice(last), start + last);
+  const a = start || 0, b = end == null ? text.length : end, out = [];
+  if (b <= a) return out;
+  const sc = mdScan(text, a, b);
+  mdFmt(sc, a, b, {}, sc.w2, out);
   return out;
 }
+// Conversión única de notas antiguas: el cuadro copiable pasó de `` a ''.
+function mkdMigrate(lines) {
+  const out = lines.map(l => ({ ...l })), n = out.length, ends = t => /``\s*$/.test(t), fix = t => t.replace(/``(\s*)$/, "''$1");
+  for (let i = 0; i < n; i++) {
+    const t = String(out[i].text || ''); if (!t.startsWith('``')) continue;
+    if (t.length >= 4 && ends(t.slice(2))) { out[i].text = "''" + fix(t.slice(2)); continue; }
+    let j = i + 1; while (j < n && !ends(String(out[j].text || ''))) j++;
+    if (j < n) { out[i].text = "''" + t.slice(2); out[j].text = fix(out[j].text); i = j; }
+  }
+  return out;
+}
+const mkdMigNotes = notes => (notes || []).map(n => ({ ...n, sheets: (n.sheets || []).map(x => ({ ...x, lines: Array.isArray(x.lines) ? mkdMigrate(x.lines) : x.lines, entities: (x.entities || []).map(e => e.type === 'text' && Array.isArray(e.lines) ? { ...e, lines: mkdMigrate(e.lines) } : e) })) }));
 
 const W0 = 577;
 let _uid = 1000;
@@ -654,6 +765,7 @@ function naLoad(base) {
     NA_REV = +d.rev || 0;
     const out = { ...base }; NA_KEEP.forEach(k => { if (d[k] !== undefined && d[k] !== null) out[k] = d[k]; });
     if (!out.notes.some(n => n.id === out.activeNote)) out.activeNote = out.notes.length ? out.notes[0].id : null;
+    if (!(d.config && d.config.mkdV2)) { out.notes = mkdMigNotes(out.notes); out.other = { ...out.other, notes: mkdMigNotes(out.other.notes) }; out.config = { ...(d.config || {}), mkdV2: true }; }
     return out;
   } catch (_) { return base; }
 }
@@ -737,32 +849,63 @@ class Component extends DCLogic {
       newEnt('pct', 'Peso_Hotel', { desc: 'Peso del hotel en el total', mode: 'pct', part: '240', total: 'Gastos', pct: '', decimals: false })
     ];
     const sheets = [mkSheet('Guía de formato MKD', [
-      '# Título de nivel 1',
-      '## Título de nivel 2',
-      '### Título de nivel 3',
-      'Texto normal con **negrita**, *cursiva* y ***negrita en cursiva***.',
-      '---',
-      '> Esto es una anotación.',
-      '> Varias líneas seguidas forman un solo bloque.',
-      '## Listas',
-      '- Elemento de lista',
-      '- Otro elemento',
-      '  - Subelemento con **negrita**',
-      '  - Otro subelemento',
-      '- De vuelta al primer nivel',
-      '3. La numeración empieza en el primer número',
-      '1. y sigue sola aunque escribas otro',
-      '1. tercer paso',
-      '## Casillas',
-      '[True] Casilla marcada',
-      '[False] Casilla sin marcar',
-      '([True] Casilla con texto agrupado)',
-      '## Cuadros copiables',
-      '``Una línea lista para copiar``',
-      '``',
-      'Bloque de varias líneas.',
-      'Las menciones se copian con su valor: =Subtotal',
-      '``'
+      "# Título de nivel 1",
+      "## Título de nivel 2",
+      "### Título de nivel 3",
+      "#### Título de nivel 4",
+      "##### Título de nivel 5",
+      "###### Título de nivel 6",
+      "Texto normal con **negrita**, *cursiva*, ***negrita en cursiva*** y ~~tachado~~.",
+      "Con tres guiones o tres asteriscos solos en una línea se crea una línea separadora:",
+      "---",
+      "## Anotaciones",
+      "> Esto es una anotación.",
+      "> Varias líneas seguidas forman un solo bloque.",
+      ">> Con dos símbolos, una anotación dentro de otra.",
+      "## Listas",
+      "- Elemento de lista con guion",
+      "* Elemento de lista con asterisco",
+      "+ Elemento de lista con el símbolo más",
+      "  - Subelemento con **negrita** (dos espacios por nivel)",
+      "  - Otro subelemento",
+      "- De vuelta al primer nivel",
+      "3. La numeración empieza en el primer número",
+      "1. y sigue sola aunque escribas otro",
+      "1. tercer paso",
+      "## Casillas",
+      "[True] Casilla marcada",
+      "[False] Casilla sin marcar",
+      "[x] También marcada, al estilo Markdown",
+      "[ ] También sin marcar",
+      "- [x] Con guion delante, la casilla va dentro de una lista",
+      "([True] Casilla con texto agrupado)",
+      "## Enlaces e imágenes",
+      "Un enlace: [qué es Markdown](https://es.wikipedia.org/wiki/Markdown)",
+      "![Logo de NoteApp](icons/icon-192.png)",
+      "## Tablas",
+      "| Producto | Precio |",
+      "| --- | --- |",
+      "| Pan | 1,20 |",
+      "| Leche | 0,95 |",
+      "## Código",
+      "Código dentro de una frase: `=Subtotal` se ve tal cual, sin calcular.",
+      "``",
+      "Bloque de código.",
+      "Aquí todo se ve tal cual: **sin negrita** y =Subtotal sin calcular.",
+      "``",
+      "## Cuadros copiables",
+      "'Una línea lista para copiar'",
+      "''",
+      "Bloque de varias líneas.",
+      "Las menciones se copian con su valor: =Subtotal",
+      "''",
+      "## Menciones",
+      "Escribe un igual pegado al nombre de una entidad: el subtotal vale =Subtotal.",
+      "Delante del igual no puede haber nada pegado, salvo \\* o \\~: **=Subtotal** funciona, pero en 2+2=4 o en web.com/?id=5 no se crea ninguna mención.",
+      "## Escapar",
+      "Pon una barra \\\\ delante de un símbolo para que se vea tal cual: \\*sin cursiva\\*, \\=Subtotal, \\[True].",
+      "\\# Esto no es un título",
+      "\\'Casa' y 'Coche' no es una línea copiable"
     ]), mkSheet('Guía de entidades', [
       '# Guía de entidades',
       'Las entidades viven en el panel derecho y se añaden desde la barra lateral. Cada una tiene un **nombre único** y produce un valor que puedes citar en cualquier hoja escribiendo un igual delante de su nombre: por ejemplo, el subtotal vale *=Subtotal*.',
@@ -800,11 +943,11 @@ class Component extends DCLogic {
       '> El hotel supone el =Peso_Hotel % del gasto total.',
       '> Si añadimos la cena, la propina sería de =Propina euros.',
       'Faltan =(Agenda / Viajes / Lisboa / Faltan_Vuelo) días para el vuelo: **=(Agenda / Viajes / Lisboa / Aviso_Maleta)**',
-      '``',
+      "''",
       'Total del viaje: =Gastos euros',
       'Seguro: =Seguro euros',
       'Por persona: =Por_Persona euros',
-      '``'
+      "''"
     ], viaje)];
     const notes = [{ id: uid('n'), name: 'Conoce NoteApp', sheets, activeSheet: sheets[0].id }];
     const inDays = k => { const d = new Date(); d.setDate(d.getDate() + k); return ymd(d); };
@@ -824,7 +967,7 @@ class Component extends DCLogic {
       newEnt('notif', 'Aviso_Pago', { desc: 'Pagar el hotel', target: 'Pago_Hotel', d: '', h: '12' })
     ]);
     const anotes = [{ id: uid('n'), name: 'Viajes', sheets: [lis, pag], activeSheet: lis.id }];
-    return naLoad({ other: { notes: anotes, activeNote: anotes[0].id }, calView: {}, now: Date.now(), lsel: {}, copied: null, entMenu: null, field: null, colMenu: null, menu: false, mode: 'notas', notes, activeNote: notes[0].id, editing: null, draft: '', dragging: false, clean: true, focusId: null, config: {}, fs: 'off', fsName: '' });
+    return naLoad({ other: { notes: anotes, activeNote: anotes[0].id }, calView: {}, now: Date.now(), lsel: {}, copied: null, entMenu: null, field: null, colMenu: null, menu: false, mode: 'notas', notes, activeNote: notes[0].id, editing: null, draft: '', dragging: false, clean: true, focusId: null, config: { mkdV2: true }, fs: 'off', fsName: '' });
   })();
   panelRef = React.createRef();
   taRef = React.createRef();
@@ -910,11 +1053,11 @@ class Component extends DCLogic {
   fsApply(data) {
     const m = data.meta || {}, v = m.vista || {};
     _uid = Math.max(_uid, naMaxId([data.notas, data.agenda]));
-    const notas = data.notas, agenda = data.agenda;
+    const up = !(m.config && m.config.mkdV2), notas = up ? mkdMigNotes(data.notas) : data.notas, agenda = up ? mkdMigNotes(data.agenda) : data.agenda;
     const act = (list, sec) => { const id = sec && sec.activa; return list.some(n => n.id === id) ? id : list.length ? list[0].id : null; };
     const N = { notes: notas, activeNote: act(notas, m.notas) }, A = { notes: agenda, activeNote: act(agenda, m.agenda) }, ag = v.mode === 'agenda', cur = ag ? A : N;
     this._rev = +m.rev || 0; this._naHold = true;
-    this.setState({ mode: ag ? 'agenda' : 'notas', notes: cur.notes, activeNote: cur.activeNote, other: ag ? N : A, clean: typeof v.clean === 'boolean' ? v.clean : this.state.clean, calView: v.calView || {}, lsel: v.lsel || {}, config: m.config || {}, focusId: null, field: null, entMenu: null, colMenu: null, menu: false, editing: null, draft: '' });
+    this.setState({ mode: ag ? 'agenda' : 'notas', notes: cur.notes, activeNote: cur.activeNote, other: ag ? N : A, clean: typeof v.clean === 'boolean' ? v.clean : this.state.clean, calView: v.calView || {}, lsel: v.lsel || {}, config: up ? { ...(m.config || {}), mkdV2: true } : (m.config || {}), focusId: null, field: null, entMenu: null, colMenu: null, menu: false, editing: null, draft: '' });
   }
   fsQueue() {
     if (!this._fsDir || this.state.fs !== 'on') return;
@@ -1418,44 +1561,63 @@ class Component extends DCLogic {
     const s = this.state, cleanV = s.clean || !!out;
     const blocks = cleanV ? blockInfo(src) : null;
     const isList = b => !!b && (b.kind === 'ul' || b.kind === 'ol');
+    const isFence = b => !!b && (b.kind === 'code' || b.kind === 'copy');
+    const isTab = b => !!b && (b.kind === 'trow' || b.kind === 'tsep');
+    const segV = (sg, focused) => {
+      const v = { isText: false, isLink: false, isCode: false, isImg: false, isBox: false, isEnt: false, off: sg.off };
+      const fw = sg.b ? 700 : 'inherit', fst = sg.i ? 'italic' : 'normal', td = sg.s ? 'line-through' : 'none';
+      if (sg.t === 'text') return sg.href
+        ? { ...v, isLink: true, text: sg.text, href: sg.href, fw, fst, td: sg.s ? 'underline line-through' : 'underline' }
+        : { ...v, isText: true, text: sg.text, color: sg.color || 'inherit', fw, fst, td };
+      if (sg.t === 'code') return { ...v, isCode: true, text: sg.text, fw, fst, td };
+      if (sg.t === 'img') return { ...v, isImg: true, src: sg.src, alt: sg.alt };
+      if (sg.t === 'ent') return { ...v, isEnt: true, off2: sg.off + 1, eq: sg.raw ? '=' : '', label: sg.raw ? (isPath(sg.name) ? sg.name.slice(1) : sg.name) : resolveEntity(sg.name), fw: focused ? 'inherit' : sg.b ? 800 : 600, fst, td, pad: sg.raw ? '4px 0' : '4px 4px', title: sg.raw ? '' : isPath(sg.name) ? sg.name : '=' + sg.name };
+      return { ...v, isBox: true, on: sg.on, mr: sg.mr, bg: sg.on ? '#008000' : 'transparent', onToggle: e => { e.preventDefault(); e.stopPropagation(); } };
+    };
     let prevHead = false, prevB = null;
     const lines = src.map((ln, idx) => {
       const focused = !s.clean && s.focusId === ln.id;
       const b = blocks ? blocks[idx] : { kind: 'p' };
       const p = b.kind === 'p' ? parseLine(ln.text) : { level: 0, start: 0 }, head = p.level > 0;
       let [fs, lh] = head ? (HEAD[p.level] || ['16px', '25px']) : ['16px', '25px'];
-      const cont = !!prevB && ((b.kind === 'code' && prevB.kind === 'code' && prevB.from === b.from) || (b.kind === 'quote' && prevB.kind === 'quote'));
+      const cont = !!prevB && ((isFence(b) && isFence(prevB) && prevB.from === b.from) || (b.kind === 'quote' && prevB.kind === 'quote') || (isTab(b) && isTab(prevB) && prevB.from === b.from));
       const mt = idx === 0 || cont ? '0px' : (blocks && isList(b) && isList(prevB)) ? '6px' : (head || prevHead) ? '25px' : '13px';
       prevHead = head; prevB = b;
-      const v = { pad: '0px', bg: 'transparent', rad: '0px', bar: 'none', color: '#fff', isHr: false, hasMarker: false, marker: '', mkLeft: '0px', hasCopy: false, showText: true, onCopy: null, copyTitle: '', copyColor: '#8a8a8a' };
+      const v = { pad: '0px', bg: 'transparent', rad: '0px', bar: 'none', color: head && p.level === 6 ? '#a6a6a6' : '#fff', ff: 'inherit', isHr: false, isRow: false, cells: [], cols: 'none', hasMarker: false, marker: '', mkLeft: '0px', hasCopy: false, showText: true, onCopy: null, copyTitle: '', copyColor: '#8a8a8a' };
       let segs;
       if (!blocks) segs = rawSegs(ln.text);
       else if (b.kind === 'hr') { segs = []; v.isHr = true; v.showText = false; }
-      else {
+      else if (b.kind === 'tsep') { segs = []; v.showText = false; Object.assign(v, { bg: '#008000', pad: '1px 0' }); }
+      else if (b.kind === 'trow') {
+        segs = []; v.showText = false;
+        const cells = [];
+        for (let k = 0; k < b.ncol; k++) { const c = b.cells[k]; cells.push({ segs: c ? cleanSegs(ln.text, c.s, c.e).map(x => segV(x, false)) : [], align: b.aligns[k] || 'left', fw: b.head ? 700 : 400 }); }
+        Object.assign(v, { isRow: true, cells, cols: 'repeat(' + b.ncol + ', minmax(0, 1fr))', bg: b.head ? '#2a2a2a' : '#222222', rad: b.head ? (b.last ? '7px' : '7px 7px 0 0') : b.last ? '0 0 7px 7px' : '0', bar: !b.head && !b.last ? 'inset 0 -1px 0 #2f2f2f' : 'none' });
+      }
+      else if (isFence(b)) {
+        const code = b.kind === 'code', top = b.pos === 'single' || b.pos === 'first', bot = b.pos === 'single' || b.pos === 'last';
+        segs = code ? (b.end > b.start ? [{ t: 'text', text: ln.text.slice(b.start, b.end), off: b.start }] : []) : cleanSegs(ln.text, b.start, b.end);
+        Object.assign(v, { bg: code ? '#141414' : '#2a2a2a', pad: (top ? '9px' : '0px') + ' 44px ' + (bot ? '9px' : '0px') + ' 14px', rad: (top ? '7px 7px ' : '0 0 ') + (bot ? '7px 7px' : '0 0') });
+        if (code) { Object.assign(v, { ff: MONO, color: '#d6d6d6' }); fs = '14px'; lh = '22px'; }
+        if (!segs.length && b.pos !== 'single' && b.pos !== 'mid') lh = '0px';
+        if (top) {
+          const key = ln.id, copied = s.copied === key;
+          Object.assign(v, { hasCopy: true, copyTitle: copied ? 'Copiado' : 'Copiar', copyColor: copied ? '#008000' : '#8a8a8a',
+            onCopy: e => { e.stopPropagation(); const txt = []; for (let k = b.from; k <= b.to; k++) { const bk = blocks[k], t = src[k].text; txt.push(code ? t.slice(bk.start, Math.max(bk.start, bk.end)) : plainOf(cleanSegs(t, bk.start, bk.end))); } while (txt.length > 1 && !txt[0]) txt.shift(); while (txt.length > 1 && !txt[txt.length - 1]) txt.pop(); this.copyText(txt.join('\n'), key); } });
+        }
+      } else {
         segs = cleanSegs(ln.text, b.kind === 'p' ? p.start : b.start, b.end);
         if (b.kind === 'quote') {
-          Object.assign(v, { bg: '#242424', bar: 'inset 3px 0 0 #008000', color: '#cfcfcf', pad: (b.first ? '8px' : '0px') + ' 14px ' + (b.last ? '8px' : '0px') + ' 17px', rad: '0 ' + (b.first ? '6px' : '0') + ' ' + (b.last ? '6px' : '0') + ' 0' });
-        } else if (b.kind === 'code') {
-          const top = b.pos === 'single' || b.pos === 'first', bot = b.pos === 'single' || b.pos === 'last';
-          Object.assign(v, { bg: '#2a2a2a', pad: (top ? '9px' : '0px') + ' 44px ' + (bot ? '9px' : '0px') + ' 14px', rad: (top ? '7px 7px ' : '0 0 ') + (bot ? '7px 7px' : '0 0') });
-          if (!segs.length && b.pos !== 'single' && b.pos !== 'mid') lh = '0px';
-          if (top) {
-            const key = ln.id, copied = s.copied === key;
-            Object.assign(v, { hasCopy: true, copyTitle: copied ? 'Copiado' : 'Copiar', copyColor: copied ? '#008000' : '#8a8a8a',
-              onCopy: e => { e.stopPropagation(); const txt = []; for (let k = b.from; k <= b.to; k++) { const bk = blocks[k]; txt.push(plainOf(cleanSegs(src[k].text, bk.start, bk.end))); } while (txt.length > 1 && !txt[0]) txt.shift(); while (txt.length > 1 && !txt[txt.length - 1]) txt.pop(); this.copyText(txt.join('\n'), key); } });
-          }
+          const L = b.lvl || 1, bars = [];
+          for (let k = 0; k < L; k++) { if (k) bars.push('inset ' + (k * 14) + 'px 0 0 #242424'); bars.push('inset ' + (k * 14 + 3) + 'px 0 0 #008000'); }
+          Object.assign(v, { bg: '#242424', bar: bars.join(', '), color: '#cfcfcf', pad: (b.first ? '8px' : '0px') + ' 14px ' + (b.last ? '8px' : '0px') + ' ' + (17 + (L - 1) * 14) + 'px', rad: '0 ' + (b.first ? '6px' : '0') + ' ' + (b.last ? '6px' : '0') + ' 0' });
         } else if (isList(b)) {
           const ind = b.lvl * 24;
           Object.assign(v, { pad: '0 0 0 ' + (ind + 28) + 'px', hasMarker: true, mkLeft: ind + 'px', marker: b.kind === 'ul' ? '•' : b.num + '.' });
         }
       }
       if (!ln.text && !focused && src.length === 1) segs = [{ t: 'text', text: 'Escribe aquí…', off: 0, color: DIM }];
-      segs = segs.map(sg => sg.t === 'text'
-        ? { isText: true, isBox: false, isEnt: false, text: sg.text, off: sg.off, color: sg.color, fw: sg.b ? 700 : 'inherit', fst: sg.i ? 'italic' : 'normal' }
-        : sg.t === 'ent'
-        ? { isText: false, isBox: false, isEnt: true, off: sg.off, off2: sg.off + 1, eq: sg.raw ? '=' : '', label: sg.raw ? (isPath(sg.name) ? sg.name.slice(1) : sg.name) : resolveEntity(sg.name), fw: focused ? 'inherit' : sg.b ? 800 : 600, fst: sg.i ? 'italic' : 'normal', title: sg.raw ? '' : isPath(sg.name) ? sg.name : '=' + sg.name }
-        : { isText: false, isBox: true, isEnt: false, on: sg.on, mr: sg.mr, bg: sg.on ? '#008000' : 'transparent',
-            onToggle: e => { e.preventDefault(); e.stopPropagation(); } });
+      segs = segs.map(sg => segV(sg, focused));
       return { id: ln.id, text: ln.text, focused, segs, fs, lh, mt, fw: head ? 700 : 400, ...v, ...this.lineHandlers(ln, idx, src, entId), ...(out ? { onDown: null } : null) };
     });
     return lines;

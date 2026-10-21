@@ -2,3 +2,7 @@
 Thumbs.db
 desktop.ini
 .vercel
+
+# Archivos solo locales (para asistentes de IA)
+AGENTS.md
+memory.md
