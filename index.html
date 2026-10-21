@@ -21,7 +21,7 @@
 <helmet>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap">
-<style>@keyframes dcRipple{0%{transform:scale(1);opacity:.85}100%{transform:scale(1.4);opacity:0}}html,body{margin:0;height:100%;background:#000;}*{box-sizing:border-box;}a{color:#008000;}a:hover{color:#00a000;}input::selection,textarea::selection{background:rgba(0,128,0,.45);}[data-scroll]::-webkit-scrollbar{width:8px;height:8px;}[data-scroll]::-webkit-scrollbar-track{background:transparent;margin:8px 0;}[data-scroll]::-webkit-scrollbar-thumb{background:#555;border:3px solid transparent;background-clip:padding-box;border-radius:4px;}[data-scroll]::-webkit-scrollbar-thumb:hover{background-color:#6a6a6a;}[data-scroll]::-webkit-scrollbar-corner{background:transparent;}</style>
+<style>@keyframes dcRipple{0%{transform:scale(1);opacity:.85}100%{transform:scale(1.4);opacity:0}}html,body{margin:0;height:100%;background:#000;}*{box-sizing:border-box;}a{color:#008000;}a:hover{color:#00a000;}input::selection,textarea::selection{background:rgba(0,128,0,.45);}[data-lines] ::selection{background:rgba(0,128,0,.45);color:#fff;}[data-scroll]::-webkit-scrollbar{width:8px;height:8px;}[data-scroll]::-webkit-scrollbar-track{background:transparent;margin:8px 0;}[data-scroll]::-webkit-scrollbar-thumb{background:#555;border:3px solid transparent;background-clip:padding-box;border-radius:4px;}[data-scroll]::-webkit-scrollbar-thumb:hover{background-color:#6a6a6a;}[data-scroll]::-webkit-scrollbar-corner{background:transparent;}</style>
 </helmet>
 <div style="position:fixed;inset:0;background:#000;color:#fff;font-family:'Google Sans','Product Sans',Figtree,system-ui,sans-serif;display:grid;grid-template-columns:59px minmax(0,1fr);grid-template-rows:63px minmax(0,1fr);overflow:hidden;user-select:none;">
   <header style="grid-column:1 / 3;display:flex;align-items:center;justify-content:space-between;padding:0 20px 4px 18px;min-width:0;gap:clamp(16px,2.7vw,53px);">
@@ -120,9 +120,9 @@
     <sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ true }}">
     <div style="flex:1;min-height:0;display:flex;gap:4px;padding-top:5px;">
       <sc-if value="{{ isNotas }}" hint-placeholder-val="{{ true }}"><section ref="{{ panelRef }}" onMouseDown="{{ panelDown }}" style="position:relative;flex:0 1 {{ panelWidth }};max-width:100%;min-width:min(200px,100%);background:#1c1c1c;border-radius:7px;padding:8px 2px 8px 0;cursor:{{ panelCursor }};">
-        <div data-scroll="" style="height:100%;overflow-y:auto;overflow-x:hidden;padding:8px 20px 27px 22px;">
+        <div data-scroll="" data-lines="sheet" style="height:100%;overflow-y:auto;overflow-x:hidden;padding:8px 20px 27px 22px;user-select:text;-webkit-user-select:text;">
           <sc-for list="{{ lines }}" as="ln" hint-placeholder-count="4">
-            <div data-line="1" onMouseDown="{{ ln.onDown }}" style="position:relative;margin-top:{{ ln.mt }};padding:{{ ln.pad }};background:{{ ln.bg }};border-radius:{{ ln.rad }};box-shadow:{{ ln.bar }};font-family:{{ ln.ff }};font-size:{{ ln.fs }};line-height:{{ ln.lh }};font-weight:{{ ln.fw }};color:{{ ln.color }};">
+            <div data-line="1" data-lid="{{ ln.id }}" onMouseDown="{{ ln.onDown }}" style="position:relative;margin-top:{{ ln.mt }};padding:{{ ln.pad }};background:{{ ln.bg }};border-radius:{{ ln.rad }};box-shadow:{{ ln.bar }};font-family:{{ ln.ff }};font-size:{{ ln.fs }};line-height:{{ ln.lh }};font-weight:{{ ln.fw }};color:{{ ln.color }};">
               <sc-if value="{{ ln.isHr }}" hint-placeholder-val="{{ false }}"><div style="height:25px;display:flex;align-items:center;"><span style="flex:1;height:2px;background:#3a3a3a;"></span></div></sc-if>
               <sc-if value="{{ ln.hasMarker }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:0;left:{{ ln.mkLeft }};width:20px;text-align:right;color:#008000;font-weight:600;">{{ ln.marker }}</span></sc-if>
               <sc-if value="{{ ln.hasCopy }}" hint-placeholder-val="{{ false }}"><button onClick="{{ ln.onCopy }}" aria-label="Copiar contenido" title="{{ ln.copyTitle }}" style="position:absolute;top:8px;right:10px;z-index:1;width:22px;height:22px;padding:0;border:0;border-radius:5px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#1c1c1c;"><span style="width:15px;height:15px;background:{{ ln.copyColor }};mask:url(assets/clon.svg) center / contain no-repeat;-webkit-mask:url(assets/clon.svg) center / contain no-repeat;transition:background-color .15s;"></span></button></sc-if><sc-if value="{{ ln.isRow }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:{{ ln.cols }};"><sc-for list="{{ ln.cells }}" as="c" hint-placeholder-count="2"><div style="min-width:0;padding:6px 12px;text-align:{{ c.align }};font-weight:{{ c.fw }};white-space:pre-wrap;word-break:break-word;"><sc-for list="{{ c.segs }}" as="sg" hint-placeholder-count="1"><sc-if value="{{ sg.isText }}" hint-placeholder-val="{{ true }}"><span data-off="{{ sg.off }}" style="color:{{ sg.color }};font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.text }}</span></sc-if><sc-if value="{{ sg.isLink }}" hint-placeholder-val="{{ false }}"><a href="{{ sg.href }}" target="_blank" rel="noopener noreferrer" data-off="{{ sg.off }}" style="color:#fff;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};text-decoration-color:#008000;text-decoration-thickness:2px;text-underline-offset:3px;cursor:pointer;">{{ sg.text }}</a></sc-if><sc-if value="{{ sg.isCode }}" hint-placeholder-val="{{ false }}"><code data-off="{{ sg.off }}" style="font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:0.88em;background:#333;color:#e6e6e6;padding:1px 5px;border-radius:4px;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.text }}</code></sc-if><sc-if value="{{ sg.isImg }}" hint-placeholder-val="{{ false }}"><img loading="lazy" src="{{ sg.src }}" alt="{{ sg.alt }}" title="{{ sg.alt }}" style="max-width:100%;max-height:420px;border-radius:6px;vertical-align:middle;"></sc-if><sc-if value="{{ sg.isEnt }}" hint-placeholder-val="{{ false }}"><span title="{{ sg.title }}" style="background:#1d2b1d;padding:{{ sg.pad }};border-radius:2px;"><span data-off="{{ sg.off }}" style="color:#fff;">{{ sg.eq }}</span><span data-off="{{ sg.off2 }}" style="color:#008000;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.label }}</span></span></sc-if><sc-if value="{{ sg.isBox }}" hint-placeholder-val="{{ false }}"><span onMouseDown="{{ sg.onToggle }}" role="checkbox" aria-checked="{{ sg.on }}" style="display:inline-block;width:15px;height:15px;border-radius:3px;vertical-align:-2px;margin-right:{{ sg.mr }};background:{{ sg.bg }};box-shadow:inset 0 0 0 2px #008000;"></span></sc-if></sc-for>&#8203;</div></sc-for></div></sc-if>
@@ -201,9 +201,9 @@
                   <button onClick="{{ e.up }}" aria-label="Subir" style="position:absolute;right:-28px;top:7px;width:16px;height:16px;padding:0;border:0;cursor:pointer;transform:rotate(-90deg);background:{{ e.upColor }};mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;-webkit-mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;"></button>
                 <button onClick="{{ e.down }}" aria-label="Bajar" style="position:absolute;right:-28px;top:23px;width:16px;height:16px;padding:0;border:0;cursor:pointer;transform:rotate(90deg);background:{{ e.downColor }};mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;-webkit-mask:url(assets/angulo-pequeno-derecho.svg) center / 9px no-repeat;"></button>
                 </sc-if>
-                <div onMouseDown="{{ e.boxDown }}" style="width:fit-content;min-width:min(220px,100%);max-width:100%;margin:0 auto;padding:12px 18px 14px;background:#1c1c1c;border-radius:7px;cursor:{{ e.boxCursor }};">
+                <div data-lines="{{ e.id }}" onMouseDown="{{ e.boxDown }}" style="user-select:text;-webkit-user-select:text;width:fit-content;min-width:min(220px,100%);max-width:100%;margin:0 auto;padding:12px 18px 14px;background:#1c1c1c;border-radius:7px;cursor:{{ e.boxCursor }};">
                   <sc-for list="{{ e.lines }}" as="ln" hint-placeholder-count="1">
-            <div data-line="1" onMouseDown="{{ ln.onDown }}" style="position:relative;margin-top:{{ ln.mt }};padding:{{ ln.pad }};background:{{ ln.bg }};border-radius:{{ ln.rad }};box-shadow:{{ ln.bar }};font-family:{{ ln.ff }};font-size:{{ ln.fs }};line-height:{{ ln.lh }};font-weight:{{ ln.fw }};color:{{ ln.color }};">
+            <div data-line="1" data-lid="{{ ln.id }}" onMouseDown="{{ ln.onDown }}" style="position:relative;margin-top:{{ ln.mt }};padding:{{ ln.pad }};background:{{ ln.bg }};border-radius:{{ ln.rad }};box-shadow:{{ ln.bar }};font-family:{{ ln.ff }};font-size:{{ ln.fs }};line-height:{{ ln.lh }};font-weight:{{ ln.fw }};color:{{ ln.color }};">
               <sc-if value="{{ ln.isHr }}" hint-placeholder-val="{{ false }}"><div style="height:25px;display:flex;align-items:center;"><span style="flex:1;height:2px;background:#3a3a3a;"></span></div></sc-if>
               <sc-if value="{{ ln.hasMarker }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:0;left:{{ ln.mkLeft }};width:20px;text-align:right;color:#008000;font-weight:600;">{{ ln.marker }}</span></sc-if>
               <sc-if value="{{ ln.hasCopy }}" hint-placeholder-val="{{ false }}"><button onClick="{{ ln.onCopy }}" aria-label="Copiar contenido" title="{{ ln.copyTitle }}" style="position:absolute;top:8px;right:10px;z-index:1;width:22px;height:22px;padding:0;border:0;border-radius:5px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;" style-hover="background:#1c1c1c;"><span style="width:15px;height:15px;background:{{ ln.copyColor }};mask:url(assets/clon.svg) center / contain no-repeat;-webkit-mask:url(assets/clon.svg) center / contain no-repeat;transition:background-color .15s;"></span></button></sc-if><sc-if value="{{ ln.isRow }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:{{ ln.cols }};"><sc-for list="{{ ln.cells }}" as="c" hint-placeholder-count="2"><div style="min-width:0;padding:6px 12px;text-align:{{ c.align }};font-weight:{{ c.fw }};white-space:pre-wrap;word-break:break-word;"><sc-for list="{{ c.segs }}" as="sg" hint-placeholder-count="1"><sc-if value="{{ sg.isText }}" hint-placeholder-val="{{ true }}"><span data-off="{{ sg.off }}" style="color:{{ sg.color }};font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.text }}</span></sc-if><sc-if value="{{ sg.isLink }}" hint-placeholder-val="{{ false }}"><a href="{{ sg.href }}" target="_blank" rel="noopener noreferrer" data-off="{{ sg.off }}" style="color:#fff;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};text-decoration-color:#008000;text-decoration-thickness:2px;text-underline-offset:3px;cursor:pointer;">{{ sg.text }}</a></sc-if><sc-if value="{{ sg.isCode }}" hint-placeholder-val="{{ false }}"><code data-off="{{ sg.off }}" style="font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:0.88em;background:#333;color:#e6e6e6;padding:1px 5px;border-radius:4px;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.text }}</code></sc-if><sc-if value="{{ sg.isImg }}" hint-placeholder-val="{{ false }}"><img loading="lazy" src="{{ sg.src }}" alt="{{ sg.alt }}" title="{{ sg.alt }}" style="max-width:100%;max-height:420px;border-radius:6px;vertical-align:middle;"></sc-if><sc-if value="{{ sg.isEnt }}" hint-placeholder-val="{{ false }}"><span title="{{ sg.title }}" style="background:#1d2b1d;padding:{{ sg.pad }};border-radius:2px;"><span data-off="{{ sg.off }}" style="color:#fff;">{{ sg.eq }}</span><span data-off="{{ sg.off2 }}" style="color:#008000;font-weight:{{ sg.fw }};font-style:{{ sg.fst }};text-decoration:{{ sg.td }};">{{ sg.label }}</span></span></sc-if><sc-if value="{{ sg.isBox }}" hint-placeholder-val="{{ false }}"><span onMouseDown="{{ sg.onToggle }}" role="checkbox" aria-checked="{{ sg.on }}" style="display:inline-block;width:15px;height:15px;border-radius:3px;vertical-align:-2px;margin-right:{{ sg.mr }};background:{{ sg.bg }};box-shadow:inset 0 0 0 2px #008000;"></span></sc-if></sc-for>&#8203;</div></sc-for></div></sc-if>
@@ -984,9 +984,19 @@ class Component extends DCLogic {
       if (this.state.menu && !(e.target.closest && e.target.closest('[data-menu]'))) this.setState({ menu: false });
       if (this.state.colMenu && !(e.target.closest && e.target.closest('[data-colmenu]'))) this.setState({ colMenu: null });
       if (this.state.entMenu && !(e.target.closest && e.target.closest('[data-entmenu]'))) this.setState({ entMenu: null });
+      if (this._msel && !(e.target.closest && e.target.closest('[data-lid]'))) this._msel = null;
     };
+    // Selección libre de texto entre varias líneas (arrastrar, Mayús+clic, Mayús+flechas, Ctrl+A)
+    this._move = e => this.selMove(e);
+    this._up = () => this.selUp();
+    this._copy = e => this.selCopy(e);
+    this._paste = e => this.selPaste(e);
+    document.addEventListener('mousemove', this._move);
+    document.addEventListener('mouseup', this._up);
+    document.addEventListener('copy', this._copy);
+    document.addEventListener('paste', this._paste);
     document.addEventListener('mousedown', this._down, true);
-    this._key = e => { if (e.key === 'Escape' && (this.state.menu || this.state.entMenu)) this.setState({ menu: false, entMenu: null }); };
+    this._key = e => { if (this.selKey(e)) return; if (e.key === 'Escape' && (this.state.menu || this.state.entMenu)) this.setState({ menu: false, entMenu: null }); };
     document.addEventListener('keydown', this._key);
     this._rev = NA_REV;
     this._naFlush = () => { clearTimeout(this._naT); naSave(this.state, this._rev); this.fsQueue(); };
@@ -996,7 +1006,7 @@ class Component extends DCLogic {
     if (FS_OK) fsGetHandle().then(async h => { if (!h) return; this._fsDir = h; let p = 'prompt'; try { p = await h.queryPermission({ mode: 'readwrite' }); } catch (_) {} if (p === 'granted') this.fsStart(h, false); else this.setState({ fs: 'perm', fsName: h.name }); });
     this._last = Date.now(); this._tick = setInterval(() => { const s = this.state; this.checkNotifs(s); if (s.mode === 'agenda' || s.other.notes.some(n => n.sheets.some(x => (x.entities || []).some(e => e.type === 'count')))) this.setState({ now: Date.now() }); }, 1000);
   }
-  componentWillUnmount() { if (this._naFlush) { this._naFlush(); window.removeEventListener('pagehide', this._naFlush); window.removeEventListener('beforeunload', this._naFlush); } clearInterval(this._tick); document.removeEventListener('mousedown', this._down, true); document.removeEventListener('keydown', this._key); }
+  componentWillUnmount() { if (this._naFlush) { this._naFlush(); window.removeEventListener('pagehide', this._naFlush); window.removeEventListener('beforeunload', this._naFlush); } clearInterval(this._tick); document.removeEventListener('mousedown', this._down, true); document.removeEventListener('keydown', this._key); document.removeEventListener('mousemove', this._move); document.removeEventListener('mouseup', this._up); document.removeEventListener('copy', this._copy); document.removeEventListener('paste', this._paste); }
   componentDidUpdate() {
     const naS = this.state, naP = this._naPrev;
     if (naP && NA_KEEP.some(k => naP[k] !== naS[k])) {
@@ -1006,10 +1016,13 @@ class Component extends DCLogic {
     }
     const ta = this.taRef.current;
     if (ta && this._caret != null) {
-      const c = Math.min(this._caret, ta.value.length);
+      const k = this._caret, L = ta.value.length;
       this._caret = null;
-      ta.focus(); ta.setSelectionRange(c, c);
+      ta.focus();
+      if (typeof k === 'object') { const a = Math.min(k.a, L), b = Math.min(k.b, L); ta.setSelectionRange(Math.min(a, b), Math.max(a, b), b < a ? 'backward' : 'forward'); }
+      else { const c = Math.min(k, L); ta.setSelectionRange(c, c); }
     }
+    this.applySel();
   }
   curNote(s) { return s.notes.find(n => n.id === s.activeNote); }
   curSheet(s) { const n = this.curNote(s); return n && n.sheets.find(x => x.id === n.activeSheet); }
@@ -1502,6 +1515,197 @@ class Component extends DCLogic {
     const fb = () => { const ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (_) {} ta.remove(); done(); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done, fb); else fb();
   }
+  // ----- Selección de texto entre varias líneas (vista sucia) -----
+  // this._msel = { key, ent, a: { id, o }, f: { id, o } }: a = donde empezó la selección, f = donde termina. key = 'sheet' o id de la entidad de texto.
+  linesOf(ent, s) {
+    s = s || this.state; const sh = this.curSheet(s); if (!sh) return null;
+    if (!ent) return sh.lines;
+    const e = (sh.entities || []).find(x => x.id === ent); if (!e) return null;
+    return e.lines && e.lines.length ? e.lines : [{ id: e.id + 'l', text: '' }];
+  }
+  boxOf(key) { const list = document.querySelectorAll('[data-lines]'); for (const el of list) if (el.getAttribute('data-lines') === key) return el; return null; }
+  lineEl(box, id) { const list = box.querySelectorAll('[data-lid]'); for (const el of list) if (el.getAttribute('data-lid') === id) return el; return null; }
+  textNodes(lineEl) {
+    const out = [], w = document.createTreeWalker(lineEl, NodeFilter.SHOW_TEXT); let t;
+    while ((t = w.nextNode())) { const sp = t.parentElement && t.parentElement.closest('[data-off]'); if (sp && lineEl.contains(sp)) out.push({ t, d: +sp.getAttribute('data-off') }); }
+    return out;
+  }
+  pointPos(node, off) {
+    const el = node && (node.nodeType === 3 ? node.parentElement : node); if (!el || !el.closest) return null;
+    const lineEl = el.closest('[data-lid]'), box = lineEl && lineEl.closest('[data-lines]'); if (!box) return null;
+    const key = box.getAttribute('data-lines'), ent = key === 'sheet' ? null : key, id = lineEl.getAttribute('data-lid');
+    const ln = (this.linesOf(ent) || []).find(l => l.id === id); if (!ln) return null;
+    const nodes = this.textNodes(lineEl); let o = ln.text.length;
+    if (node.nodeType === 3) { const hit = nodes.find(x => x.t === node); if (hit) o = hit.d + Math.min(off, node.length); }
+    else { const r = document.createRange(); try { r.setStart(node, off); r.collapse(true); const nx = nodes.find(x => r.comparePoint(x.t, 0) >= 0); if (nx) o = nx.d; } catch (_) {} }
+    return { key, ent, id, o: Math.max(0, Math.min(o, ln.text.length)) };
+  }
+  posToDom(box, id, o) {
+    const lineEl = this.lineEl(box, id); if (!lineEl) return null;
+    const nodes = this.textNodes(lineEl);
+    for (const x of nodes) if (o >= x.d && o <= x.d + x.t.length) return { node: x.t, off: o - x.d };
+    const w = document.createTreeWalker(lineEl, NodeFilter.SHOW_TEXT); let t, last = null; while ((t = w.nextNode())) last = t;
+    return last ? { node: last, off: 0 } : { node: lineEl, off: 0 };
+  }
+  pointFromXY(x, y, key) {
+    const box = this.boxOf(key); if (!box) return null;
+    let node = null, off = 0;
+    // El cuadro de edición transparente tapa el texto: se oculta un instante para medir sobre el texto real
+    const ta = this.taRef.current, vis = ta ? ta.style.visibility : '';
+    if (ta) ta.style.visibility = 'hidden';
+    if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(x, y); if (r) { node = r.startContainer; off = r.startOffset; } }
+    else if (document.caretPositionFromPoint) { const p = document.caretPositionFromPoint(x, y); if (p) { node = p.offsetNode; off = p.offset; } }
+    if (ta) ta.style.visibility = vis;
+    const p = node ? this.pointPos(node, off) : null;
+    if (p && p.key === key) return p;
+    // Fuera de una línea: se usa la más cercana (encima → su principio, debajo → su final)
+    const ent = key === 'sheet' ? null : key, lines = this.linesOf(ent); if (!lines || !lines.length) return null;
+    let best = null, bd = Infinity;
+    box.querySelectorAll('[data-lid]').forEach(el => { const r = el.getBoundingClientRect(), d = y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0; if (d < bd) { bd = d; best = { el, r }; } });
+    if (!best) return null;
+    const id = best.el.getAttribute('data-lid'), ln = lines.find(l => l.id === id); if (!ln) return null;
+    const start = y < best.r.top || (y <= best.r.bottom && x < best.r.left + 4);
+    return { key, ent, id, o: start ? 0 : ln.text.length };
+  }
+  setMulti(key, ent, a, f) {
+    this._msel = { key, ent, a: { id: a.id, o: a.o }, f: { id: f.id, o: f.o } };
+    if (this.state.focusId) { const ae = document.activeElement; if (ae && ae.tagName === 'TEXTAREA') ae.blur(); this.setState({ focusId: null }); }
+    else this.applySel();
+  }
+  applySel() {
+    const m = this._msel; if (!m) return;
+    const box = this.boxOf(m.key), lines = this.linesOf(m.ent);
+    if (!box || !lines || !lines.some(l => l.id === m.a.id) || !lines.some(l => l.id === m.f.id)) { this._msel = null; return; }
+    const A = this.posToDom(box, m.a.id, m.a.o), F = this.posToDom(box, m.f.id, m.f.o); if (!A || !F) return;
+    const sel = window.getSelection(); if (!sel) return;
+    if (sel.anchorNode === A.node && sel.anchorOffset === A.off && sel.focusNode === F.node && sel.focusOffset === F.off) return;
+    try { sel.setBaseAndExtent(A.node, A.off, F.node, F.off); } catch (_) {}
+  }
+  readSel() {
+    const m = this._msel, sel = window.getSelection(); if (!m || !sel || !sel.anchorNode) return;
+    const a = this.pointPos(sel.anchorNode, sel.anchorOffset), f = this.pointPos(sel.focusNode, sel.focusOffset);
+    if (a && f && a.key === m.key && f.key === m.key) { m.a = { id: a.id, o: a.o }; m.f = { id: f.id, o: f.o }; }
+    if (m.a.id === m.f.id) this.selToLine();
+  }
+  selToLine() { const m = this._msel; if (!m) return; this._msel = null; const sel = window.getSelection(); if (sel) sel.removeAllRanges(); this.focusLine(m.a.id, { a: m.a.o, b: m.f.o }); }
+  selRange() {
+    const m = this._msel; if (!m) return null;
+    const lines = this.linesOf(m.ent); if (!lines) return null;
+    const ia = lines.findIndex(l => l.id === m.a.id), iff = lines.findIndex(l => l.id === m.f.id); if (ia < 0 || iff < 0) return null;
+    const A = { i: ia, o: Math.min(m.a.o, lines[ia].text.length) }, F = { i: iff, o: Math.min(m.f.o, lines[iff].text.length) };
+    const fwd = A.i < F.i || (A.i === F.i && A.o <= F.o);
+    return { lines, s: fwd ? A : F, e: fwd ? F : A };
+  }
+  selText() {
+    const r = this.selRange(); if (!r) return null;
+    const out = []; for (let i = r.s.i; i <= r.e.i; i++) { const t = r.lines[i].text; out.push(t.slice(i === r.s.i ? r.s.o : 0, i === r.e.i ? r.e.o : t.length)); }
+    return out.join('\n');
+  }
+  replaceSel(text) {
+    const m = this._msel, r = this.selRange(); this._msel = null;
+    const sel = window.getSelection(); if (sel) sel.removeAllRanges();
+    if (!m || !r) return;
+    const src = r.lines, a = r.s, b = r.e;
+    const before = src[a.i].text.slice(0, a.o), after = src[b.i].text.slice(b.o);
+    const made = String(text).replace(/\r/g, '').split('\n').map((t, k) => ({ id: k === 0 ? src[a.i].id : uid('l'), text: t }));
+    made[0].text = before + made[0].text;
+    const last = made[made.length - 1], caret = last.text.length; last.text += after;
+    this.setLines(src.slice(0, a.i).concat(made, src.slice(b.i + 1)), last.id, caret, m.ent);
+  }
+  selectAll(key, ent) {
+    const lines = this.linesOf(ent); if (!lines || !lines.length) return;
+    const last = lines[lines.length - 1];
+    if (lines.length === 1) { this._msel = null; this.focusLine(last.id, { a: 0, b: last.text.length }); return; }
+    this.setMulti(key, ent, { id: lines[0].id, o: 0 }, { id: last.id, o: last.text.length });
+  }
+  // Punto de partida para Mayús+clic: la selección actual o el cursor de la línea que se está editando
+  anchorNow(key, ent) {
+    const m = this._msel; if (m && m.key === key) return m.a;
+    const s = this.state, lines = this.linesOf(ent) || [], ta = this.taRef.current;
+    if (s.focusId && ta && lines.some(l => l.id === s.focusId)) return { id: s.focusId, o: ta.selectionDirection === 'backward' ? ta.selectionEnd : ta.selectionStart };
+    return null;
+  }
+  autoScroll(key, y) {
+    const box = this.boxOf(key), sc = box && (box.hasAttribute('data-scroll') ? box : box.closest('[data-scroll]')); if (!sc) return;
+    const r = sc.getBoundingClientRect();
+    if (y < r.top + 24) sc.scrollTop -= 18; else if (y > r.bottom - 24) sc.scrollTop += 18;
+  }
+  selMove(e) {
+    const d = this._drag; if (!d) return;
+    if (!(e.buttons & 1)) { this._drag = null; return; }
+    this.autoScroll(d.key, e.clientY);
+    const p = this.pointFromXY(e.clientX, e.clientY, d.key); if (!p) return;
+    if (!d.multi) {
+      if (p.id === d.id) {
+        if (!d.ta && d.anchor) { const ta = this.taRef.current; if (ta && this.state.focusId === p.id && document.activeElement === ta) { const a = d.anchor.o; ta.setSelectionRange(Math.min(a, p.o), Math.max(a, p.o), p.o < a ? 'backward' : 'forward'); } }
+        return;
+      }
+      if (d.ta) { const ta = this.taRef.current; d.anchor = { id: d.id, o: ta ? (ta.selectionDirection === 'backward' ? ta.selectionEnd : ta.selectionStart) : 0 }; }
+      d.multi = true;
+    }
+    e.preventDefault();
+    this.setMulti(d.key, d.ent, d.anchor, p);
+  }
+  selUp() {
+    const d = this._drag; this._drag = null;
+    if (d && d.multi && this._msel && this._msel.a.id === this._msel.f.id) this.selToLine();
+  }
+  selCopy(e) {
+    const m = this._msel, ae = document.activeElement;
+    if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
+    let t = null;
+    if (m) t = this.selText();
+    else { const sel = window.getSelection(), n = sel && sel.anchorNode, el = n && (n.nodeType === 3 ? n.parentElement : n); if (sel && !sel.isCollapsed && el && el.closest && el.closest('[data-lines]')) t = sel.toString().replace(/​/g, ''); }
+    if (t == null || !e.clipboardData) return;
+    e.clipboardData.setData('text/plain', t); e.preventDefault();
+  }
+  selPaste(e) {
+    if (!this._msel) return;
+    const ae = document.activeElement; if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
+    const t = (e.clipboardData || window.clipboardData).getData('text/plain'); e.preventDefault(); this._pasted = true;
+    this.replaceSel(t || '');
+  }
+  selKey(e) {
+    if (e.naSel) return true; // ya lo resolvió la línea que se estaba editando
+    const ae = document.activeElement, typing = ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable);
+    const k = e.key, mod = e.ctrlKey || e.metaKey;
+    // Ctrl+A fuera de un campo: selecciona solo el texto de la hoja
+    if (!typing && mod && !e.altKey && (k === 'a' || k === 'A')) {
+      const m = this._msel, s = this.state;
+      if (m) { e.preventDefault(); this.selectAll(m.key, m.ent); return true; }
+      const box = this.boxOf('sheet'); if (!box) return false;
+      e.preventDefault();
+      if (s.clean) { const r = document.createRange(); r.selectNodeContents(box); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); }
+      else this.selectAll('sheet', null);
+      return true;
+    }
+    const m = this._msel; if (!m || typing) return false;
+    if (mod && (k === 'x' || k === 'X')) {
+      e.preventDefault(); const t = this.selText() || '';
+      const fb = () => { const ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (_) {} ta.remove(); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).catch(fb); else fb();
+      this.replaceSel(''); return true;
+    }
+    if (mod && (k === 'v' || k === 'V')) {
+      // El pegado llega por el evento 'paste'; si el navegador no lo envía, se lee el portapapeles
+      this._pasted = false;
+      setTimeout(() => { if (this._pasted || !this._msel || !navigator.clipboard || !navigator.clipboard.readText) return; navigator.clipboard.readText().then(t => { if (this._msel) this.replaceSel(t || ''); }, () => {}); }, 60);
+      return true;
+    }
+    if (mod || e.altKey) return false;
+    if (k === 'Escape') { e.preventDefault(); this._msel = null; const sel = window.getSelection(); if (sel) sel.removeAllRanges(); return true; }
+    if (k === 'ArrowLeft' || k === 'ArrowRight' || k === 'ArrowUp' || k === 'ArrowDown') {
+      e.preventDefault();
+      if (e.shiftKey) { const sel = window.getSelection(); if (sel && sel.modify) { sel.modify('extend', k === 'ArrowLeft' || k === 'ArrowUp' ? 'backward' : 'forward', k === 'ArrowUp' || k === 'ArrowDown' ? 'line' : 'character'); this.readSel(); } }
+      else { const r = this.selRange(); if (!r) return true; const p = k === 'ArrowLeft' || k === 'ArrowUp' ? r.s : r.e; this._msel = null; const sel = window.getSelection(); if (sel) sel.removeAllRanges(); this.focusLine(r.lines[p.i].id, p.o); }
+      return true;
+    }
+    if (k === 'Backspace' || k === 'Delete') { e.preventDefault(); this.replaceSel(''); return true; }
+    if (k === 'Enter') { e.preventDefault(); this.replaceSel('\n'); return true; }
+    if (k.length === 1) { e.preventDefault(); this.replaceSel(k); return true; }
+    if (k === 'Dead' || k === 'Process') { this.replaceSel(''); return true; }
+    return false;
+  }
   offsetFromPoint(lineEl, x, y, fallback) {
     let node, off;
     if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(x, y); if (r) { node = r.startContainer; off = r.startOffset; } }
@@ -1516,10 +1720,22 @@ class Component extends DCLogic {
     const s = this.state, setL = (l, f, c) => this.setLines(l, f, c, entId);
     return {
       onDown: e => {
-        if (s.clean) return;
-        if (s.focusId === ln.id && e.target.tagName === 'TEXTAREA') return;
+        if (s.clean || e.button !== 0) return;
+        const key = entId || 'sheet';
+        if (s.focusId === ln.id && e.target.tagName === 'TEXTAREA') {
+          if (e.shiftKey && this._msel) { e.preventDefault(); const p = this.pointFromXY(e.clientX, e.clientY, key); if (p) this.setMulti(key, entId || null, this._msel.a, p); return; }
+          this._msel = null; this._drag = { key, ent: entId || null, ta: true, id: ln.id, multi: false };
+          return;
+        }
         e.preventDefault(); e.stopPropagation();
-        this.focusLine(ln.id, this.offsetFromPoint(e.currentTarget, e.clientX, e.clientY, ln.text.length));
+        const o = this.offsetFromPoint(e.currentTarget, e.clientX, e.clientY, ln.text.length);
+        if (e.shiftKey) {
+          const anc = this.anchorNow(key, entId || null);
+          if (anc) { this._drag = { key, ent: entId || null, ta: false, id: anc.id, anchor: anc, multi: true }; if (anc.id === ln.id) { this._msel = null; this.focusLine(ln.id, { a: anc.o, b: o }); } else this.setMulti(key, entId || null, anc, { id: ln.id, o }); return; }
+        }
+        this._msel = null;
+        this._drag = { key, ent: entId || null, ta: false, id: ln.id, anchor: { id: ln.id, o }, multi: false };
+        this.focusLine(ln.id, o);
       },
       onChange: e => { const text = e.target.value.replace(/\n/g, ' '); setL(lines.map(l => l.id === ln.id ? { ...l, text } : l)); },
       onBlur: () => this.setState(st => st.focusId === ln.id ? { focusId: null } : null),
@@ -1540,6 +1756,16 @@ class Component extends DCLogic {
         const ta = e.target, a = ta.selectionStart, b = ta.selectionEnd, len = ln.text.length;
         const lh = parseFloat(getComputedStyle(ta).lineHeight) || 25;
         const oneRow = ta.offsetHeight < lh * 1.5;
+        const key = entId || 'sheet', back = ta.selectionDirection === 'backward', fo = back ? a : b, an = back ? b : a;
+        if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === 'a' || e.key === 'A') && lines.length > 1) {
+          e.preventDefault(); e.nativeEvent.naSel = true; this.selectAll(key, entId || null); return;
+        }
+        if (e.shiftKey && !e.ctrlKey && !e.metaKey && e.key === 'ArrowDown' && idx < lines.length - 1 && (oneRow || fo === len)) {
+          e.preventDefault(); e.nativeEvent.naSel = true; const nx = lines[idx + 1]; this.setMulti(key, entId || null, { id: ln.id, o: an }, { id: nx.id, o: fo === len ? nx.text.length : Math.min(fo, nx.text.length) }); return;
+        }
+        if (e.shiftKey && !e.ctrlKey && !e.metaKey && e.key === 'ArrowUp' && idx > 0 && (oneRow || fo === 0)) {
+          e.preventDefault(); e.nativeEvent.naSel = true; const pv = lines[idx - 1]; this.setMulti(key, entId || null, { id: ln.id, o: an }, { id: pv.id, o: fo === 0 ? 0 : Math.min(fo, pv.text.length) }); return;
+        }
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           const nl = { id: uid('l'), text: ln.text.slice(b) };
