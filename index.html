@@ -276,13 +276,20 @@ function parseLine(text) {
   const h = /^(#{1,6}) (.*)$/.exec(text);
   return h ? { level: h[1].length, start: h[1].length + 1 } : { level: 0, start: 0 };
 }
-const ENT = /(=\([^()=]*?\/[^()]*?\))|=([A-Za-zÀ-ÖØ-öø-ÿ0-9_]+)/g;
 let RESOLVE = () => null;
 const resolveEntity = name => { try { return fmt(RESOLVE(name)); } catch (_) { return 'ND'; } };
 const ID_CH = 'A-Za-zÀ-ÖØ-öø-ÿ0-9_', NAME_START = 'A-Za-zÀ-ÖØ-öø-ÿ_';
-const PATH_RX = '=\\([^()=]*?\\/[^()]*?\\)';
-const isPath = n => /^=\(/.test(n);
-const pathSegs = raw => [{ text: '=(', color: '#fff' }, { text: raw.slice(2, -1), color: '#008000' }, { text: ')', color: '#fff' }];
+// Ruta a una entidad de otra hoja o nota: =/Nota/Hoja/Entidad. Cada barra va pegada al nombre que la sigue;
+// la nota y la hoja pueden llevar espacios, la entidad no (la ruta acaba donde acaba su nombre).
+const PATH_RX = '=\\/(?! )[^\\/\\n=]+\\/(?! )[^\\/\\n=]+\\/[' + NAME_START + '][' + ID_CH + ']*';
+const ENT = new RegExp('(' + PATH_RX + ')|=([' + ID_CH + ']+)', 'g');
+const isPath = n => /^=\//.test(n);
+const pathSegs = raw => [{ text: '=', color: '#fff' }].concat(...raw.slice(2).split('/').map(p => [{ text: '/', color: '#fff' }, { text: p, color: '#008000' }]));
+// Convierte las rutas antiguas =(Nota / Hoja / Entidad) y =(Agenda / Nota / Hoja / Entidad) al formato nuevo.
+const OLD_PATH = /=\(([^()=]*?\/[^()]*?)\)/g;
+const refMigStr = t => typeof t !== 'string' || t.indexOf('=(') < 0 ? t : t.replace(OLD_PATH, (m, inner) => { let p = inner.split('/').map(x => x.trim().replace(/\s+/g, ' ')); if (p.length === 4 && p[0].toLowerCase() === 'agenda') p = p.slice(1); return p.length === 3 && p.every(Boolean) ? '=/' + p.join('/') : m; });
+const GUIDE_FIX = new Map([["Las menciones se copian con su valor: =Subtotal", "Las menciones se copian con su valor: =/Conoce NoteApp/Guía de entidades/Subtotal"], ["Escribe un igual pegado al nombre de una entidad: el subtotal vale =Subtotal.", "Escribe un igual pegado al nombre de una entidad de la misma hoja. Para una entidad de otra hoja o de otra nota, escribe su ruta: el subtotal vale =/Conoce NoteApp/Guía de entidades/Subtotal."], ["Delante del igual no puede haber nada pegado, salvo \\* o \\~: **=Subtotal** funciona, pero en 2+2=4 o en web.com/?id=5 no se crea ninguna mención.", "Delante del igual no puede haber nada pegado, salvo \\* o \\~: **=/Conoce NoteApp/Guía de entidades/Subtotal** funciona, pero en 2+2=4 o en web.com/?id=5 no se crea ninguna mención."], ["Las entidades viven en el panel derecho y se añaden desde la barra lateral. Cada una tiene un **nombre único** y produce un valor que puedes citar en cualquier hoja escribiendo un igual delante de su nombre: por ejemplo, el subtotal vale *=Subtotal*.", "Las entidades viven en el panel derecho y se añaden desde la barra lateral. Cada una tiene un **nombre único dentro de su hoja** y produce un valor que puedes citar en esa misma hoja escribiendo un igual delante de su nombre: por ejemplo, el subtotal vale *=Subtotal*. Desde otra hoja u otra nota se cita con su ruta (mira el final de esta guía)."], ["## Referencias entre ventanas", "## Rutas: entidades de otras hojas y notas"], ["Para citar una entidad de otra nota, escribe su ruta entre paréntesis tras el igual. La nota y la hoja van con su nombre original, con espacios si los tienen; al final va el nombre de la entidad. El precio de esta guía vale =(Conoce NoteApp / Guía de entidades / Precio).", "Para citar una entidad de otra hoja o de otra nota, escribe un igual seguido de su ruta: \\=/Nota/Hoja/Entidad. Cada barra va pegada al nombre que la sigue. La nota y la hoja se escriben con su nombre original, con espacios si los tienen; la entidad no lleva espacios, así que la ruta termina en el primer espacio tras su nombre. El precio de esta guía vale =/Conoce NoteApp/Guía de entidades/Precio."], ["Para la Agenda, empieza la ruta con la palabra Agenda: el vuelo sale el **=(Agenda / Viajes / Lisboa / Vuelo_Lisboa)**.", "Funciona igual con la Agenda: el vuelo sale el **=/Viajes/Lisboa/Vuelo_Lisboa**. Si en Notas y en Agenda hay notas con el mismo nombre, se usa la de la ventana en la que escribes la ruta."]]);
+const refMigDeep = v => { if (typeof v === 'string') return GUIDE_FIX.get(v) || refMigStr(v); if (Array.isArray(v)) { let ch = false; const o = v.map(x => { const y = refMigDeep(x); if (y !== x) ch = true; return y; }); return ch ? o : v; } if (v && typeof v === 'object') { let ch = false; const o = {}; for (const k in v) { const y = refMigDeep(v[k]); if (y !== v[k]) ch = true; o[k] = y; } return ch ? o : v; } return v; };
 let NOW = Date.now();
 const num = v => ({ t: 'num', v }), bool = v => ({ t: 'bool', v }), dt = v => ({ t: 'date', v });
 const pad2 = n => String(n).padStart(2, '0');
@@ -386,40 +393,38 @@ const UNIT_MS = { d: 864e5, h: 36e5, m: 6e4, s: 1e3 }, UNIT_SFX = { d: ' d', h: 
 function countUnit(a, u) { const order = ['d', 'h', 'm', 's']; let i = Math.max(0, order.indexOf(u)); while (i < 3 && Math.floor(a / UNIT_MS[order[i]]) === 0) i++; return order[i]; }
 const normN = s => String(s || '').trim().replace(/\s+/g, ' ').toLowerCase();
 function makeWorld(s) {
-  const entries = [];
-  const ag = s.mode === 'agenda', nNotes = ag ? s.other.notes : s.notes, aNotes = ag ? s.notes : s.other.notes;
-  [['n', nNotes], ['a', aNotes]].forEach(([scope, list]) => list.forEach(n => n.sheets.forEach(x => (x.entities || []).forEach(e => { if (!NOVAL(e.type)) entries.push({ e, scope, note: n.name, sheet: x.name }); }))));
-  const byN = new Map(), byA = new Map();
-  entries.forEach(en => { const m = en.scope === 'a' ? byA : byN; if (!m.has(en.e.name)) m.set(en.e.name, en); });
-  const memo = new Map(), stack = new Set();
+  // =Nombre busca solo en la hoja donde se escribe; =/Nota/Hoja/Entidad busca en cualquier nota (primero en la ventana de quien la escribe).
+  const entries = [], sheetW = new Map();
+  [['c', s.notes], ['o', s.other.notes]].forEach(([w, list]) => list.forEach(n => n.sheets.forEach(x => { sheetW.set(x.id, w); (x.entities || []).forEach(e => { if (!NOVAL(e.type)) entries.push({ e, w, sid: x.id, note: normN(n.name), sheet: normN(x.name) }); }); })));
+  const bySheet = new Map();
+  entries.forEach(en => { let m = bySheet.get(en.sid); if (!m) bySheet.set(en.sid, m = new Map()); if (!m.has(en.e.name)) m.set(en.e.name, en); });
+  const memo = new Map(), stack = new Set(), getters = new Map(), pmemo = new Map();
   const val = en => {
     const id = en.e.id; if (memo.has(id)) return memo.get(id); if (stack.has(id)) return null;
     stack.add(id); let v = null;
-    try { v = entOut(en.e, en.scope === 'a' ? gA : gN); } catch (_) { v = null; } finally { stack.delete(id); }
+    try { v = entOut(en.e, at(en.sid)); } catch (_) { v = null; } finally { stack.delete(id); }
     memo.set(id, v); return v;
   };
-  const pmemo = new Map();
-  const findPath = key => {
-    if (pmemo.has(key)) return pmemo.get(key);
-    const p = key.slice(2, -1).split('/').map(normN); let en = null;
-    if (p.length === 4 && p[0] === 'agenda') en = entries.find(x => x.scope === 'a' && normN(x.note) === p[1] && normN(x.sheet) === p[2] && x.e.name.toLowerCase() === p[3]);
-    else if (p.length === 2 && p[0] === 'agenda') en = entries.find(x => x.scope === 'a' && x.e.name.toLowerCase() === p[1]);
-    else if (p.length === 3) en = entries.find(x => x.scope === 'n' && normN(x.note) === p[0] && normN(x.sheet) === p[1] && x.e.name.toLowerCase() === p[2]);
-    pmemo.set(key, en || null); return en || null;
+  const findPath = (key, w) => {
+    const k = w + key; if (pmemo.has(k)) return pmemo.get(k);
+    const p = key.slice(2).split('/').map(normN); let en = null;
+    if (p.length === 3) { const hits = entries.filter(x => x.note === p[0] && x.sheet === p[1] && x.e.name.toLowerCase() === p[2]); en = hits.find(x => x.w === w) || hits[0] || null; }
+    pmemo.set(k, en); return en;
   };
-  const mk = map => {
+  const at = sid => {
+    if (getters.has(sid)) return getters.get(sid);
+    const map = bySheet.get(sid) || new Map(), w = sheetW.get(sid) || 'c';
     const g = name => {
-      if (isPath(name)) { const en = findPath(name); return en ? val(en) : null; }
+      if (isPath(name)) { const en = findPath(name, w); return en ? val(en) : null; }
       const en = map.get(name); if (en) return val(en);
       if (name === 'Ahora') return dt(NOW);
       if (name === 'Hoy') { const d = new Date(NOW); d.setHours(0, 0, 0, 0); return dt(d.getTime()); }
       return null;
     };
-    g.has = name => isPath(name) ? !!findPath(name) : map.has(name) || name === 'Ahora' || name === 'Hoy';
-    return g;
+    g.has = name => isPath(name) ? !!findPath(name, w) : map.has(name) || name === 'Ahora' || name === 'Hoy';
+    getters.set(sid, g); return g;
   };
-  const gN = mk(byN), gA = mk(byA);
-  return { gN, gA };
+  return { at };
 }
 function hlExpr(text) {
   const out = [], re = new RegExp('(' + PATH_RX + ')|(=?)([' + NAME_START + '][' + ID_CH + ']*)|(\\d+(?:[.,]\\d+)?)', 'g');
@@ -766,6 +771,7 @@ function naLoad(base) {
     const out = { ...base }; NA_KEEP.forEach(k => { if (d[k] !== undefined && d[k] !== null) out[k] = d[k]; });
     if (!out.notes.some(n => n.id === out.activeNote)) out.activeNote = out.notes.length ? out.notes[0].id : null;
     if (!(d.config && d.config.mkdV2)) { out.notes = mkdMigNotes(out.notes); out.other = { ...out.other, notes: mkdMigNotes(out.other.notes) }; out.config = { ...(d.config || {}), mkdV2: true }; }
+    out.notes = refMigDeep(out.notes); out.other = { ...out.other, notes: refMigDeep(out.other.notes) };
     return out;
   } catch (_) { return base; }
 }
@@ -897,18 +903,18 @@ class Component extends DCLogic {
       "'Una línea lista para copiar'",
       "''",
       "Bloque de varias líneas.",
-      "Las menciones se copian con su valor: =Subtotal",
+      "Las menciones se copian con su valor: =/Conoce NoteApp/Guía de entidades/Subtotal",
       "''",
       "## Menciones",
-      "Escribe un igual pegado al nombre de una entidad: el subtotal vale =Subtotal.",
-      "Delante del igual no puede haber nada pegado, salvo \\* o \\~: **=Subtotal** funciona, pero en 2+2=4 o en web.com/?id=5 no se crea ninguna mención.",
+      "Escribe un igual pegado al nombre de una entidad de la misma hoja. Para una entidad de otra hoja o de otra nota, escribe su ruta: el subtotal vale =/Conoce NoteApp/Guía de entidades/Subtotal.",
+      "Delante del igual no puede haber nada pegado, salvo \\* o \\~: **=/Conoce NoteApp/Guía de entidades/Subtotal** funciona, pero en 2+2=4 o en web.com/?id=5 no se crea ninguna mención.",
       "## Escapar",
       "Pon una barra \\\\ delante de un símbolo para que se vea tal cual: \\*sin cursiva\\*, \\=Subtotal, \\[True].",
       "\\# Esto no es un título",
       "\\'Casa' y 'Coche' no es una línea copiable"
     ]), mkSheet('Guía de entidades', [
       '# Guía de entidades',
-      'Las entidades viven en el panel derecho y se añaden desde la barra lateral. Cada una tiene un **nombre único** y produce un valor que puedes citar en cualquier hoja escribiendo un igual delante de su nombre: por ejemplo, el subtotal vale *=Subtotal*.',
+      "Las entidades viven en el panel derecho y se añaden desde la barra lateral. Cada una tiene un **nombre único dentro de su hoja** y produce un valor que puedes citar en esa misma hoja escribiendo un igual delante de su nombre: por ejemplo, el subtotal vale *=Subtotal*. Desde otra hoja u otra nota se cita con su ruta (mira el final de esta guía).",
       '> Activa la vista sucia con el interruptor superior para editar nombres, descripciones y fórmulas. El botón de función alterna entre ver las entradas o la salida.',
       '## Expresión',
       'Calcula operaciones con suma, resta, multiplicación, división y paréntesis. Admite números y otras entidades por su nombre. Aquí, Precio por Unidades da **=Subtotal**.',
@@ -926,9 +932,9 @@ class Component extends DCLogic {
       'Filas y columnas con texto, números, casillas o menciones. Una columna puede sumar, restar, multiplicar o dividir, y su resultado es el valor de la tabla. Las filas con una casilla en False se tachan y no cuentan. La compra suma **=Compra**.',
       '## Separador',
       'Un título entre líneas que ordena el panel en secciones. No produce ningún valor.',
-      '## Referencias entre ventanas',
-      'Para citar una entidad de otra nota, escribe su ruta entre paréntesis tras el igual. La nota y la hoja van con su nombre original, con espacios si los tienen; al final va el nombre de la entidad. El precio de esta guía vale =(Conoce NoteApp / Guía de entidades / Precio).',
-      'Para la Agenda, empieza la ruta con la palabra Agenda: el vuelo sale el **=(Agenda / Viajes / Lisboa / Vuelo_Lisboa)**.'
+      "## Rutas: entidades de otras hojas y notas",
+      "Para citar una entidad de otra hoja o de otra nota, escribe un igual seguido de su ruta: \\=/Nota/Hoja/Entidad. Cada barra va pegada al nombre que la sigue. La nota y la hoja se escriben con su nombre original, con espacios si los tienen; la entidad no lleva espacios, así que la ruta termina en el primer espacio tras su nombre. El precio de esta guía vale =/Conoce NoteApp/Guía de entidades/Precio.",
+      "Funciona igual con la Agenda: el vuelo sale el **=/Viajes/Lisboa/Vuelo_Lisboa**. Si en Notas y en Agenda hay notas con el mismo nombre, se usa la de la ventana en la que escribes la ruta."
     ], guiaEnt), mkSheet('Demostración', [
       '# Viaje a Lisboa',
       'Llevamos gastados =Gastos euros entre **=Personas personas**, así que cada uno pone *=Por_Persona* euros.',
@@ -942,7 +948,7 @@ class Component extends DCLogic {
       '## Resumen para el grupo',
       '> El hotel supone el =Peso_Hotel % del gasto total.',
       '> Si añadimos la cena, la propina sería de =Propina euros.',
-      'Faltan =(Agenda / Viajes / Lisboa / Faltan_Vuelo) días para el vuelo: **=(Agenda / Viajes / Lisboa / Aviso_Maleta)**',
+      'Faltan =/Viajes/Lisboa/Faltan_Vuelo días para el vuelo: **=/Viajes/Lisboa/Aviso_Maleta**',
       "''",
       'Total del viaje: =Gastos euros',
       'Seguro: =Seguro euros',
@@ -960,7 +966,7 @@ class Component extends DCLogic {
       { id: uid('e'), type: 'text', lines: mkLines(['## Antes de salir', '- Pasaporte y DNI', '- Cargador y adaptador', 'Faltan **=Faltan_Vuelo días**: =Aviso_Maleta']) },
       newEnt('toggle', 'Maleta_Hecha', { desc: 'Maleta preparada', on: false }),
       newEnt('logic', 'Aviso_Maleta', { desc: 'Recordatorio', a: 'Maleta_Hecha', cmp: '=', b: 'True', out: 'Todo listo', alts: [{ id: uid('b'), a: 'Faltan_Vuelo', cmp: '<=', b: '2', out: '¡Haz la maleta!' }], els: 'Hay tiempo' }),
-      newEnt('logic', 'Presupuesto', { desc: 'Estado del presupuesto', a: '=(Conoce NoteApp / Demostración / En_Presupuesto)', cmp: '=', b: 'True', out: 'Dentro del presupuesto', els: 'Revisar gastos' })
+      newEnt('logic', 'Presupuesto', { desc: 'Estado del presupuesto', a: '=/Conoce NoteApp/Demostración/En_Presupuesto', cmp: '=', b: 'True', out: 'Dentro del presupuesto', els: 'Revisar gastos' })
     ]), pag = mkSheet('Pagos', [''], [
       newEnt('date', 'Pago_Hotel', { desc: 'Límite para pagar el hotel', date: inDays(4), time: '23:59' }),
       newEnt('count', 'Plazo_Hotel', { desc: 'Tiempo para pagar el hotel', target: 'Pago_Hotel', unit: 'txt' }),
@@ -1053,7 +1059,7 @@ class Component extends DCLogic {
   fsApply(data) {
     const m = data.meta || {}, v = m.vista || {};
     _uid = Math.max(_uid, naMaxId([data.notas, data.agenda]));
-    const up = !(m.config && m.config.mkdV2), notas = up ? mkdMigNotes(data.notas) : data.notas, agenda = up ? mkdMigNotes(data.agenda) : data.agenda;
+    const up = !(m.config && m.config.mkdV2), notas = refMigDeep(up ? mkdMigNotes(data.notas) : data.notas), agenda = refMigDeep(up ? mkdMigNotes(data.agenda) : data.agenda);
     const act = (list, sec) => { const id = sec && sec.activa; return list.some(n => n.id === id) ? id : list.length ? list[0].id : null; };
     const N = { notes: notas, activeNote: act(notas, m.notas) }, A = { notes: agenda, activeNote: act(agenda, m.agenda) }, ag = v.mode === 'agenda', cur = ag ? A : N;
     this._rev = +m.rev || 0; this._naHold = true;
@@ -1099,10 +1105,10 @@ class Component extends DCLogic {
   }
   checkNotifs(s) {
     const now = Date.now(), last = this._last || now; this._last = now;
-    const ns = []; (s.mode === 'agenda' ? s.notes : s.other.notes).forEach(n => n.sheets.forEach(x => (x.entities || []).forEach(e => { if (e.type === 'notif') ns.push(e); })));
+    const ns = []; (s.mode === 'agenda' ? s.notes : s.other.notes).forEach(n => n.sheets.forEach(x => (x.entities || []).forEach(e => { if (e.type === 'notif') ns.push({ e, sid: x.id }); })));
     if (!ns.length) return;
     NOW = now; const W = makeWorld(s);
-    ns.forEach(e => { const i = notifInfo(e, W.gA); if (i && i.fire > last && i.fire <= now) this.fireNotif(e, i); });
+    ns.forEach(({ e, sid }) => { const i = notifInfo(e, W.at(sid)); if (i && i.fire > last && i.fire <= now) this.fireNotif(e, i); });
   }
   setWidth(w) { this.setState(s => ({ notes: this.mapSheet(s, x => ({ ...x, width: w })) })); }
   commit(kind, id) {
@@ -1135,7 +1141,7 @@ class Component extends DCLogic {
     });
   }
   uniqueName(base, s, skipId) {
-    const taken = new Set(this.allEnts(s).filter(e => e.id !== skipId).map(e => e.name));
+    const taken = new Set((this.entsOf(s) || []).filter(e => !NOVAL(e.type) && e.id !== skipId).map(e => e.name));
     if (!taken.has(base)) return base;
     for (let k = 2; ; k++) { const suf = '_' + k, nm = base.slice(0, 22 - suf.length) + suf; if (!taken.has(nm)) return nm; }
   }
@@ -1143,7 +1149,7 @@ class Component extends DCLogic {
   addEnt(type) {
     this.setState(s => {
       if (!this.entsOf(s)) return null;
-      const ag = s.mode === 'agenda', all = this.allEnts(s), base = ag && type === 'toggle' ? 'Casilla' : ENT_BASE[type]; let k = 1;
+      const ag = s.mode === 'agenda', all = (this.entsOf(s) || []).filter(e => !NOVAL(e.type)), base = ag && type === 'toggle' ? 'Casilla' : ENT_BASE[type]; let k = 1;
       while (all.some(e => e.name === base + '_' + k)) k++;
       const e = newEnt(type, base + '_' + k, ag && type === 'toggle' ? { desc: 'Casilla' } : null);
       return this.mapEnts(s, a => a.concat(e));
@@ -1627,8 +1633,8 @@ class Component extends DCLogic {
     const note = this.curNote(s);
     const sheet = this.curSheet(s);
     NOW = Date.now();
-    const W = makeWorld(s), get = W.gN, ag = s.mode === 'agenda';
-    RESOLVE = ag ? W.gA : W.gN;
+    const W = makeWorld(s), ag = s.mode === 'agenda', get = W.at(sheet ? sheet.id : '');
+    RESOLVE = get;
     const dirty = !s.clean;
     const entList = sheet ? (sheet.entities || []) : [];
     const tabs = s.notes.map(n => this.makeTab('note', n.id, n.name, n.id === s.activeNote, false));
@@ -1653,7 +1659,7 @@ class Component extends DCLogic {
       toasts: (s.toasts || []).map(t => ({ ...t, close: () => this.setState(st => ({ toasts: (st.toasts || []).filter(x => x.id !== t.id) })) })),
       dirty,
       entGap: dirty ? '34px' : '27px',
-      entities: entList.map((e, i) => this.entView(e, i, entList, ag ? W.gA : W.gN, dirty)),
+      entities: entList.map((e, i) => this.entView(e, i, entList, get, dirty)),
       addExpr: () => this.addEnt('expr'),
       addToggle: () => this.addEnt('toggle'),
       addTable: () => this.addEnt('table'),
