@@ -1,0 +1,28 @@
+<!-- Componente "entidad-separador" de NoteApp. Separador: título entre líneas (o espacio en blanco si no tiene título).
+     Los estilos fijos están en entidad-separador.css; los que cambian ({{ }}) siguen aquí.
+     Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
+<x-dc>
+  <sc-if value="{{ e.sepBlank }}" hint-placeholder-val="{{ false }}"><div aria-hidden="true" class="entidad-separador-caja"></div></sc-if>
+  <sc-if value="{{ e.sepLine }}" hint-placeholder-val="{{ true }}">
+  <div class="entidad-separador-caja-2" style="height:{{ e.sepH }};margin-left:{{ e.sepMl }};">
+    <span class="entidad-separador-texto"></span>
+    <sc-if value="{{ e.sepStatic }}" hint-placeholder-val="{{ false }}"><span class="entidad-separador-texto-2" style="font-size:{{ e.sepFs }};font-weight:600;color:{{ e.sepColor }};">{{ e.title }}</span></sc-if>
+    <sc-if value="{{ dirty }}" hint-placeholder-val="{{ false }}"><div class="entidad-separador-caja-3" style="font-size:{{ e.sepFs }};font-weight:600;"><span class="entidad-separador-texto-3">{{ e.titleSizer }}</span><input value="{{ e.title }}" onChange="{{ e.onTitle }}" maxLength="40" spellCheck="false" placeholder="Título" class="entidad-separador-campo" style="color:{{ e.sepInColor }};"></div></sc-if>
+    <span class="entidad-separador-texto"></span>
+    <sc-if value="{{ dirty }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ e.toggleBig }}" title="{{ e.bigTitle }}" aria-label="Título destacado" aria-pressed="{{ e.big }}" class="entidad-separador-titulo-destacado" style="background:{{ e.bigColor }};"></button>
+      <div data-entmenu="1" class="entidad-separador-menu">
+        <button onClick="{{ e.toggleMenu }}" aria-label="Opciones del separador" aria-haspopup="menu" aria-expanded="{{ e.menuOpen }}" title="Opciones" class="entidad-separador-opciones-separador" style="background:{{ e.menuDot }};"></button>
+        <sc-if value="{{ e.menuOpen }}" hint-placeholder-val="{{ false }}">
+          <div role="menu" class="entidad-separador-menu-2">
+            <button role="menuitem" onClick="{{ e.duplicate }}" class="entidad-separador-opcion-menu">Duplicar separador</button>
+            <button role="menuitem" onClick="{{ e.remove }}" class="entidad-separador-opcion-menu">Borrar separador</button>
+          </div>
+        </sc-if>
+      </div>
+      <button onClick="{{ e.up }}" aria-label="Subir" class="entidad-separador-subir" style="right:-28px;top:{{ e.upTop }};background:{{ e.upColor }};"></button>
+      <button onClick="{{ e.down }}" aria-label="Bajar" class="entidad-separador-bajar" style="right:-28px;top:{{ e.downTop }};background:{{ e.downColor }};"></button>
+    </sc-if>
+  </div>
+  </sc-if>
+</x-dc>

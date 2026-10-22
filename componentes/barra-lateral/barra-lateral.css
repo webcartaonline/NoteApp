@@ -1,0 +1,254 @@
+/* Componente "barra-lateral": Barra lateral: interruptor Notas/Agenda, botones para añadir entidades, carpeta de guardado y ajustes. */
+
+.barra-lateral-lateral {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 20px;
+  min-height: 0;
+}
+
+.barra-lateral-cambiar-modo {
+  position: relative;
+  width: 38px;
+  height: 75px;
+  padding: 0;
+  border: 0;
+  border-radius: 19px;
+  background: #2b2b2b;
+  cursor: pointer;
+  flex: none;
+}
+
+.barra-lateral-texto {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #008000;
+  transition: top .28s cubic-bezier(.4,0,.2,1);
+}
+
+.barra-lateral-texto-2 {
+  position: absolute;
+  left: 9px;
+  top: 9px;
+  width: 19px;
+  height: 19px;
+  background: #fff;
+  mask: url(../../assets/lineas-de-calendario.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/lineas-de-calendario.svg) center / contain no-repeat;
+}
+
+.barra-lateral-texto-3 {
+  position: absolute;
+  left: 10px;
+  top: 47px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  mask: url(../../assets/lista-de-rectangulos.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/lista-de-rectangulos.svg) center / contain no-repeat;
+}
+
+.barra-lateral-caja {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 28px;
+  margin-bottom: 16px;
+  gap: clamp(11px,3.5vh,37px);
+}
+
+.barra-lateral-anadir-tabla {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: #5a5a5a;
+  mask: url(../../assets/lista-de-tablas.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/lista-de-tablas.svg) center / contain no-repeat;
+}
+
+.barra-lateral-anadir-expresion {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: #5a5a5a;
+  mask: url(../../assets/entrada-numerica.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/entrada-numerica.svg) center / contain no-repeat;
+}
+
+.barra-lateral-anadir-interruptor {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: #5a5a5a;
+  mask: url(../../assets/boton-de-radio.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/boton-de-radio.svg) center / contain no-repeat;
+}
+
+.barra-lateral-anadir-logica {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: #5a5a5a;
+  mask: url(../../assets/rama-de-codigo.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/rama-de-codigo.svg) center / contain no-repeat;
+}
+
+.barra-lateral-anadir-deslizador {
+  width: 20px;
+  height: 14px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: #5a5a5a;
+  mask: url(../../assets/agregar-barra.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/agregar-barra.svg) center / contain no-repeat;
+}
+
+.barra-lateral-anadir-porcentaje {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: #5a5a5a;
+  mask: url(../../assets/porcentaje.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/porcentaje.svg) center / contain no-repeat;
+}
+
+.barra-lateral-anadir-separador {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.barra-lateral-texto-4 {
+  flex: 1;
+  height: 2px;
+  border-radius: 1px;
+  background: #5a5a5a;
+}
+
+.barra-lateral-texto-5 {
+  flex: none;
+  width: 5px;
+  height: 9px;
+  border-radius: 1px;
+  background: #5a5a5a;
+}
+
+.barra-lateral-calendario {
+  width: 19px;
+  height: 19px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: #5a5a5a;
+  mask: url(../../assets/lineas-de-calendario.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/lineas-de-calendario.svg) center / contain no-repeat;
+}
+
+.barra-lateral-contador {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: #5a5a5a;
+  mask: url(../../assets/reloj.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/reloj.svg) center / contain no-repeat;
+}
+
+.barra-lateral-notificacion {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: #5a5a5a;
+  mask: url(../../assets/campana.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/campana.svg) center / contain no-repeat;
+}
+
+.barra-lateral-anadir-texto {
+  width: 19px;
+  height: 19px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: #5a5a5a;
+  mask: url(../../assets/texto.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/texto.svg) center / contain no-repeat;
+}
+
+.barra-lateral-carpeta-guardado {
+  margin-top: auto;
+  position: relative;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  flex: none;
+  background: transparent;
+}
+
+.barra-lateral-texto-6 {
+  position: absolute;
+  inset: 0;
+  mask: url(../../assets/carpeta.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/carpeta.svg) center / contain no-repeat;
+}
+
+.barra-lateral-texto-7 {
+  position: absolute;
+  right: -3px;
+  bottom: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.barra-lateral-ajustes {
+  margin-top: 24px;
+  width: 19px;
+  height: 19px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  flex: none;
+  background: #fff;
+  mask: url(../../assets/ajustes.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/ajustes.svg) center / contain no-repeat;
+}

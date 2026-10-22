@@ -1,0 +1,27 @@
+/* Componente "entidades": Columna de entidades de la hoja: recorre la lista y muestra cada entidad con su componente. */
+
+.entidades-desplazable {
+  flex: 1;
+  min-width: min(440px,58%);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 30px 40px 34px;
+}
+
+.entidades-parrafo {
+  margin: 80px 0 0;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  text-wrap: pretty;
+}
+
+.entidades-caja {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+.entidades-caja-2 {
+  position: relative;
+}

@@ -1,0 +1,41 @@
+<!-- Componente "barra-hojas" de NoteApp. Barra superior del panel: vista limpia/sucia, reloj (Agenda), pestañas de las hojas y menú de opciones.
+     Los estilos fijos están en barra-hojas.css; los que cambian ({{ }}) siguen aquí.
+     Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
+<x-dc>
+  <div class="barra-hojas-caja">
+    <div class="barra-hojas-caja-2">
+      <button aria-label="Convertir" class="barra-hojas-convertir"></button>
+      <button onClick="{{ toggleView }}" aria-label="Vista limpia" aria-pressed="{{ clean }}" title="Vista limpia / sucia" class="barra-hojas-vista-limpia">
+        <span class="barra-hojas-texto" style="left:{{ knobLeft }};top:0;background:{{ knobColor }};"></span>
+      </button>
+    </div>
+    <div class="barra-hojas-caja-3"><sc-if value="{{ isAgenda }}" hint-placeholder-val="{{ false }}"><span class="barra-hojas-texto-2">{{ clockTxt }}</span></sc-if>
+      <div class="barra-hojas-caja-4">
+        <div class="barra-hojas-caja-5">
+          <sc-for list="{{ sheets }}" as="t" hint-placeholder-count="3">
+            <div data-sheet="{{ t.sid }}" class="barra-hojas-hoja" style="background:{{ t.bg }};">
+              <sc-if value="{{ t.canLeft }}" hint-placeholder-val="{{ false }}"><button onMouseDown="{{ t.noFocus }}" onClick="{{ t.moveLeft }}" aria-label="Mover hoja a la izquierda" title="Mover a la izquierda" class="barra-hojas-mover-hoja-izquierda"></button></sc-if>
+              <sc-if value="{{ t.canRight }}" hint-placeholder-val="{{ false }}"><button onMouseDown="{{ t.noFocus }}" onClick="{{ t.moveRight }}" aria-label="Mover hoja a la derecha" title="Mover a la derecha" class="barra-hojas-mover-hoja-derecha"></button></sc-if>
+              <span class="barra-hojas-texto-3" style="font-weight:{{ t.weight }};">{{ t.display }}</span>
+              <input value="{{ t.text }}" readOnly="{{ t.readOnly }}" maxLength="22" spellCheck="false" title="Doble clic para editar" onDoubleClick="{{ t.onDbl }}" onChange="{{ t.onChange }}" onKeyDown="{{ t.onKey }}" onBlur="{{ t.onBlur }}" onMouseDown="{{ t.onDown }}" onClick="{{ t.onClick }}" class="barra-hojas-nombre" style="font:inherit;font-weight:{{ t.weight }};color:{{ t.color }};cursor:{{ t.cursor }};box-shadow:{{ t.underline }};">
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <button onClick="{{ addSheet }}" title="Añadir hoja" aria-label="Añadir página" class="barra-hojas-anadir-pagina">
+        <span class="barra-hojas-texto-4"></span>
+        <span class="barra-hojas-texto-5"></span>
+      </button>
+      <div data-menu="1" class="barra-hojas-menu">
+        <button onClick="{{ toggleMenu }}" aria-label="Estado" aria-haspopup="menu" aria-expanded="{{ menuOpen }}" title="Opciones" class="barra-hojas-estado" style="background:{{ dotColor }};"></button>
+        <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+          <div role="menu" class="barra-hojas-menu-2">
+            <button role="menuitem" onClick="{{ deleteSheet }}" disabled="{{ noSheet }}" class="barra-hojas-opcion-menu" style="opacity:{{ sheetItemOpacity }};">Eliminar hoja</button>
+            <button role="menuitem" onClick="{{ deleteNote }}" disabled="{{ noNote }}" class="barra-hojas-opcion-menu" style="opacity:{{ noteItemOpacity }};">Eliminar nota</button>
+          </div>
+        </sc-if>
+      </div>
+
+    </div>
+  </div>
+</x-dc>

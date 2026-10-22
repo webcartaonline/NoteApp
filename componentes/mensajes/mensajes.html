@@ -1,0 +1,18 @@
+<!-- Componente "mensajes" de NoteApp. Mensajes emergentes (abajo a la derecha): avisos que saltan y mensajes de la carpeta de guardado.
+     Los estilos fijos están en mensajes.css; los que cambian ({{ }}) siguen aquí.
+     Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
+<x-dc>
+  <div aria-live="polite" class="mensajes-caja">
+    <sc-for list="{{ toasts }}" as="t" hint-placeholder-count="0">
+      <div role="alert" class="mensajes-aviso">
+        <span class="mensajes-texto"></span>
+        <div class="mensajes-caja-2">
+          <span class="mensajes-texto-2">{{ t.title }}</span>
+          <span class="mensajes-texto-3">{{ t.body }}</span>
+          <span class="mensajes-texto-4">{{ t.when }}</span>
+        </div>
+        <button onClick="{{ t.close }}" aria-label="Cerrar aviso" class="mensajes-cerrar-aviso"><span class="mensajes-texto-5"></span><span class="mensajes-texto-6"></span></button>
+      </div>
+    </sc-for>
+  </div>
+</x-dc>

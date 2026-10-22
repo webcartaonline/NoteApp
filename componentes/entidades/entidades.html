@@ -1,0 +1,26 @@
+<!-- Componente "entidades" de NoteApp. Columna de entidades de la hoja: recorre la lista y muestra cada entidad con su componente.
+     Los estilos fijos están en entidades.css; los que cambian ({{ }}) siguen aquí.
+     Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
+<x-dc>
+  <div data-scroll="" class="entidades-desplazable">
+    <sc-if value="{{ agendaEmpty }}" hint-placeholder-val="{{ false }}"><p class="entidades-parrafo">Añade un calendario desde la barra lateral</p></sc-if>
+    <div class="entidades-caja" style="gap:{{ entGap }};width:100%;max-width:{{ colMax }};">
+      <sc-for list="{{ entities }}" as="e" hint-placeholder-count="0">
+        <div class="entidades-caja-2">
+          <sc-if value="{{ e.isSep }}"><dc-import name="entidad-separador" dc-props="{{ ui }}" e="{{ e }}"></dc-import></sc-if>
+          <sc-if value="{{ e.entDirty }}"><dc-import name="entidad-cabecera" dc-props="{{ ui }}" e="{{ e }}"></dc-import></sc-if>
+          <sc-if value="{{ e.isText }}"><dc-import name="entidad-texto" dc-props="{{ ui }}" e="{{ e }}"></dc-import></sc-if>
+          <sc-if value="{{ e.isNotif }}"><dc-import name="entidad-aviso" dc-props="{{ ui }}" e="{{ e }}"></dc-import></sc-if>
+          <sc-if value="{{ e.tipo === 'expr' }}"><dc-import name="entidad-expresion" dc-props="{{ ui }}" e="{{ e }}"></dc-import></sc-if>
+          <sc-if value="{{ e.tipo === 'toggle' }}"><dc-import name="entidad-interruptor" dc-props="{{ ui }}" e="{{ e }}"></dc-import></sc-if>
+          <sc-if value="{{ e.tipo === 'slider' }}"><dc-import name="entidad-deslizador" dc-props="{{ ui }}" e="{{ e }}"></dc-import></sc-if>
+          <sc-if value="{{ e.tipo === 'pct' }}"><dc-import name="entidad-porcentaje" dc-props="{{ ui }}" e="{{ e }}"></dc-import></sc-if>
+          <sc-if value="{{ e.isLogic }}"><dc-import name="entidad-logica" dc-props="{{ ui }}" e="{{ e }}"></dc-import></sc-if>
+          <sc-if value="{{ e.isDate }}"><dc-import name="entidad-calendario" dc-props="{{ ui }}" e="{{ e }}"></dc-import></sc-if>
+          <sc-if value="{{ e.isCount }}"><dc-import name="entidad-contador" dc-props="{{ ui }}" e="{{ e }}"></dc-import></sc-if>
+          <sc-if value="{{ e.isTable }}"><dc-import name="entidad-tabla" dc-props="{{ ui }}" e="{{ e }}"></dc-import></sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</x-dc>

@@ -1,0 +1,24 @@
+<!-- Componente "entidad-aviso" de NoteApp. Entidad Aviso (notificación): fecha, antelación y mensaje.
+     Los estilos fijos están en entidad-aviso.css; los que cambian ({{ }}) siguen aquí.
+     Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
+<x-dc>
+  <div class="entidad-aviso-caja">
+                  <div class="entidad-aviso-caja-2">
+                    <sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}"><div class="entidad-aviso-caja-3"><span class="entidad-aviso-texto">{{ e.descSizer }}</span><input value="{{ e.desc }}" onChange="{{ e.onDesc }}" maxLength="120" spellCheck="false" class="entidad-aviso-campo"></div><div class="entidad-aviso-caja-4"></div><div role="radiogroup" aria-label="Origen de la fecha" class="entidad-aviso-origen-fecha"><sc-for list="{{ e.nkinds }}" as="m" hint-placeholder-count="2"><button role="radio" aria-checked="{{ m.on }}" onClick="{{ m.onClick }}" title="{{ m.title }}" class="entidad-aviso-opcion" style="background:{{ m.bg }};color:{{ m.color }};font:inherit;font-size:13px;font-weight:{{ m.fw }};">{{ m.label }}</button></sc-for></div><sc-if value="{{ e.hasRefSeg }}" hint-placeholder-val="{{ false }}"><div role="radiogroup" aria-label="Referencia del periodo" class="entidad-aviso-origen-fecha"><sc-for list="{{ e.nrefs }}" as="m" hint-placeholder-count="2"><button role="radio" aria-checked="{{ m.on }}" onClick="{{ m.onClick }}" title="{{ m.title }}" class="entidad-aviso-opcion" style="background:{{ m.bg }};color:{{ m.color }};font:inherit;font-size:13px;font-weight:{{ m.fw }};">{{ m.label }}</button></sc-for></div></sc-if></sc-if>
+                    <sc-if value="{{ e.headClean }}" hint-placeholder-val="{{ false }}"><div class="entidad-aviso-caja-5"><span title="{{ e.desc }}" class="entidad-aviso-texto-2">{{ e.desc }}</span></div></sc-if>
+                    <div class="entidad-aviso-caja-6" style="color:{{ e.outColor }};">{{ e.outTxt }}</div>
+                  </div>
+                  <div class="entidad-aviso-caja-7">
+                    <sc-if value="{{ e.headClean }}" hint-placeholder-val="{{ false }}"><sc-for list="{{ e.cparts }}" as="p" hint-placeholder-count="4"><span class="entidad-aviso-texto-3" style="color:{{ p.color }};font-weight:{{ p.fw }};">{{ p.text }}</span></sc-for></sc-if>
+                    <sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}">
+                      <span class="entidad-aviso-avisar">Avisar</span>
+                      <sc-for list="{{ e.offs }}" as="o" hint-placeholder-count="3"><div class="entidad-aviso-caja-8"><input value="{{ o.value }}" onChange="{{ o.onChange }}" inputMode="numeric" maxLength="3" spellCheck="false" placeholder="0" aria-label="{{ o.label }}" class="entidad-aviso-campo-2"><span class="entidad-aviso-avisar">{{ o.unit }}</span></div></sc-for>
+                      <span class="entidad-aviso-avisar">antes de</span>
+                      <sc-if value="{{ e.isManual }}" hint-placeholder-val="{{ false }}"><input type="date" value="{{ e.ndate }}" onChange="{{ e.onDate }}" aria-label="Fecha" class="entidad-aviso-fecha"><input type="time" value="{{ e.ntime }}" onChange="{{ e.onTime }}" aria-label="Hora" class="entidad-aviso-fecha"></sc-if>
+                      <sc-if value="{{ e.isEntField }}" hint-placeholder-val="{{ false }}"><div class="entidad-aviso-caja-9"><div class="entidad-aviso-caja-10"><div class="entidad-aviso-caja-11" style="justify-content:{{ e.ft.justify }};visibility:{{ e.ft.hlVis }};text-decoration:{{ e.ft.deco }};"><sc-for list="{{ e.ft.segs }}" as="s" hint-placeholder-count="1"><span style="color:{{ s.color }};">{{ s.text }}</span></sc-for></div><input value="{{ e.ft.value }}" spellCheck="false" onChange="{{ e.ft.onChange }}" onFocus="{{ e.ft.onFocus }}" onBlur="{{ e.ft.onBlur }}" onKeyDown="{{ e.ft.onKey }}" class="entidad-aviso-campo-3" style="text-align:{{ e.ft.align }};opacity:{{ e.ft.inOp }};"></div></div><span class="entidad-aviso-texto-4" style="color:{{ e.tgtColor }};">{{ e.tgtTxt }}</span></sc-if>
+                    </sc-if>
+                  </div>
+                  <sc-if value="{{ e.entDirty }}" hint-placeholder-val="{{ false }}"><div class="entidad-aviso-caja-12"><input value="{{ e.msg }}" onChange="{{ e.onMsg }}" maxLength="120" spellCheck="false" placeholder="Mensaje del aviso (opcional)" class="entidad-aviso-campo-4"><button onClick="{{ e.test }}" title="Lanza el aviso ahora" class="entidad-aviso-lanza-aviso-ahora"><span class="entidad-aviso-texto-5"></span>Probar aviso</button></div></sc-if>
+                  <sc-if value="{{ e.hasMsgClean }}" hint-placeholder-val="{{ false }}"><p class="entidad-aviso-parrafo">{{ e.msg }}</p></sc-if>
+                </div>
+</x-dc>

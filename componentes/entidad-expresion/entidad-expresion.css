@@ -1,0 +1,134 @@
+/* Componente "entidad-expresion": Entidad Expresión: fórmula y resultado. */
+
+.entidad-expresion-caja {
+  display: flex;
+  height: 37px;
+  background: #2a2a2a;
+  border-radius: 7px;
+  font-size: 16px;
+}
+
+.entidad-expresion-caja-2 {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.entidad-expresion-texto {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entidad-expresion-caja-3 {
+  flex: none;
+  min-width: 95px;
+  max-width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 10px;
+  background: #1c1c1c;
+  border-radius: 7px;
+  color: #008000;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.entidad-expresion-caja-4 {
+  display: inline-grid;
+  flex: 0 1 auto;
+  min-width: 60px;
+  max-width: 50%;
+  align-items: center;
+  padding: 0 10px;
+  overflow: hidden;
+}
+
+.entidad-expresion-texto-2 {
+  grid-area: 1 / 1;
+  white-space: pre;
+  visibility: hidden;
+  overflow: hidden;
+}
+
+.entidad-expresion-campo {
+  grid-area: 1 / 1;
+  width: 0;
+  min-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: #fff;
+  caret-color: #008000;
+}
+
+.entidad-expresion-caja-5 {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  background: #1c1c1c;
+  border-radius: 7px;
+}
+
+.entidad-expresion-caja-6 {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.entidad-expresion-caja-7 {
+  position: absolute;
+  inset: 0;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: pre;
+}
+
+.entidad-expresion-campo-2 {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 10px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: #fff;
+  caret-color: #008000;
+}
+
+.entidad-expresion-caja-8 {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 10px;
+  font-size: 15px;
+  white-space: pre;
+  overflow: hidden;
+}
+
+.entidad-expresion-texto-3 {
+  color: #fff;
+  padding: 0 8px;
+}
+
+.entidad-expresion-texto-4 {
+  color: #008000;
+  font-weight: 600;
+}

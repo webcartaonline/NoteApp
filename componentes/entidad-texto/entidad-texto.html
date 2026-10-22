@@ -1,0 +1,26 @@
+<!-- Componente "entidad-texto" de NoteApp. Entidad Texto: cuadro de texto con formato MKD.
+     Los estilos fijos están en entidad-texto.css; los que cambian ({{ }}) siguen aquí.
+     Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
+<x-dc>
+  <sc-if value="{{ dirty }}" hint-placeholder-val="{{ false }}">
+    <div class="entidad-texto-caja">
+      <span class="entidad-texto-texto"></span>
+      <span class="entidad-texto-texto-2">Texto</span>
+      <button onClick="{{ e.toggleFx }}" aria-label="Fórmula" aria-pressed="{{ e.fxOn }}" title="{{ e.fxTitle }}" class="entidad-texto-formula" style="background:{{ e.fxColor }};"></button>
+      <div data-entmenu="1" class="entidad-texto-menu">
+      <button onClick="{{ e.toggleMenu }}" aria-label="Opciones" aria-haspopup="menu" aria-expanded="{{ e.menuOpen }}" title="Opciones" class="entidad-texto-opciones" style="background:{{ e.menuDot }};"></button>
+      <sc-if value="{{ e.menuOpen }}" hint-placeholder-val="{{ false }}">
+        <div role="menu" class="entidad-texto-menu-2">
+          <button role="menuitem" onClick="{{ e.duplicate }}" class="entidad-texto-opcion-menu">Duplicar texto</button>
+          <button role="menuitem" onClick="{{ e.remove }}" class="entidad-texto-opcion-menu">Borrar texto</button>
+        </div>
+      </sc-if>
+    </div>
+    </div>
+    <button onClick="{{ e.up }}" aria-label="Subir" class="entidad-texto-subir" style="background:{{ e.upColor }};"></button>
+  <button onClick="{{ e.down }}" aria-label="Bajar" class="entidad-texto-bajar" style="background:{{ e.downColor }};"></button>
+  </sc-if>
+  <div data-lines="{{ e.id }}" onMouseDown="{{ e.boxDown }}" class="entidad-texto-lineas" style="cursor:{{ e.boxCursor }};">
+    <dc-import name="lineas" dc-props="{{ ui }}" list="{{ e.lines }}"></dc-import>
+  </div>
+</x-dc>

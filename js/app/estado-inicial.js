@@ -1,0 +1,171 @@
+// Estado inicial de la app: notas y agenda de ejemplo (solo se usan si no hay datos guardados).
+// Si hay datos guardados en el navegador, naLoad() los carga en su lugar.
+function naEstadoInicial() {
+  const mkTable = (name, cols, rows) => {
+    const t = newEnt('table', name);
+    t.cols = cols.map(([title, op]) => ({ id: uid('c'), title, op: op || null }));
+    t.rows = rows.map(r => { const cells = {}; t.cols.forEach((c, i) => { cells[c.id] = r[i]; }); return { id: uid('r'), cells }; });
+    return t;
+  };
+  const sep = title => ({ id: uid('e'), type: 'sep', title });
+  const guiaEnt = [
+    sep('Expresión'),
+    newEnt('expr', 'Precio', { desc: 'Precio por unidad', expr: '12,5' }),
+    newEnt('expr', 'Subtotal', { desc: 'Precio por unidades', expr: 'Precio * Unidades' }),
+    sep('Interruptor'),
+    newEnt('toggle', 'Envio', { desc: 'Envío a domicilio', on: true, expr: '4,95' }),
+    sep('Lógica'),
+    newEnt('logic', 'Descuento', { desc: '10 % si pasa de 50', a: 'Subtotal', cmp: '>=', b: '50', out: 'Subtotal * 0,1' }),
+    newEnt('toggle', 'Plan_Estatico', { desc: 'Plan Estático', on: false }),
+    newEnt('toggle', 'Plan_Basico', { desc: 'Plan Básico', on: true }),
+    newEnt('toggle', 'Plan_Completo', { desc: 'Plan Completo', on: false }),
+    newEnt('logic', 'Plan', { desc: 'Plan en uso', a: 'Plan_Estatico', cmp: '=', b: 'True', out: 'Estático', alts: [{ id: uid('b'), a: 'Plan_Basico', cmp: '=', b: 'True', out: 'Básico' }, { id: uid('b'), a: 'Plan_Completo', cmp: '=', b: 'True', out: 'Completo' }], els: 'Ninguno' }),
+    sep('Deslizador'),
+    newEnt('slider', 'Unidades', { desc: 'Unidades compradas', value: 4, min: '1', max: '10', decimals: false }),
+    sep('Porcentaje'),
+    newEnt('pct', 'IVA', { desc: 'IVA del subtotal', mode: 'part', pct: '21', total: 'Subtotal' }),
+    sep('Tabla'),
+    mkTable('Compra', [['Hecho'], ['Producto'], ['Importe', 'sum']], [['[True]', 'Pedido', '=Subtotal'], ['[True]', 'Envío', '=Envio'], ['[False]', 'Envoltorio', '3'], ['[True]', 'IVA', '=IVA']])
+  ];
+  const viaje = [
+    sep('Gastos'),
+    mkTable('Gastos', [['Pagado'], ['Concepto'], ['Importe', 'sum']], [['[True]', 'Vuelos', '180'], ['[True]', 'Hotel', '240'], ['[False]', 'Cena de despedida', '60'], ['[True]', 'Transporte', '=Taxi']]),
+    newEnt('expr', 'Taxi', { desc: 'Taxis por trayecto', expr: '12 * 3' }),
+    newEnt('toggle', 'Seguro', { desc: 'Seguro de viaje', on: true, expr: '25' }),
+    sep('Reparto'),
+    newEnt('slider', 'Personas', { desc: 'Personas que pagan', value: 3, min: '1', max: '8', decimals: false }),
+    newEnt('expr', 'Por_Persona', { desc: 'Cada uno paga', expr: '(Gastos + Seguro) / Personas' }),
+    newEnt('logic', 'En_Presupuesto', { desc: 'Máximo 200 por persona', a: 'Por_Persona', cmp: '<=', b: '200', out: '' }),
+    sep('Extras'),
+    newEnt('pct', 'Propina', { desc: 'Propina de la cena', mode: 'part', pct: '10', total: '60', part: '' }),
+    newEnt('pct', 'Peso_Hotel', { desc: 'Peso del hotel en el total', mode: 'pct', part: '240', total: 'Gastos', pct: '', decimals: false })
+  ];
+  const sheets = [mkSheet('Guía de formato MKD', [
+    "# Título de nivel 1",
+    "## Título de nivel 2",
+    "### Título de nivel 3",
+    "#### Título de nivel 4",
+    "##### Título de nivel 5",
+    "###### Título de nivel 6",
+    "Texto normal con **negrita**, *cursiva*, ***negrita en cursiva*** y ~~tachado~~.",
+    "Con tres guiones o tres asteriscos solos en una línea se crea una línea separadora:",
+    "---",
+    "## Anotaciones",
+    "> Esto es una anotación.",
+    "> Varias líneas seguidas forman un solo bloque.",
+    ">> Con dos símbolos, una anotación dentro de otra.",
+    "> ### Dentro de una anotación también puedes poner títulos",
+    "> - listas con **negrita**, *cursiva* o `código`",
+    ">   - y subelementos",
+    "> 1. listas numeradas",
+    "> ---",
+    "> y líneas separadoras.",
+    "## Listas",
+    "- Elemento de lista con guion",
+    "* Elemento de lista con asterisco",
+    "+ Elemento de lista con el símbolo más",
+    "  - Subelemento con **negrita** (dos espacios por nivel)",
+    "  - Otro subelemento",
+    "- De vuelta al primer nivel",
+    "3. La numeración empieza en el primer número",
+    "1. y sigue sola aunque escribas otro",
+    "1. tercer paso",
+    "## Casillas",
+    "[True] Casilla marcada",
+    "[False] Casilla sin marcar",
+    "[x] También marcada, al estilo Markdown",
+    "[ ] También sin marcar",
+    "- [x] Con guion delante, la casilla va dentro de una lista",
+    "([True] Casilla con texto agrupado)",
+    "## Enlaces e imágenes",
+    "Un enlace: [qué es Markdown](https://es.wikipedia.org/wiki/Markdown)",
+    "![Logo de NoteApp](icons/icon-192.png)",
+    "## Tablas",
+    "| Producto | Precio |",
+    "| --- | --- |",
+    "| Pan | 1,20 |",
+    "| Leche | 0,95 |",
+    "## Código",
+    "Código dentro de una frase: `=Subtotal` se ve tal cual, sin calcular.",
+    "``",
+    "Bloque de código.",
+    "Aquí todo se ve tal cual: **sin negrita** y =Subtotal sin calcular.",
+    "``",
+    "## Cuadros copiables",
+    "'Una línea lista para copiar'",
+    "''",
+    "Bloque de varias líneas.",
+    "Las menciones se copian con su valor: =/Conoce NoteApp/Guía de entidades/Subtotal",
+    "''",
+    "## Menciones",
+    "Escribe un igual pegado al nombre de una entidad de la misma hoja. Para una entidad de otra hoja o de otra nota, escribe su ruta: el subtotal vale =/Conoce NoteApp/Guía de entidades/Subtotal.",
+    "Delante del igual no puede haber nada pegado, salvo \\* o \\~: **=/Conoce NoteApp/Guía de entidades/Subtotal** funciona, pero en 2+2=4 o en web.com/?id=5 no se crea ninguna mención.",
+    "Mientras escribes el nombre de una entidad tras el igual, cada espacio se convierte en guion bajo. Pulsa Esc (o dos espacios seguidos) para terminar el nombre y seguir escribiendo con espacios normales.",
+    "## Escapar",
+    "Pon una barra \\\\ delante de un símbolo para que se vea tal cual: \\*sin cursiva\\*, \\=Subtotal, \\[True].",
+    "\\# Esto no es un título",
+    "\\'Casa' y 'Coche' no es una línea copiable"
+  ]), mkSheet('Guía de entidades', [
+    '# Guía de entidades',
+    "Las entidades viven en el panel derecho y se añaden desde la barra lateral. Cada una tiene un **nombre único dentro de su hoja** y produce un valor que puedes citar en esa misma hoja escribiendo un igual delante de su nombre: por ejemplo, el subtotal vale *=Subtotal*. Desde otra hoja u otra nota se cita con su ruta (mira el final de esta guía).",
+    '> Activa la vista sucia con el interruptor superior para editar nombres, descripciones y fórmulas. El botón de función alterna entre ver las entradas o la salida.',
+    '## Expresión',
+    'Calcula operaciones con suma, resta, multiplicación, división y paréntesis. Admite números y otras entidades por su nombre. Aquí, Precio por Unidades da **=Subtotal**.',
+    'El icono de comillas, junto al nombre, activa o quita los decimales. Está en todas las entidades que pueden dar números (expresión, tabla, interruptor con fórmula, lógica, deslizador y porcentaje): si lo apagas, el resultado se redondea, por ejemplo 5,3 clientes pasa a 5.',
+    '## Interruptor',
+    'Una casilla que vale True o False. Si le das una fórmula, devuelve ese valor cuando está activa y 0 cuando no. El envío suma ahora **=Envio**.',
+    '## Lógica',
+    'Compara dos datos (igual, distinto, menor, mayor, menor o igual, mayor o igual). Sin salida devuelve True o False; con salida, devuelve ese valor si se cumple y, si no, el de la fila «si no» (0 por defecto). El descuento es **=Descuento**.',
+    'Con el botón + añades casos «si no, si»: gana el primero que se cumple. Haz clic en un caso para cambiar su comparación. Las salidas admiten texto, números, fórmulas u otras entidades; usa comillas si un texto coincide con un nombre. Marca otro plan y el texto cambia solo.',
+    'Plan en uso: **=Plan**',
+    '## Deslizador',
+    'Elige un valor arrastrando entre un mínimo y un máximo, que también pueden ser fórmulas. El icono de comillas activa o quita los decimales. Ahora hay **=Unidades** unidades: muévelo y mira cómo cambia todo.',
+    '## Porcentaje',
+    'Resuelve el hueco que elijas en la frase «El A% de B es X»: la parte, el porcentaje o el total. El IVA del subtotal es **=IVA**.',
+    '## Tabla',
+    'Filas y columnas con texto, números, casillas o menciones. Una columna puede sumar, restar, multiplicar o dividir, y su resultado es el valor de la tabla. Las filas con una casilla en False se tachan y no cuentan. La compra suma **=Compra**.',
+    '## Separador',
+    'Un título entre líneas que ordena el panel en secciones. El botón de la T grande, a la izquierda del menú, destaca el título más grande y en verde. Si dejas el título vacío, el separador se convierte en un espacio en blanco. No produce ningún valor.',
+    "## Rutas: entidades de otras hojas y notas",
+    "Para citar una entidad de otra hoja o de otra nota, escribe un igual seguido de su ruta: \\=/Nota/Hoja/Entidad. Cada barra va pegada al nombre que la sigue. La nota y la hoja se escriben con su nombre original, con espacios si los tienen; la entidad no lleva espacios, así que la ruta termina en el primer espacio tras su nombre. El precio de esta guía vale =/Conoce NoteApp/Guía de entidades/Precio.",
+    "Funciona igual con la Agenda: el vuelo sale el **=/Viajes/Lisboa/Vuelo_Lisboa**. Si en Notas y en Agenda hay notas con el mismo nombre, se usa la de la ventana en la que escribes la ruta."
+  ], guiaEnt), mkSheet('Demostración', [
+    '# Viaje a Lisboa',
+    'Llevamos gastados =Gastos euros entre **=Personas personas**, así que cada uno pone *=Por_Persona* euros.',
+    '¿Seguimos dentro del presupuesto? **=En_Presupuesto**',
+    '## Pendientes',
+    '([True] Reservar vuelos)',
+    '([True] Pagar el hotel)',
+    '([False] Reservar la cena de despedida)',
+    'Seguro contratado: [True]',
+    '---',
+    '## Resumen para el grupo',
+    '> El hotel supone el =Peso_Hotel % del gasto total.',
+    '> Si añadimos la cena, la propina sería de =Propina euros.',
+    'Faltan =/Viajes/Lisboa/Faltan_Vuelo días para el vuelo: **=/Viajes/Lisboa/Aviso_Maleta**',
+    "''",
+    'Total del viaje: =Gastos euros',
+    'Seguro: =Seguro euros',
+    'Por persona: =Por_Persona euros',
+    "''"
+  ], viaje)];
+  const notes = [{ id: uid('n'), name: 'Conoce NoteApp', sheets, activeSheet: sheets[0].id }];
+  const inDays = k => { const d = new Date(); d.setDate(d.getDate() + k); return ymd(d); };
+  const lis = mkSheet('Lisboa', [''], [
+    sep('Vuelo'),
+    newEnt('date', 'Vuelo_Lisboa', { desc: 'Salida del vuelo', date: inDays(12), time: '07:45' }),
+    newEnt('count', 'Faltan_Vuelo', { desc: 'Cuenta atrás del vuelo', target: 'Vuelo_Lisboa', unit: 'd' }),
+    newEnt('notif', 'Aviso_Checkin', { desc: 'Check-in online', target: 'Vuelo_Lisboa', d: '1', msg: 'Haz el check-in y descarga la tarjeta de embarque.' }),
+    sep('Equipaje'),
+    { id: uid('e'), type: 'text', lines: mkLines(['## Antes de salir', '- Pasaporte y DNI', '- Cargador y adaptador', 'Faltan **=Faltan_Vuelo días**: =Aviso_Maleta']) },
+    newEnt('toggle', 'Maleta_Hecha', { desc: 'Maleta preparada', on: false }),
+    newEnt('logic', 'Aviso_Maleta', { desc: 'Recordatorio', a: 'Maleta_Hecha', cmp: '=', b: 'True', out: 'Todo listo', alts: [{ id: uid('b'), a: 'Faltan_Vuelo', cmp: '<=', b: '2', out: '¡Haz la maleta!' }], els: 'Hay tiempo' }),
+    newEnt('logic', 'Presupuesto', { desc: 'Estado del presupuesto', a: '=/Conoce NoteApp/Demostración/En_Presupuesto', cmp: '=', b: 'True', out: 'Dentro del presupuesto', els: 'Revisar gastos' })
+  ]), pag = mkSheet('Pagos', [''], [
+    newEnt('date', 'Pago_Hotel', { desc: 'Límite para pagar el hotel', date: inDays(4), time: '23:59' }),
+    newEnt('count', 'Plazo_Hotel', { desc: 'Tiempo para pagar el hotel', target: 'Pago_Hotel', unit: 'txt' }),
+    newEnt('notif', 'Aviso_Pago', { desc: 'Pagar el hotel', target: 'Pago_Hotel', d: '', h: '12' })
+  ]);
+  const anotes = [{ id: uid('n'), name: 'Viajes', sheets: [lis, pag], activeSheet: lis.id }];
+  return naLoad({ other: { notes: anotes, activeNote: anotes[0].id }, calView: {}, now: Date.now(), lsel: {}, copied: null, entMenu: null, field: null, colMenu: null, menu: false, mode: 'notas', notes, activeNote: notes[0].id, editing: null, draft: '', dragging: false, clean: true, focusId: null, config: { mkdV2: true }, fs: 'off', fsName: '' });
+}

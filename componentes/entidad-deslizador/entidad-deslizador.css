@@ -1,0 +1,159 @@
+/* Componente "entidad-deslizador": Entidad Deslizador. */
+
+.entidad-deslizador-caja {
+  background: #2a2a2a;
+  border-radius: 7px;
+  font-size: 16px;
+}
+
+.entidad-deslizador-caja-2 {
+  display: flex;
+  height: 37px;
+}
+
+.entidad-deslizador-caja-3 {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.entidad-deslizador-texto {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entidad-deslizador-caja-4 {
+  flex: none;
+  min-width: 95px;
+  max-width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 10px;
+  background: #1c1c1c;
+  border-radius: 7px;
+  color: #008000;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.entidad-deslizador-caja-5 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 10px 4px;
+  color: #008000;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.entidad-deslizador-texto-2 {
+  flex: none;
+}
+
+.entidad-deslizador-caja-6 {
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.entidad-deslizador-texto-3 {
+  flex: none;
+  height: 6px;
+  border-radius: 3px;
+  background: #008000;
+}
+
+.entidad-deslizador-texto-4 {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: #5a5a5a;
+}
+
+.entidad-deslizador-caja-7 {
+  display: inline-grid;
+  flex: 0 1 auto;
+  min-width: 60px;
+  max-width: 50%;
+  align-items: center;
+  padding: 0 10px;
+  overflow: hidden;
+}
+
+.entidad-deslizador-texto-5 {
+  grid-area: 1 / 1;
+  white-space: pre;
+  visibility: hidden;
+  overflow: hidden;
+}
+
+.entidad-deslizador-campo {
+  grid-area: 1 / 1;
+  width: 0;
+  min-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: #fff;
+  caret-color: #008000;
+}
+
+.entidad-deslizador-caja-8 {
+  flex: 1;
+}
+
+.entidad-deslizador-caja-9 {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  padding-bottom: 4px;
+  font-size: 15px;
+}
+
+.entidad-deslizador-caja-10 {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.entidad-deslizador-caja-11 {
+  position: absolute;
+  inset: 0;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: pre;
+}
+
+.entidad-deslizador-campo-2 {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 10px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: #fff;
+  caret-color: #008000;
+}

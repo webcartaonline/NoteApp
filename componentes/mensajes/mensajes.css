@@ -1,0 +1,90 @@
+/* Componente "mensajes": Mensajes emergentes (abajo a la derecha): avisos que saltan y mensajes de la carpeta de guardado. */
+
+.mensajes-caja {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(340px,calc(100vw - 36px));
+  pointer-events: none;
+}
+
+.mensajes-aviso {
+  pointer-events: auto;
+  display: flex;
+  gap: 12px;
+  padding: 12px 12px 13px 14px;
+  background: #1c1c1c;
+  border-radius: 9px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.55),inset 0 0 0 1px #2e2e2e;
+}
+
+.mensajes-texto {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  background: #008000;
+  mask: url(../../assets/campana.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/campana.svg) center / contain no-repeat;
+  margin-top: 1px;
+}
+
+.mensajes-caja-2 {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mensajes-texto-2 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.mensajes-texto-3 {
+  font-size: 14px;
+  line-height: 19px;
+  color: #cfcfcf;
+  text-wrap: pretty;
+}
+
+.mensajes-texto-4 {
+  font-size: 13px;
+  color: #8a8a8a;
+}
+
+.mensajes-cerrar-aviso {
+  flex: none;
+  position: relative;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: rotate(45deg);
+}
+
+.mensajes-texto-5 {
+  position: absolute;
+  left: 8px;
+  top: 3px;
+  width: 2px;
+  height: 12px;
+  background: #7a7a7a;
+  border-radius: 1px;
+}
+
+.mensajes-texto-6 {
+  position: absolute;
+  left: 3px;
+  top: 8px;
+  width: 12px;
+  height: 2px;
+  background: #7a7a7a;
+  border-radius: 1px;
+}

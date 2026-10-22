@@ -6,12 +6,20 @@ Diseñada con Claude Design. Es una web estática: no necesita instalación ni c
 
 ## Estructura
 
-- `index.html` — la aplicación
-- `support.js` — el motor que hace funcionar la página
+- `index.html` — la página principal: carga los estilos y los scripts y coloca las partes de la app
+- `componentes/` — las partes de la pantalla, cada una en su carpeta con su `.html` (lo que se ve) y su `.css` (cómo se ve):
+  cabecera, barra lateral, barra de hojas, panel de texto, líneas, lista de entidades, una por cada tipo de entidad y mensajes
+- `css/` — estilos generales (`base.css`) y de la estructura principal (`app.css`)
+- `js/arranque.js` — carga los componentes y pone en marcha la app
+- `js/motor/` — funciones generales: fórmulas, menciones, formato MKD, renombrar y guardado
+- `js/app/` — la lógica de la app, repartida por temas (guardado en carpeta, entidades, líneas, selección…)
+- `support.js` — el motor que hace funcionar la página (no se edita)
 - `assets/` — iconos de la interfaz
 - `icons/` — logo de la app (para instalarla, la pestaña del navegador y el móvil)
 - `manifest.webmanifest` — ficha de la app instalable (nombre, colores, logo)
 - `sw.js` — permite instalar la app y abrirla sin conexión
+
+Para probarla en el ordenador hace falta un servidor (no funciona con doble clic en `index.html`): en la carpeta, `python -m http.server` y abrir `http://localhost:8000`.
 
 ## Instalar la app (PWA)
 

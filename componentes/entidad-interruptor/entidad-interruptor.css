@@ -1,0 +1,151 @@
+/* Componente "entidad-interruptor": Entidad Interruptor (y casilla True/False). */
+
+.entidad-interruptor-caja {
+  display: flex;
+  gap: 5px;
+  height: 37px;
+  font-size: 16px;
+}
+
+.entidad-interruptor-boton {
+  flex: none;
+  width: 37px;
+  height: 37px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.entidad-interruptor-texto {
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 1.5px #008000;
+}
+
+.entidad-interruptor-caja-2 {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  border-radius: 7px;
+}
+
+.entidad-interruptor-caja-3 {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.entidad-interruptor-texto-2 {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entidad-interruptor-caja-4 {
+  flex: none;
+  min-width: 95px;
+  max-width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 10px;
+  border-radius: 7px;
+  color: #008000;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.entidad-interruptor-caja-5 {
+  display: inline-grid;
+  flex: 0 1 auto;
+  min-width: 60px;
+  max-width: 50%;
+  align-items: center;
+  padding: 0 10px;
+  overflow: hidden;
+}
+
+.entidad-interruptor-texto-3 {
+  grid-area: 1 / 1;
+  white-space: pre;
+  visibility: hidden;
+  overflow: hidden;
+}
+
+.entidad-interruptor-campo {
+  grid-area: 1 / 1;
+  width: 0;
+  min-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: #fff;
+  caret-color: #008000;
+}
+
+.entidad-interruptor-caja-6 {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.entidad-interruptor-caja-7 {
+  position: absolute;
+  inset: 0;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: pre;
+}
+
+.entidad-interruptor-campo-2 {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 10px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: #fff;
+  caret-color: #008000;
+}
+
+.entidad-interruptor-caja-8 {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 10px;
+  font-size: 15px;
+  white-space: pre;
+  overflow: hidden;
+}
+
+.entidad-interruptor-texto-4 {
+  color: #fff;
+  padding: 0 8px;
+}
+
+.entidad-interruptor-texto-5 {
+  color: #008000;
+  font-weight: 600;
+}

@@ -1,0 +1,22 @@
+<!-- Componente "cabecera" de NoteApp. Cabecera: título de la ventana (Notas / Agenda), pestañas de las notas y botón para añadir una nota.
+     Los estilos fijos están en cabecera.css; los que cambian ({{ }}) siguen aquí.
+     Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
+<x-dc>
+  <header class="cabecera-cabecera">
+    <h1 class="cabecera-titulo">
+      <sc-if value="{{ isNotas }}" hint-placeholder-val="{{ true }}">Notas</sc-if>
+      <sc-if value="{{ isAgenda }}" hint-placeholder-val="{{ false }}">Agenda</sc-if>
+    </h1>
+    <nav class="cabecera-navegacion">
+      <div class="cabecera-caja">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+          <div class="cabecera-caja-2">
+            <span class="cabecera-texto" style="font-weight:{{ t.weight }};">{{ t.display }}</span>
+            <input value="{{ t.text }}" readOnly="{{ t.readOnly }}" maxLength="22" spellCheck="false" title="Doble clic para editar" onDoubleClick="{{ t.onDbl }}" onChange="{{ t.onChange }}" onKeyDown="{{ t.onKey }}" onBlur="{{ t.onBlur }}" onMouseDown="{{ t.onDown }}" onClick="{{ t.onClick }}" class="cabecera-nombre" style="font:inherit;font-weight:{{ t.weight }};color:{{ t.color }};cursor:{{ t.cursor }};box-shadow:{{ t.underline }};">
+          </div>
+        </sc-for>
+      </div>
+      <button onClick="{{ addNote }}" title="Añadir nota" class="cabecera-anadir" aria-label="Añadir"></button>
+    </nav>
+  </header>
+</x-dc>
