@@ -284,6 +284,15 @@ const ID_CH = 'A-Za-zÀ-ÖØ-öø-ÿ0-9_', NAME_START = 'A-Za-zÀ-ÖØ-öø-ÿ_'
 const PATH_RX = '=\\/(?! )[^\\/\\n=]+\\/(?! )[^\\/\\n=]+\\/[' + NAME_START + '][' + ID_CH + ']*';
 const ENT = new RegExp('(' + PATH_RX + ')|=([' + ID_CH + ']+)', 'g');
 const isPath = n => /^=\//.test(n);
+// Al escribir una mención, el espacio se convierte en _ (para salir: Esc o dos espacios seguidos).
+const MEN_END = new RegExp('(?:^|(?<=[\\s*~]))=(?:\\/(?! )[^\\/\\n=]+\\/(?! )[^\\/\\n=]+\\/)?[' + NAME_START + '][' + ID_CH + ']*$');
+// Devuelve dónde empieza la mención que acaba justo antes del cursor (o -1 si no hay ninguna).
+function menAt(lines, idx, before) {
+  const m = MEN_END.exec(before); if (!m) return -1;
+  if ((before.slice(0, m.index).match(/`/g) || []).length % 2) return -1;
+  const b = blockInfo(lines)[idx]; if (b && b.kind === 'code') return -1;
+  return m.index;
+}
 const pathSegs = raw => [{ text: '=', color: '#fff' }].concat(...raw.slice(2).split('/').map(p => [{ text: '/', color: '#fff' }, { text: p, color: '#008000' }]));
 // Convierte las rutas antiguas =(Nota / Hoja / Entidad) y =(Agenda / Nota / Hoja / Entidad) al formato nuevo.
 const OLD_PATH = /=\(([^()=]*?\/[^()]*?)\)/g;
@@ -925,6 +934,7 @@ class Component extends DCLogic {
       "## Menciones",
       "Escribe un igual pegado al nombre de una entidad de la misma hoja. Para una entidad de otra hoja o de otra nota, escribe su ruta: el subtotal vale =/Conoce NoteApp/Guía de entidades/Subtotal.",
       "Delante del igual no puede haber nada pegado, salvo \\* o \\~: **=/Conoce NoteApp/Guía de entidades/Subtotal** funciona, pero en 2+2=4 o en web.com/?id=5 no se crea ninguna mención.",
+      "Mientras escribes el nombre de una entidad tras el igual, cada espacio se convierte en guion bajo. Pulsa Esc (o dos espacios seguidos) para terminar el nombre y seguir escribiendo con espacios normales.",
       "## Escapar",
       "Pon una barra \\\\ delante de un símbolo para que se vea tal cual: \\*sin cursiva\\*, \\=Subtotal, \\[True].",
       "\\# Esto no es un título",
@@ -1518,7 +1528,11 @@ class Component extends DCLogic {
         const el = e.target;
         this.setState({ editing: { kind, id }, draft: name }, () => { el.focus(); el.select(); });
       },
-      onChange: e => { if (editing) this.setState({ draft: e.target.value.slice(0, 22) }); },
+      onChange: e => {
+        if (!editing) return;
+        const el = e.target, p = el.selectionStart, v = kind === 'ent' ? el.value.replace(/ /g, '_') : el.value;
+        this.setState({ draft: v.slice(0, 22) }, kind === 'ent' ? () => { try { el.setSelectionRange(p, p); } catch (_) {} } : undefined);
+      },
       onKey: e => {
         if (!editing) return;
         if (e.key === 'Enter') e.target.blur();
@@ -1754,7 +1768,18 @@ class Component extends DCLogic {
         this._drag = { key, ent: entId || null, ta: false, id: ln.id, anchor: { id: ln.id, o }, multi: false };
         this.focusLine(ln.id, o);
       },
-      onChange: e => { const text = e.target.value.replace(/\n/g, ' '); setL(lines.map(l => l.id === ln.id ? { ...l, text } : l)); },
+      onChange: e => {
+        const ta = e.target; let text = ta.value.replace(/\n/g, ' '), c = ta.selectionStart;
+        if (c > 0 && text.length === ln.text.length + 1 && text[c - 1] === ' ' && text.slice(0, c - 1) + text.slice(c) === ln.text) {
+          const pre = text.slice(0, c - 1), at = menAt(lines, idx, pre), off = this._menOff, au = this._menAuto;
+          if (at >= 0 && !(off && off.id === ln.id && off.at === at)) {
+            if (au && au.id === ln.id && au.pos === c - 2 && pre[c - 2] === '_') { text = pre.slice(0, -1) + ' ' + text.slice(c); c -= 1; this._menAuto = null; }
+            else { text = pre + '_' + text.slice(c); this._menAuto = { id: ln.id, pos: c - 1 }; }
+            return setL(lines.map(l => l.id === ln.id ? { ...l, text } : l), ln.id, c);
+          }
+        }
+        setL(lines.map(l => l.id === ln.id ? { ...l, text } : l));
+      },
       onBlur: () => this.setState(st => st.focusId === ln.id ? { focusId: null } : null),
       onPaste: e => {
         const t = (e.clipboardData || window.clipboardData).getData('text/plain');
@@ -1802,7 +1827,14 @@ class Component extends DCLogic {
           e.preventDefault(); this.focusLine(lines[idx - 1].id, a);
         } else if (e.key === 'ArrowDown' && idx < lines.length - 1 && a === b && (oneRow || a === len)) {
           e.preventDefault(); this.focusLine(lines[idx + 1].id, a);
-        } else if (e.key === 'Escape') ta.blur();
+        } else if (e.key === 'Escape') {
+          const at = a === b ? menAt(lines, idx, ln.text.slice(0, a)) : -1, off = this._menOff, au = this._menAuto;
+          if (at >= 0 && !(off && off.id === ln.id && off.at === at)) {
+            e.preventDefault();
+            if (au && au.id === ln.id && au.pos === a - 1 && ln.text[a - 1] === '_') { this._menAuto = null; setL(lines.map(l => l.id === ln.id ? { ...l, text: ln.text.slice(0, a - 1) + ' ' + ln.text.slice(a) } : l), ln.id, a); }
+            else this._menOff = { id: ln.id, at };
+          } else ta.blur();
+        }
       }
     };
   }
