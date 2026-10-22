@@ -87,9 +87,11 @@
       </div>
       <div style="flex:1;min-width:0;display:flex;align-items:center;gap:15px;padding-right:8px;background:#2a2a2a;border-radius:7px;"><sc-if value="{{ isAgenda }}" hint-placeholder-val="{{ false }}"><span style="flex:none;padding-left:11px;font-size:14px;color:#a6a6a6;white-space:nowrap;font-variant-numeric:tabular-nums;">{{ clockTxt }}</span></sc-if>
         <div style="flex:1;min-width:0;height:100%;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;display:flex;padding:1px;">
-          <div style="margin-left:auto;display:flex;align-items:stretch;gap:12px;">
+          <div style="margin-left:auto;display:flex;align-items:stretch;gap:6px;">
             <sc-for list="{{ sheets }}" as="t" hint-placeholder-count="3">
-              <div style="display:inline-grid;align-items:center;flex:none;padding:0 11px;border-radius:6px;background:{{ t.bg }};font-size:15px;line-height:20px;">
+              <div data-sheet="{{ t.sid }}" style="position:relative;display:inline-grid;align-items:center;flex:none;padding:0 16px;border-radius:6px;background:{{ t.bg }};font-size:15px;line-height:20px;">
+                <sc-if value="{{ t.canLeft }}" hint-placeholder-val="{{ false }}"><button onMouseDown="{{ t.noFocus }}" onClick="{{ t.moveLeft }}" aria-label="Mover hoja a la izquierda" title="Mover a la izquierda" style="position:absolute;left:3px;top:50%;width:10px;height:14px;margin-top:-7px;padding:0;border:0;cursor:pointer;transform:rotate(180deg);background:#6a6a6a;mask:url(assets/angulo-pequeno-derecho.svg) center / 7px no-repeat;-webkit-mask:url(assets/angulo-pequeno-derecho.svg) center / 7px no-repeat;transition:background-color .15s;" style-hover="background:#fff;"></button></sc-if>
+                <sc-if value="{{ t.canRight }}" hint-placeholder-val="{{ false }}"><button onMouseDown="{{ t.noFocus }}" onClick="{{ t.moveRight }}" aria-label="Mover hoja a la derecha" title="Mover a la derecha" style="position:absolute;right:3px;top:50%;width:10px;height:14px;margin-top:-7px;padding:0;border:0;cursor:pointer;background:#6a6a6a;mask:url(assets/angulo-pequeno-derecho.svg) center / 7px no-repeat;-webkit-mask:url(assets/angulo-pequeno-derecho.svg) center / 7px no-repeat;transition:background-color .15s;" style-hover="background:#fff;"></button></sc-if>
                 <span style="grid-area:1 / 1;white-space:pre;visibility:hidden;font-weight:{{ t.weight }};padding:0 1px;">{{ t.display }}</span>
                 <input value="{{ t.text }}" readOnly="{{ t.readOnly }}" maxLength="22" spellCheck="false" title="Doble clic para editar" onDoubleClick="{{ t.onDbl }}" onChange="{{ t.onChange }}" onKeyDown="{{ t.onKey }}" onBlur="{{ t.onBlur }}" onMouseDown="{{ t.onDown }}" onClick="{{ t.onClick }}" style="grid-area:1 / 1;width:0;min-width:100%;margin:0;padding:0 1px;border:0;outline:none;background:transparent;font:inherit;font-weight:{{ t.weight }};color:{{ t.color }};cursor:{{ t.cursor }};caret-color:#008000;box-shadow:{{ t.underline }};">
               </div>
@@ -1603,6 +1605,15 @@ class Component extends DCLogic {
     if (kind === 'note') this.setState({ activeNote: id, focusId: null });
     else this.setState(s => ({ focusId: null, notes: s.notes.map(n => n.id !== s.activeNote ? n : { ...n, activeSheet: id }) }));
   }
+  moveSheet(id, dir) {
+    this.setState(s => ({ notes: s.notes.map(n => {
+      if (n.id !== s.activeNote) return n;
+      const k = n.sheets.findIndex(x => x.id === id), j = k + dir;
+      if (k < 0 || j < 0 || j >= n.sheets.length) return n;
+      const sh = n.sheets.slice(); [sh[k], sh[j]] = [sh[j], sh[k]];
+      return { ...n, sheets: sh };
+    }) }), () => { try { const el = document.querySelector('[data-sheet="' + id + '"]'); el && el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (_) {} });
+  }
   makeTab(kind, id, name, active, isSheet) {
     const s = this.state;
     const editing = !!s.editing && s.editing.kind === kind && s.editing.id === id;
@@ -2013,7 +2024,11 @@ class Component extends DCLogic {
     const dirty = !s.clean;
     const entList = sheet ? (sheet.entities || []) : [];
     const tabs = s.notes.map(n => this.makeTab('note', n.id, n.name, n.id === s.activeNote, false));
-    const sheets = note ? note.sheets.map(x => this.makeTab('sheet', x.id, x.name, x.id === note.activeSheet, true)) : [];
+    const sheets = note ? note.sheets.map((x, i, all) => {
+      const t = this.makeTab('sheet', x.id, x.name, x.id === note.activeSheet, true), on = x.id === note.activeSheet && t.readOnly;
+      return { ...t, sid: x.id, canLeft: on && i > 0, canRight: on && i < all.length - 1,
+        noFocus: e => e.preventDefault(), moveLeft: () => this.moveSheet(x.id, -1), moveRight: () => this.moveSheet(x.id, 1) };
+    }) : [];
     const src = sheet ? sheet.lines : [];
 
     const lines = this.mkdLines(src, null);
