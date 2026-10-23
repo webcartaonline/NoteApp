@@ -89,7 +89,7 @@
   display: inline-grid;
   align-items: center;
   flex: none;
-  padding: 0 16px;
+  padding: 0 20px;
   border-radius: 6px;
   font-size: 15px;
   line-height: 20px;
@@ -97,18 +97,18 @@
 
 .barra-hojas-mover-hoja-izquierda {
   position: absolute;
-  left: 3px;
+  left: 2px;
   top: 50%;
-  width: 10px;
-  height: 14px;
-  margin-top: -7px;
+  width: 16px;
+  height: 20px;
+  margin-top: -10px;
   padding: 0;
   border: 0;
   cursor: pointer;
   transform: rotate(180deg);
-  background: #6a6a6a;
-  mask: url(../../assets/angulo-pequeno-derecho.svg) center / 7px no-repeat;
-  -webkit-mask: url(../../assets/angulo-pequeno-derecho.svg) center / 7px no-repeat;
+  background: #8a8a8a;
+  mask: url(../../assets/angulo-pequeno-derecho.svg) center / 11px no-repeat;
+  -webkit-mask: url(../../assets/angulo-pequeno-derecho.svg) center / 11px no-repeat;
   transition: background-color .15s;
 }
 .barra-hojas-mover-hoja-izquierda:hover {
@@ -117,17 +117,17 @@
 
 .barra-hojas-mover-hoja-derecha {
   position: absolute;
-  right: 3px;
+  right: 2px;
   top: 50%;
-  width: 10px;
-  height: 14px;
-  margin-top: -7px;
+  width: 16px;
+  height: 20px;
+  margin-top: -10px;
   padding: 0;
   border: 0;
   cursor: pointer;
-  background: #6a6a6a;
-  mask: url(../../assets/angulo-pequeno-derecho.svg) center / 7px no-repeat;
-  -webkit-mask: url(../../assets/angulo-pequeno-derecho.svg) center / 7px no-repeat;
+  background: #8a8a8a;
+  mask: url(../../assets/angulo-pequeno-derecho.svg) center / 11px no-repeat;
+  -webkit-mask: url(../../assets/angulo-pequeno-derecho.svg) center / 11px no-repeat;
   transition: background-color .15s;
 }
 .barra-hojas-mover-hoja-derecha:hover {
