@@ -6,6 +6,21 @@ const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
 const ESC_CH = /[!-\/:-@\[-`{-~’‘]/;
 const BOX_W = { True: true, False: false, x: true, X: true, ' ': false };
 const isQ = c => c === "'" || c === '’' || c === '‘';
+// Casillas-entidad: ([True] Nombre) o ([False] Nombre) en el texto crean una entidad True/False llamada Nombre.
+const FLAG_NAME = new RegExp('^[' + NAME_START + '][' + ID_CH + ']*$');
+const FLAG_HINT = /\(\[(?:True|False)\]/;
+// Casillas-entidad de una lista de líneas (no dentro de bloques de código): [{ name, on }].
+function lineFlags(lines) {
+  if (!Array.isArray(lines) || !lines.some(l => FLAG_HINT.test(String(l.text || '')))) return [];
+  const bi = blockInfo(lines), out = [];
+  lines.forEach((l, i) => {
+    const t = String(l.text || ''); if (!FLAG_HINT.test(t) || (bi[i] && bi[i].kind === 'code')) return;
+    mdScan(t, 0, t.length).atoms.forEach(at => { if (at.kind === 'box' && at.name) out.push({ name: at.name, on: at.on }); });
+  });
+  return out;
+}
+// Casillas-entidad de una hoja: su texto y sus entidades de texto.
+const sheetFlags = x => !x ? [] : lineFlags(x.lines).concat(...(x.entities || []).filter(e => e.type === 'text').map(e => lineFlags(e.lines)));
 function safeUrl(u, img) {
   u = String(u || '').trim(); if (!u) return null;
   if (/^www\./i.test(u)) u = 'https://' + u;
@@ -46,6 +61,9 @@ function mdScan(text, a, b) {
     const s = a + m.index, e = s + m[0].length; if (!free(s, e)) continue;
     const ts = s + 1, te = ts + m[1].length + 2, data = m[2], lead = data.length - data.replace(/^\s+/, '').length, trail = data.length - data.replace(/\s+$/, '').length;
     cat[s] = 2; cat[e - 1] = 2;
+    // ([True] Nombre) / ([False] Nombre): si el texto es un nombre válido (sin espacios), la casilla es una entidad True/False con ese nombre.
+    const name = (m[1] === 'True' || m[1] === 'False') && FLAG_NAME.test(data.trim()) ? data.trim() : null;
+    if (name) { for (let q = te; q < e - 1; q++) cat[q] = 2; take({ s: ts, e: te, kind: 'box', on: BOX_W[m[1]], mr: '0px', grp: true, ps: s, pe: e - 1, name }); continue; }
     for (let q = te; q < te + lead; q++) cat[q] = 2;
     if (data.trim()) for (let q = e - 1 - trail; q < e - 1; q++) cat[q] = 2;
     take({ s: ts, e: te, kind: 'box', on: BOX_W[m[1]], mr: data.trim() ? '10px' : '0px', grp: true, ps: s, pe: e - 1 });
@@ -81,7 +99,7 @@ function mdLeaf(sc, s, e, f, out) {
     if (at.s > i) mdText(sc, i, at.s, f, out);
     if (at.kind === 'link') { const k = out.length; mdFmt(sc, at.ls, at.le, f, sc.w, out); for (let j = k; j < out.length; j++) if (out[j].t === 'text') out[j].href = at.url; }
     else if (at.kind === 'img') out.push({ t: 'img', src: at.url, alt: sc.text.slice(at.ls, at.le), off: at.s });
-    else if (at.kind === 'box') out.push({ t: 'box', on: at.on, off: at.s, mr: at.mr });
+    else if (at.kind === 'box') out.push({ t: 'box', on: at.on, off: at.s, mr: at.mr, name: at.name || '' });
     else out.push({ t: 'ent', name: at.name, off: at.s, b: f.b, i: f.i, s: f.s });
     i = at.e;
   }

@@ -36,7 +36,7 @@ NoteApp.partes.push(Base => class extends Base {
     });
   }
   uniqueName(base, s, skipId) {
-    const taken = new Set((this.entsOf(s) || []).filter(e => !NOVAL(e.type) && e.id !== skipId).map(e => e.name));
+    const taken = new Set((this.entsOf(s) || []).filter(e => !NOVAL(e.type) && e.id !== skipId).map(e => e.name).concat(sheetFlags(this.curSheet(s)).map(f => f.name)));
     if (!taken.has(base)) return base;
     for (let k = 2; ; k++) { const suf = '_' + k, nm = base.slice(0, ENT_MAX - suf.length) + suf; if (!taken.has(nm)) return nm; }
   }
@@ -44,8 +44,8 @@ NoteApp.partes.push(Base => class extends Base {
   addEnt(type) {
     this.setState(s => {
       if (!this.entsOf(s)) return null;
-      const ag = s.mode === 'agenda', all = (this.entsOf(s) || []).filter(e => !NOVAL(e.type)), base = ag && type === 'toggle' ? 'Casilla' : ENT_BASE[type]; let k = 1;
-      while (all.some(e => e.name === base + '_' + k)) k++;
+      const ag = s.mode === 'agenda', all = (this.entsOf(s) || []).filter(e => !NOVAL(e.type)), base = ag && type === 'toggle' ? 'Casilla' : ENT_BASE[type], flags = sheetFlags(this.curSheet(s)).map(f => f.name); let k = 1;
+      while (all.some(e => e.name === base + '_' + k) || flags.includes(base + '_' + k)) k++;
       const e = newEnt(type, base + '_' + k, ag && type === 'toggle' ? { desc: 'Casilla' } : null);
       return this.mapEnts(s, a => a.concat(e));
     });

@@ -38,7 +38,9 @@ function evalExpr(src, get) {
       if (name === 'False') return bool(false);
       const v = look(name); if (!v) throw new NDErr(); return v;
     };
-    const expr = () => { let a = factor(); while (peek() === '+' || peek() === '-' || peek() === '*' || peek() === '/') { const op = next(); a = arith(a, factor(), op); } return a; };
+    // Como en una calculadora: primero * y /, después + y - (los paréntesis van antes que todo).
+    const term = () => { let a = factor(); while (peek() === '*' || peek() === '/') { const op = next(); a = arith(a, factor(), op); } return a; };
+    const expr = () => { let a = term(); while (peek() === '+' || peek() === '-') { const op = next(); a = arith(a, term(), op); } return a; };
     const v = expr(); if (i < toks.length) throw new SyntaxError(); return v;
   };
   try { run(() => num(0)); } catch (e) { if (!(e instanceof NDErr)) return { t: 'text', v: s }; }
@@ -87,6 +89,7 @@ function entOut(e, get) {
   return DEC_T.has(e.type) ? roundOut(e, entOut0(e, get)) : entOut0(e, get);
 }
 function entOut0(e, get) {
+  if (e.type === 'flag') return bool(!!e.on); // casilla-entidad del texto: ([True] Nombre)
   if (e.type === 'expr') return evalExpr(e.expr, get);
   if (e.type === 'toggle') { const has = (e.expr || '').trim(); if (!e.on) return has ? num(0) : bool(false); return has ? evalExpr(e.expr, get) : bool(true); }
   if (e.type === 'slider') return num(sliderVal(e, get));
@@ -111,7 +114,12 @@ const normN = s => String(s || '').trim().replace(/\s+/g, ' ').toLowerCase();
 function makeWorld(s) {
   // =Nombre busca solo en la hoja donde se escribe; =/Nota/Hoja/Entidad busca en cualquier nota (primero en la ventana de quien la escribe).
   const entries = [], sheetW = new Map();
-  [['c', s.notes], ['o', s.other.notes]].forEach(([w, list]) => list.forEach(n => n.sheets.forEach(x => { sheetW.set(x.id, w); (x.entities || []).forEach(e => { if (!NOVAL(e.type)) entries.push({ e, w, sid: x.id, note: normN(n.name), sheet: normN(x.name) }); }); })));
+  // Primero las entidades del panel y después las casillas-entidad del texto: si se repite un nombre, gana la del panel.
+  [['c', s.notes], ['o', s.other.notes]].forEach(([w, list]) => list.forEach(n => n.sheets.forEach(x => {
+    sheetW.set(x.id, w); const base = { w, sid: x.id, note: normN(n.name), sheet: normN(x.name) };
+    (x.entities || []).forEach(e => { if (!NOVAL(e.type)) entries.push({ e, ...base }); });
+    sheetFlags(x).forEach(f => entries.push({ e: { id: 'f:' + x.id + ':' + f.name, type: 'flag', name: f.name, on: f.on }, ...base }));
+  })));
   const bySheet = new Map();
   entries.forEach(en => { let m = bySheet.get(en.sid); if (!m) bySheet.set(en.sid, m = new Map()); if (!m.has(en.e.name)) m.set(en.e.name, en); });
   const memo = new Map(), stack = new Set(), getters = new Map(), pmemo = new Map();

@@ -77,6 +77,7 @@ function naEstadoInicial() {
     "[ ] También sin marcar",
     "- [x] Con guion delante, la casilla va dentro de una lista",
     "([True] Casilla con texto agrupado)",
+    "([False] Mi_activador) Si el texto es un nombre sin espacios, la casilla se convierte en una entidad True/False con ese nombre: en la vista limpia se marca con un clic y ahora vale =Mi_activador.",
     "## Enlaces e imágenes",
     "Un enlace: [qué es Markdown](https://es.wikipedia.org/wiki/Markdown)",
     "![Logo de NoteApp](icons/icon-192.png)",

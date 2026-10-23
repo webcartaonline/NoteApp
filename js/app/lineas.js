@@ -91,13 +91,20 @@ NoteApp.partes.push(Base => class extends Base {
       }
     };
   }
+  // Marca o desmarca la casilla que empieza en la posición off de la línea: [True]↔[False], [x]/[X]↔[ ].
+  toggleBox(lineId, off, src, entId) {
+    const ln = src.find(l => l.id === lineId); if (!ln) return;
+    const m = /^\[(True|False|x|X| )\]/.exec(ln.text.slice(off)); if (!m) return;
+    const nv = { True: 'False', False: 'True', x: ' ', X: ' ', ' ': 'x' }[m[1]], text = ln.text.slice(0, off) + '[' + nv + ']' + ln.text.slice(off + m[0].length);
+    this.setLines(src.map(l => l.id === lineId ? { ...l, text } : l), undefined, undefined, entId);
+  }
   mkdLines(src, entId, out) {
     const s = this.state, cleanV = s.clean || !!out;
     const blocks = cleanV ? blockInfo(src) : null;
     const isList = b => !!b && (b.kind === 'ul' || b.kind === 'ol');
     const isFence = b => !!b && (b.kind === 'code' || b.kind === 'copy');
     const isTab = b => !!b && (b.kind === 'trow' || b.kind === 'tsep');
-    const segV = (sg, focused) => {
+    const segV = (sg, focused, ln) => {
       const v = { isText: false, isLink: false, isCode: false, isImg: false, isBox: false, isEnt: false, off: sg.off };
       const fw = sg.b ? 700 : 'inherit', fst = sg.i ? 'italic' : 'normal', td = sg.s ? 'line-through' : 'none';
       if (sg.t === 'text') return sg.href
@@ -106,7 +113,8 @@ NoteApp.partes.push(Base => class extends Base {
       if (sg.t === 'code') return { ...v, isCode: true, text: sg.text, fw, fst, td };
       if (sg.t === 'img') return { ...v, isImg: true, src: sg.src, alt: sg.alt };
       if (sg.t === 'ent') return { ...v, isEnt: true, off2: sg.off + 1, eq: sg.raw ? '=' : '', label: sg.raw ? (isPath(sg.name) ? sg.name.slice(1) : sg.name) : resolveEntity(sg.name), fw: focused ? 'inherit' : sg.b ? 800 : 600, fst, td, pad: sg.raw ? '4px 0' : '4px 4px', title: sg.raw ? '' : isPath(sg.name) ? sg.name : '=' + sg.name };
-      return { ...v, isBox: true, on: sg.on, mr: sg.mr, bg: sg.on ? '#008000' : 'transparent', onToggle: e => { e.preventDefault(); e.stopPropagation(); } };
+      const can = !!blocks && !!ln;
+      return { ...v, isBox: true, on: sg.on, mr: sg.mr, bg: sg.on ? '#008000' : 'transparent', cur: can ? 'pointer' : 'default', title: sg.name || '', onToggle: e => { e.preventDefault(); e.stopPropagation(); if (can && e.button === 0) this.toggleBox(ln.id, sg.off, src, entId); } };
     };
     let prevHead = false, prevB = null;
     const lines = src.map((ln, idx) => {
@@ -125,7 +133,7 @@ NoteApp.partes.push(Base => class extends Base {
       else if (b.kind === 'trow') {
         segs = []; v.showText = false;
         const cells = [];
-        for (let k = 0; k < b.ncol; k++) { const c = b.cells[k]; cells.push({ segs: c ? cleanSegs(ln.text, c.s, c.e).map(x => segV(x, false)) : [], align: b.aligns[k] || 'left', fw: b.head ? 700 : 400 }); }
+        for (let k = 0; k < b.ncol; k++) { const c = b.cells[k]; cells.push({ segs: c ? cleanSegs(ln.text, c.s, c.e).map(x => segV(x, false, ln)) : [], align: b.aligns[k] || 'left', fw: b.head ? 700 : 400 }); }
         Object.assign(v, { isRow: true, cells, cols: 'repeat(' + b.ncol + ', minmax(0, 1fr))', bg: b.head ? '#2a2a2a' : '#222222', rad: b.head ? (b.last ? '7px' : '7px 7px 0 0') : b.last ? '0 0 7px 7px' : '0', bar: !b.head && !b.last ? 'inset 0 -1px 0 #2f2f2f' : 'none' });
       }
       else if (isFence(b)) {
@@ -156,7 +164,7 @@ NoteApp.partes.push(Base => class extends Base {
         }
       }
       if (!ln.text && !focused && src.length === 1) segs = [{ t: 'text', text: 'Escribe aquí…', off: 0, color: DIM }];
-      segs = segs.map(sg => segV(sg, focused));
+      segs = segs.map(sg => segV(sg, focused, ln));
       return { id: ln.id, text: ln.text, focused, segs, fs, lh, mt, fw: head ? 700 : 400, ...v, ...this.lineHandlers(ln, idx, src, entId), ...(out ? { onDown: null } : null) };
     });
     return lines;

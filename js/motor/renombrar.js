@@ -5,11 +5,11 @@ const EXPR_KEYS = { expr: ['expr'], toggle: ['expr'], slider: ['min', 'max'], pc
 // Índice para saber a qué entidad apunta cada referencia (mismas reglas que makeWorld).
 function refIndex(s) {
   const entries = [], bySheet = new Map();
-  [['c', s.notes], ['o', s.other.notes]].forEach(([w, list]) => list.forEach(n => n.sheets.forEach(x => (x.entities || []).forEach(e => {
-    if (NOVAL(e.type)) return;
-    const en = { id: e.id, name: e.name, w, sid: x.id, nid: n.id, note: normN(n.name), sheet: normN(x.name) };
-    entries.push(en); let m = bySheet.get(x.id); if (!m) bySheet.set(x.id, m = new Map()); if (!m.has(e.name)) m.set(e.name, en);
-  }))));
+  [['c', s.notes], ['o', s.other.notes]].forEach(([w, list]) => list.forEach(n => n.sheets.forEach(x => {
+    const add = (id, name) => { const en = { id, name, w, sid: x.id, nid: n.id, note: normN(n.name), sheet: normN(x.name) }; entries.push(en); let m = bySheet.get(x.id); if (!m) bySheet.set(x.id, m = new Map()); if (!m.has(name)) m.set(name, en); };
+    (x.entities || []).forEach(e => { if (!NOVAL(e.type)) add(e.id, e.name); });
+    sheetFlags(x).forEach(f => add('f:' + x.id + ':' + f.name, f.name)); // casillas-entidad del texto
+  })));
   return (ref, sid, w) => {
     if (isPath(ref)) { const p = ref.slice(2).split('/').map(normN); if (p.length !== 3) return null; const hits = entries.filter(x => x.note === p[0] && x.sheet === p[1] && x.name.toLowerCase() === p[2]); return hits.find(x => x.w === w) || hits[0] || null; }
     const m = bySheet.get(sid); return (m && m.get(ref)) || null;
