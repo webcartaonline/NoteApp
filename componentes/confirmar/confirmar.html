@@ -1,0 +1,27 @@
+<!-- Componente "confirmar" de NoteApp. Ventana emergente para confirmar antes de eliminar una nota o una hoja.
+     Difumina (blur) el resto de la app mientras está abierta. Clic fuera o Esc = cancelar.
+     Los estilos fijos están en confirmar.css; los valores {{ }} vienen de renderVals() (js/app/render.js)
+     y la lógica de js/app/confirmar.js. -->
+<x-dc>
+  <sc-if value="{{ confirmOpen }}" hint-placeholder-val="{{ false }}">
+    <div onMouseDown="{{ confirmBack }}" class="confirmar-fondo">
+      <div role="alertdialog" aria-modal="true" aria-labelledby="confirmar-titulo" class="confirmar-ventana">
+        <div class="confirmar-contenido">
+          <div class="confirmar-cabeza">
+            <span class="confirmar-icono"><span class="confirmar-icono-papelera"></span></span>
+            <span id="confirmar-titulo" class="confirmar-titulo">{{ confirmTitle }}</span>
+          </div>
+          <div class="confirmar-nombre-caja">
+            <span class="confirmar-nombre" title="{{ confirmName }}">{{ confirmName }}</span>
+            <span class="confirmar-detalle">{{ confirmDetail }}</span>
+          </div>
+          <span class="confirmar-aviso">{{ confirmWarn }}</span>
+        </div>
+        <div class="confirmar-botones">
+          <button data-confirmar="cancelar" onClick="{{ confirmCancel }}" class="confirmar-boton confirmar-cancelar">Cancelar</button>
+          <button onClick="{{ confirmOk }}" class="confirmar-boton confirmar-eliminar">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</x-dc>

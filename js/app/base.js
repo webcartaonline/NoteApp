@@ -23,7 +23,7 @@ NoteApp.partes.push(Base => class extends Base {
     document.addEventListener('copy', this._copy);
     document.addEventListener('paste', this._paste);
     document.addEventListener('mousedown', this._down, true);
-    this._key = e => { if (this.selKey(e)) return; if (e.key === 'Escape' && (this.state.menu || this.state.entMenu)) this.setState({ menu: false, entMenu: null }); };
+    this._key = e => { if (this.state.confirm) { if (e.key === 'Escape') { e.preventDefault(); this.closeConfirm(); } return; } if (this.selKey(e)) return; if (e.key === 'Escape' && (this.state.menu || this.state.entMenu)) this.setState({ menu: false, entMenu: null }); };
     document.addEventListener('keydown', this._key);
     this._rev = NA_REV;
     this._naFlush = () => { clearTimeout(this._naT); naSave(this.state, this._rev); this.fsQueue(); };

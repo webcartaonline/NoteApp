@@ -50,19 +50,8 @@ NoteApp.partes.push(Base => class extends Base {
       sheetItemOpacity: sheet ? 1 : 0.4,
       noteItemOpacity: note ? 1 : 0.4,
       toggleMenu: () => this.setState(st => ({ menu: !st.menu })),
-      deleteSheet: () => this.setState(st => {
-        const n = this.curNote(st); if (!n || !n.activeSheet) return { menu: false };
-        const k = n.sheets.findIndex(x => x.id === n.activeSheet);
-        const rest = n.sheets.filter(x => x.id !== n.activeSheet);
-        const nx = rest[Math.min(k, rest.length - 1)];
-        return { menu: false, focusId: null, notes: st.notes.map(m => m.id !== n.id ? m : { ...m, sheets: rest, activeSheet: nx ? nx.id : null }) };
-      }),
-      deleteNote: () => this.setState(st => {
-        const k = st.notes.findIndex(m => m.id === st.activeNote); if (k < 0) return { menu: false };
-        const rest = st.notes.filter(m => m.id !== st.activeNote);
-        const nx = rest[Math.min(k, rest.length - 1)];
-        return { menu: false, focusId: null, editing: null, notes: rest, activeNote: nx ? nx.id : null };
-      }),
+      deleteSheet: () => this.askDelete('sheet'), // abre la ventana de confirmación (js/app/confirmar.js)
+      deleteNote: () => this.askDelete('note'),
       noSheet: !sheet,
       addNote: () => { const n = { id: uid('n'), name: 'Nueva nota', sheets: [], activeSheet: null }; this.setState(st => ({ notes: st.notes.concat(n), activeNote: n.id, focusId: null })); },
       addSheet: () => { if (!note) return; const x = mkSheet('Nueva hoja'); this.setState(st => ({ focusId: null, notes: st.notes.map(n => n.id !== st.activeNote ? n : { ...n, sheets: n.sheets.concat(x), activeSheet: x.id }) })); },
@@ -97,6 +86,7 @@ NoteApp.partes.push(Base => class extends Base {
       pillTop: s.mode === 'notas' ? '37px' : '0px',
       toggleMode: () => this.setState(st => ({ mode: st.mode === 'notas' ? 'agenda' : 'notas', notes: st.other.notes, activeNote: st.other.activeNote, other: { notes: st.notes, activeNote: st.activeNote }, focusId: null, field: null, entMenu: null, colMenu: null, menu: false, editing: null }))
     };
+    Object.assign(v, this.confirmVals(s)); // ventana de confirmación al eliminar
     v.ui = v; // los componentes reciben todos estos valores con dc-props="{{ ui }}"
     return v;
   }

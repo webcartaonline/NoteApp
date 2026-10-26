@@ -25,7 +25,8 @@
     'entidad-contador',
     'entidad-tabla',
     'entidades',
-    'mensajes'
+    'mensajes',
+    'confirmar'
   ];
   const ruta = n => 'componentes/' + n + '/' + n + '.html';
 

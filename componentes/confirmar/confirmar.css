@@ -1,0 +1,141 @@
+/* Componente "confirmar": ventana emergente para confirmar antes de eliminar una nota o una hoja. */
+
+@keyframes confirmarFondo { from { opacity: 0; } to { opacity: 1; } }
+@keyframes confirmarVentana { from { opacity: 0; transform: translateY(6px) scale(.97); } to { opacity: 1; transform: none; } }
+
+/* Capa que cubre toda la app: oscurece y difumina lo que hay detrás */
+.confirmar-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(0,0,0,.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: confirmarFondo .18s ease-out;
+}
+
+/* La ventana. Radio 18px y margen interior 8px: los botones llevan 10px (18 - 8)
+   para que sus esquinas sigan la curva de la ventana. */
+.confirmar-ventana {
+  width: min(360px, 100%);
+  padding: 8px;
+  background: #1c1c1c;
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.6), inset 0 0 0 1px #2e2e2e;
+  display: flex;
+  flex-direction: column;
+  animation: confirmarVentana .2s cubic-bezier(.2,.8,.2,1);
+}
+
+.confirmar-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 10px 18px;
+}
+
+.confirmar-cabeza {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.confirmar-icono {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(140,58,58,.2);
+}
+
+.confirmar-icono-papelera {
+  width: 16px;
+  height: 16px;
+  background: #c25b5b;
+  mask: url(../../assets/papelera.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/papelera.svg) center / contain no-repeat;
+}
+
+.confirmar-titulo {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* Recuadro con el nombre de lo que se va a eliminar */
+.confirmar-nombre-caja {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 9px 12px;
+  background: #2a2a2a;
+  border-radius: 10px;
+}
+
+.confirmar-nombre {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.confirmar-detalle {
+  font-size: 13px;
+  color: #8a8a8a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.confirmar-aviso {
+  font-size: 14px;
+  line-height: 19px;
+  color: #a6a6a6;
+  text-wrap: pretty;
+}
+
+/* Botones abajo, pegados al borde de la ventana con un margen de 8px */
+.confirmar-botones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.confirmar-boton {
+  height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: background-color .15s;
+}
+.confirmar-boton:focus-visible {
+  box-shadow: 0 0 0 2px #1c1c1c, 0 0 0 4px #6a6a6a;
+}
+
+.confirmar-cancelar {
+  background: #2a2a2a;
+}
+.confirmar-cancelar:hover {
+  background: #333 !important;
+}
+
+/* Rojo mate, poco brillante */
+.confirmar-eliminar {
+  background: #8c3a3a;
+}
+.confirmar-eliminar:hover {
+  background: #994040 !important;
+}

@@ -38,6 +38,7 @@
 <link rel="stylesheet" href="componentes/entidad-tabla/entidad-tabla.css">
 <link rel="stylesheet" href="componentes/entidades/entidades.css">
 <link rel="stylesheet" href="componentes/mensajes/mensajes.css">
+<link rel="stylesheet" href="componentes/confirmar/confirmar.css">
 <script>if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));</script>
 <!-- Arranque: descarga los componentes (carpeta componentes/) y luego el motor (support.js) -->
 <script src="js/arranque.js"></script>
@@ -62,6 +63,7 @@
     </sc-if>
   </main>
   <dc-import name="mensajes" dc-props="{{ ui }}"></dc-import>
+  <dc-import name="confirmar" dc-props="{{ ui }}"></dc-import>
 </div>
 </x-dc>
 <!-- La lógica de la app está repartida en js/app/*.js; aquí solo se juntan las partes. -->
@@ -83,6 +85,7 @@ const Component = NoteApp.crearComponente(DCLogic);
 <script src="js/app/vista-entidades.js"></script>
 <script src="js/app/pestanas.js"></script>
 <script src="js/app/seleccion.js"></script>
+<script src="js/app/confirmar.js"></script>
 <script src="js/app/lineas.js"></script>
 <script src="js/app/render.js"></script>
 </body>
