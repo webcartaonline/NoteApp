@@ -8,10 +8,16 @@ const cap = t => t ? t[0].toUpperCase() + t.slice(1) : t;
 const dateMs = e => { const p = String(e.date || '').split('-').map(Number), q = String(e.time || '00:00').split(':').map(Number); if (p.length < 3 || p.some(isNaN)) return NaN; return new Date(p[0], p[1] - 1, p[2], q[0] || 0, q[1] || 0).getTime(); };
 function durTxt(a) { const d = Math.floor(a / 864e5), h = Math.floor(a / 36e5) % 24, m = Math.floor(a / 6e4) % 60, s = Math.floor(a / 1e3) % 60; return d ? d + ' d ' + h + ' h ' + m + ' min' : h ? h + ' h ' + m + ' min' : m ? m + ' min ' + s + ' s' : s + ' s'; }
 const toNum = x => !x ? NaN : x.t === 'num' || x.t === 'date' ? x.v : x.t === 'bool' ? (x.v ? 1 : 0) : NaN;
-const parseNum = s => { s = String(s == null ? '' : s).trim(); return /^-?\d+(?:[.,]\d+)?$/.test(s) ? parseFloat(s.replace(',', '.')) : null; };
+// Números al estilo europeo: la coma separa los decimales y el punto, opcional, los miles (de 3 en 3): 10.000.000,5.
+// Los puntos son solo una ayuda para leer: por dentro se quitan (10.000.000,5 = 10000000.5).
+const NUM_RX = '(?:\\d{1,3}(?:\\.\\d{3})+(?!\\d)|\\d+)(?:,\\d+)?';
+const numOf = t => parseFloat(String(t).replace(/\./g, '').replace(',', '.'));
+const parseNum = s => { s = String(s == null ? '' : s).trim(); return new RegExp('^-?' + NUM_RX + '$').test(s) ? numOf(s) : null; };
+// Pone los puntos de los miles a la parte entera de un número ya escrito con coma decimal: 10000000,5 → 10.000.000,5.
+const groupK = s => s.replace(/^(-?)(\d+)/, (m, sg, d) => sg + d.replace(/\B(?=(\d{3})+$)/g, '.'));
 function fmt(x) {
   if (!x) return 'ND';
-  if (x.t === 'num') return isFinite(x.v) ? x.v.toLocaleString('es-ES', { maximumFractionDigits: 2, useGrouping: false }) : 'ND';
+  if (x.t === 'num') return isFinite(x.v) ? groupK(x.v.toLocaleString('es-ES', { maximumFractionDigits: 2, useGrouping: false })) : 'ND';
   if (x.t === 'bool') return x.v ? 'True' : 'False';
   if (x.t === 'date') { const f1 = ms => { const d = new Date(ms); return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }; if (x.end != null) { const a = f1(x.v), b = f1(x.end); return a.slice(0, 10) === b.slice(0, 10) ? a + ' – ' + b.slice(11) : a + ' – ' + b; } const d = new Date(x.v); return pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()); }
   return String(x.v);
@@ -19,7 +25,7 @@ function fmt(x) {
 class NDErr extends Error {}
 function evalExpr(src, get) {
   const s = String(src || '').trim(); if (!s) return null;
-  const re = new RegExp('\\s*(' + PATH_RX + '|=?[' + NAME_START + '][' + ID_CH + ']*|\\d+(?:[.,]\\d+)?|[()+\\-*/])', 'y');
+  const re = new RegExp('\\s*(' + PATH_RX + '|=?[' + NAME_START + '][' + ID_CH + ']*|' + NUM_RX + '|[()+\\-*/])', 'y');
   const toks = []; let pos = 0;
   while (pos < s.length) { re.lastIndex = pos; const m = re.exec(s); if (!m) return { t: 'text', v: s }; toks.push(m[1]); pos = re.lastIndex; }
   const run = look => {
@@ -31,7 +37,7 @@ function evalExpr(src, get) {
       if (t === '-') { const v = toNum(factor()); if (isNaN(v)) throw new NDErr(); return num(-v); }
       if (t === '+') return factor();
       if (t === '(') { const v = expr(); if (next() !== ')') throw new SyntaxError(); return v; }
-      if (/^\d/.test(t)) return num(parseFloat(t.replace(',', '.')));
+      if (/^\d/.test(t)) return num(numOf(t));
       if (/^[)*/]$/.test(t)) throw new SyntaxError();
       const name = isPath(t) ? t : t.replace(/^=/, '');
       if (name === 'True') return bool(true);
@@ -151,7 +157,7 @@ function makeWorld(s) {
   return { at };
 }
 function hlExpr(text) {
-  const out = [], re = new RegExp('(' + PATH_RX + ')|(=?)([' + NAME_START + '][' + ID_CH + ']*)|(\\d+(?:[.,]\\d+)?)', 'g');
+  const out = [], re = new RegExp('(' + PATH_RX + ')|(=?)([' + NAME_START + '][' + ID_CH + ']*)|(' + NUM_RX + ')', 'g');
   let last = 0, m;
   while ((m = re.exec(text))) {
     if (m.index > last) out.push({ text: text.slice(last, m.index), color: '#fff' });
@@ -165,7 +171,7 @@ function hlExpr(text) {
 }
 function substSegs(text, get) {
   const src = String(text || '').trim(), out = [];
-  const re = new RegExp('(' + PATH_RX + ')|(=?)([' + NAME_START + '][' + ID_CH + ']*)|(\\d+(?:[.,]\\d+)?)', 'g');
+  const re = new RegExp('(' + PATH_RX + ')|(=?)([' + NAME_START + '][' + ID_CH + ']*)|(' + NUM_RX + ')', 'g');
   let last = 0, m, refs = 0;
   while ((m = re.exec(src))) {
     if (m.index > last) out.push({ text: src.slice(last, m.index).replace(/\s+/g, ' '), color: '#fff' });

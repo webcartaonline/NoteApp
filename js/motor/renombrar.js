@@ -26,7 +26,7 @@ function renameIn(s, fix) {
   const inExpr = (t, sid, w) => {
     const tt = t.trim(); if (!tt) return t;
     if (tt.length > 1 && QUOTE.test(tt)) return t.replace(new RegExp(PATH_RX + '|=(' + NAME + ')', 'g'), (m, n) => { const nn = fix(n || m, sid, w); return nn == null ? m : put(nn, '='); });
-    return t.replace(new RegExp('(' + PATH_RX + ')|(=?)(' + NAME + ')|\\d+(?:[.,]\\d+)?', 'g'), (m, pa, eq, n) => { if (!pa && !n) return m; const nn = fix(pa || n, sid, w); return nn == null ? m : put(nn, eq || ''); });
+    return t.replace(new RegExp('(' + PATH_RX + ')|(=?)(' + NAME + ')|' + NUM_RX, 'g'), (m, pa, eq, n) => { if (!pa && !n) return m; const nn = fix(pa || n, sid, w); return nn == null ? m : put(nn, eq || ''); });
   };
   const inCell = (t, sid, w) => {
     const tt = String(t || '').trim(), r = new RegExp('^=(' + NAME + ')$').exec(tt), pa = new RegExp('^' + PATH_RX + '$').test(tt) ? tt : null;
