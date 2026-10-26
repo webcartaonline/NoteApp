@@ -3,12 +3,12 @@
      Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
 <x-dc>
   <div class="barra-hojas-caja">
-    <div class="barra-hojas-caja-2">
-      <button aria-label="Convertir" class="barra-hojas-convertir"></button>
-      <button onClick="{{ toggleView }}" aria-label="Vista limpia" aria-pressed="{{ clean }}" title="Vista limpia / sucia" class="barra-hojas-vista-limpia">
+    <button onClick="{{ toggleView }}" aria-label="Vista limpia" aria-pressed="{{ clean }}" title="Vista limpia / sucia" class="barra-hojas-caja-2">
+      <span class="barra-hojas-convertir"></span>
+      <span class="barra-hojas-vista-limpia">
         <span class="barra-hojas-texto" style="left:{{ knobLeft }};top:0;background:{{ knobColor }};"></span>
-      </button>
-    </div>
+      </span>
+    </button>
     <div class="barra-hojas-caja-3"><sc-if value="{{ isAgenda }}" hint-placeholder-val="{{ false }}"><span class="barra-hojas-texto-2">{{ clockTxt }}</span></sc-if>
       <div class="barra-hojas-caja-4">
         <div class="barra-hojas-caja-5">

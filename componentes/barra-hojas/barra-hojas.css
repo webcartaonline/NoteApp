@@ -7,21 +7,24 @@
   flex: none;
 }
 
+/* Toda la caja (icono + interruptor) es un solo botón que cambia entre vista limpia y sucia. */
 .barra-hojas-caja-2 {
   display: flex;
   align-items: center;
   gap: 9px;
+  margin: 0;
   padding: 0 9px 0 7px;
+  border: 0;
+  font: inherit;
   background: #2a2a2a;
   border-radius: 7px;
+  cursor: pointer;
 }
 
 .barra-hojas-convertir {
+  flex: none;
   width: 16px;
   height: 16px;
-  padding: 0;
-  border: 0;
-  cursor: pointer;
   background: #8a8a8a;
   mask: url(../../assets/convertir-documento.svg) center / contain no-repeat;
   -webkit-mask: url(../../assets/convertir-documento.svg) center / contain no-repeat;
@@ -29,13 +32,11 @@
 
 .barra-hojas-vista-limpia {
   position: relative;
+  flex: none;
   width: 31px;
   height: 15px;
-  padding: 0;
-  border: 0;
   border-radius: 7px;
   background: #555;
-  cursor: pointer;
 }
 
 .barra-hojas-texto {
