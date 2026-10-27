@@ -1,0 +1,115 @@
+<!-- Componente "diagrama" de NoteApp. Lienzo de la ventana Diagrama: zonas, conexiones, formas, etiquetas,
+     barras de la forma/conexión seleccionada, buscador de menciones y zoom.
+     Los estilos fijos están en diagrama.css; los que cambian ({{ }}) siguen aquí.
+     Los valores {{ }} vienen de dgVals() (js/app/diagrama.js), que se añade en renderVals().
+     OJO: el cierre de las etiquetas svg se escribe con un espacio antes del «>» a propósito: Live Server mete su
+     script de recarga en los archivos que tienen ese cierre sin espacio y los corta, y el componente deja de verse. -->
+<x-dc>
+  <div data-diagrama="1" onPointerDown="{{ dgDown }}" onDoubleClick="{{ dgDbl }}" class="diagrama-lienzo" style="cursor:{{ dgCursor }};background-size:{{ dgGridSize }};background-position:{{ dgGridPos }};">
+    <div class="diagrama-mundo" style="transform:{{ dgWorld }};">
+      <sc-for list="{{ dgZones }}" as="n" hint-placeholder-count="0">
+        <div data-node="{{ n.id }}" data-sel="{{ n.sel }}" data-hl="{{ n.hl }}" onPointerDown="{{ n.down }}" onDoubleClick="{{ n.dbl }}" class="diagrama-nodo diagrama-zona" style="left:{{ n.x }};top:{{ n.y }};width:{{ n.w }};height:{{ n.h }};cursor:{{ n.cur }};">
+          <svg class="diagrama-forma" viewBox="{{ n.vb }}" preserveAspectRatio="none"><path d="{{ n.d }}" fill="{{ n.fill }}" stroke="{{ n.stroke }}" strokeWidth="1.5" strokeDasharray="{{ n.dash }}"></path></svg >
+          <div data-lines="{{ n.id }}" class="diagrama-texto" style="padding:{{ n.pad }};justify-content:{{ n.vjust }};text-align:{{ n.align }};">
+            <div class="diagrama-texto-in"><dc-import name="lineas" dc-props="{{ ui }}" list="{{ n.lines }}"></dc-import></div>
+          </div>
+          <sc-if value="{{ n.dots }}" hint-placeholder-val="{{ false }}">
+            <span onPointerDown="{{ n.link }}" title="Arrastra para conectar" class="diagrama-punto diagrama-punto-n"></span>
+            <span onPointerDown="{{ n.link }}" title="Arrastra para conectar" class="diagrama-punto diagrama-punto-e"></span>
+            <span onPointerDown="{{ n.link }}" title="Arrastra para conectar" class="diagrama-punto diagrama-punto-s"></span>
+            <span onPointerDown="{{ n.link }}" title="Arrastra para conectar" class="diagrama-punto diagrama-punto-o"></span>
+          </sc-if>
+          <sc-if value="{{ n.resize }}" hint-placeholder-val="{{ false }}"><span onPointerDown="{{ n.resizeDown }}" title="Cambiar tamaño" class="diagrama-tamano"></span></sc-if>
+        </div>
+      </sc-for>
+      <svg class="diagrama-conexiones">
+        <sc-for list="{{ dgEdges }}" as="k" hint-placeholder-count="0">
+          <path d="{{ k.d }}" fill="none" stroke="{{ k.color }}" strokeWidth="2" strokeDasharray="{{ k.dash }}" strokeLinecap="round"></path>
+          <path d="{{ k.heads }}" fill="{{ k.color }}" stroke="{{ k.color }}" strokeWidth="1" strokeLinejoin="round"></path>
+          <path data-edge="{{ k.id }}" d="{{ k.hit }}" onPointerDown="{{ k.down }}" onDoubleClick="{{ k.dbl }}" class="diagrama-conexion-zona" style="cursor:{{ k.cur }};"></path>
+        </sc-for>
+        <path d="{{ dgLinkD }}" fill="none" stroke="#00a000" strokeWidth="2" strokeDasharray="6 5"></path>
+      </svg >
+      <sc-for list="{{ dgNodes }}" as="n" hint-placeholder-count="0">
+        <div data-node="{{ n.id }}" data-sel="{{ n.sel }}" data-hl="{{ n.hl }}" onPointerDown="{{ n.down }}" onDoubleClick="{{ n.dbl }}" class="diagrama-nodo" style="left:{{ n.x }};top:{{ n.y }};width:{{ n.w }};height:{{ n.h }};cursor:{{ n.cur }};">
+          <svg class="diagrama-forma" viewBox="{{ n.vb }}" preserveAspectRatio="none"><path d="{{ n.d }}" fill="{{ n.fill }}" stroke="{{ n.stroke }}" strokeWidth="1.5" strokeDasharray="{{ n.dash }}" strokeLinejoin="round"></path><path d="{{ n.d2 }}" fill="none" stroke="{{ n.stroke }}" strokeWidth="1.5" strokeLinejoin="round"></path></svg >
+          <div data-lines="{{ n.id }}" class="diagrama-texto" style="padding:{{ n.pad }};justify-content:{{ n.vjust }};text-align:{{ n.align }};">
+            <div class="diagrama-texto-in"><dc-import name="lineas" dc-props="{{ ui }}" list="{{ n.lines }}"></dc-import></div>
+          </div>
+          <sc-if value="{{ n.dots }}" hint-placeholder-val="{{ false }}">
+            <span onPointerDown="{{ n.link }}" title="Arrastra para conectar" class="diagrama-punto diagrama-punto-n"></span>
+            <span onPointerDown="{{ n.link }}" title="Arrastra para conectar" class="diagrama-punto diagrama-punto-e"></span>
+            <span onPointerDown="{{ n.link }}" title="Arrastra para conectar" class="diagrama-punto diagrama-punto-s"></span>
+            <span onPointerDown="{{ n.link }}" title="Arrastra para conectar" class="diagrama-punto diagrama-punto-o"></span>
+          </sc-if>
+          <sc-if value="{{ n.resize }}" hint-placeholder-val="{{ false }}"><span onPointerDown="{{ n.resizeDown }}" title="Cambiar tamaño" class="diagrama-tamano"></span></sc-if>
+        </div>
+      </sc-for>
+      <sc-for list="{{ dgLabels }}" as="l" hint-placeholder-count="0">
+        <div data-edge="{{ l.id }}" class="diagrama-etiqueta" style="left:{{ l.x }};top:{{ l.y }};border-color:{{ l.color }};">
+          <sc-if value="{{ l.show }}" hint-placeholder-val="{{ true }}"><span onPointerDown="{{ l.down }}" onDoubleClick="{{ l.dbl }}" title="{{ l.title }}" class="diagrama-etiqueta-texto">{{ l.text }}</span></sc-if>
+          <sc-if value="{{ l.editing }}" hint-placeholder-val="{{ false }}"><input data-etiqueta="1" value="{{ dgLabelDraft }}" onChange="{{ dgLabelChange }}" onKeyDown="{{ dgLabelKey }}" onBlur="{{ dgLabelBlur }}" onPointerDown="{{ dgStop }}" maxLength="120" spellCheck="false" placeholder="Etiqueta" class="diagrama-etiqueta-campo"></sc-if>
+        </div>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ dgEmpty }}" hint-placeholder-val="{{ false }}">
+      <div class="diagrama-vacio"><span class="diagrama-vacio-icono"></span><p class="diagrama-vacio-texto">{{ dgHint }}</p><p class="diagrama-vacio-texto-2">{{ dgHint2 }}</p></div>
+    </sc-if>
+    <sc-if value="{{ dgBox }}" hint-placeholder-val="{{ false }}"><div class="diagrama-recuadro" style="{{ dgBoxStyle }}"></div></sc-if>
+
+    <sc-if value="{{ dgBar }}" hint-placeholder-val="{{ false }}">
+      <div data-dg-ui="1" onPointerDown="{{ dgStop }}" class="diagrama-barra" style="{{ dgBarStyle }}">
+        <sc-for list="{{ dgColors }}" as="c" hint-placeholder-count="6"><button onClick="{{ c.pick }}" title="{{ c.title }}" aria-label="{{ c.title }}" class="diagrama-color" style="background:{{ c.bg }};box-shadow:{{ c.ring }};"></button></sc-for>
+        <sc-if value="{{ dgCanShape }}" hint-placeholder-val="{{ false }}">
+          <span class="diagrama-barra-separador"></span>
+          <sc-for list="{{ dgShapes }}" as="f" hint-placeholder-count="6"><button onClick="{{ f.pick }}" title="{{ f.title }}" aria-label="{{ f.title }}" class="diagrama-barra-forma {{ f.cls }}" style="background:{{ f.bg }};"></button></sc-for>
+        </sc-if>
+        <span class="diagrama-barra-separador"></span>
+        <sc-if value="{{ dgOne }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ dgEditTxt }}" title="Editar texto (doble clic o Intro)" aria-label="Editar texto" class="diagrama-boton diagrama-boton-texto"></button>
+          <button onClick="{{ dgMenOpen }}" title="Mencionar una entidad de Notas o Agenda" aria-label="Mencionar entidad" aria-pressed="{{ dgMenOn }}" class="diagrama-boton-mencion">=</button>
+        </sc-if>
+        <button onClick="{{ dgDup }}" title="Duplicar (Ctrl+D)" aria-label="Duplicar" class="diagrama-boton diagrama-boton-duplicar"></button>
+        <button onClick="{{ dgDel }}" title="Borrar (Supr)" aria-label="Borrar" class="diagrama-boton diagrama-boton-borrar"></button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ dgEdgeBar }}" hint-placeholder-val="{{ false }}">
+      <div data-dg-ui="1" onPointerDown="{{ dgStop }}" class="diagrama-barra" style="{{ dgEdgeBarStyle }}">
+        <button onClick="{{ dgEdgeLabel }}" title="Escribir una etiqueta (doble clic en la flecha)" class="diagrama-boton-texto-2">Etiqueta</button>
+        <button onClick="{{ dgEdgeDash }}" title="Línea continua o discontinua" class="diagrama-boton-texto-2">{{ dgEdgeDashTxt }}</button>
+        <button onClick="{{ dgEdgeHead }}" title="Puntas de flecha: al final, a los dos lados o sin flecha" class="diagrama-boton-texto-2 diagrama-boton-flecha">{{ dgEdgeHeadTxt }}</button>
+        <button onClick="{{ dgEdgeFlip }}" title="Cambiar el sentido" class="diagrama-boton-texto-2">Invertir</button>
+        <span class="diagrama-barra-separador"></span>
+        <button onClick="{{ dgEdgeDel }}" title="Borrar conexión (Supr)" aria-label="Borrar conexión" class="diagrama-boton diagrama-boton-borrar"></button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ dgMen }}" hint-placeholder-val="{{ false }}">
+      <div data-dg-ui="1" data-menciones="1" onPointerDown="{{ dgStop }}" class="diagrama-menciones">
+        <div class="diagrama-menciones-cabecera">
+          <span class="diagrama-menciones-titulo">Mencionar entidad</span>
+          <button onClick="{{ dgMenClose }}" aria-label="Cerrar" title="Cerrar (Esc)" class="diagrama-menciones-cerrar">×</button>
+        </div>
+        <input value="{{ dgMenQ }}" onChange="{{ dgMenChange }}" onKeyDown="{{ dgMenKey }}" spellCheck="false" placeholder="Buscar por nota, hoja o nombre" class="diagrama-menciones-buscar">
+        <div data-dg-scroll="1" data-scroll="" class="diagrama-menciones-lista">
+          <sc-if value="{{ dgMenNone }}" hint-placeholder-val="{{ false }}"><p class="diagrama-menciones-nada">No hay entidades que coincidan</p></sc-if>
+          <sc-for list="{{ dgMenItems }}" as="it" hint-placeholder-count="4">
+            <button onClick="{{ it.pick }}" title="{{ it.path }}" class="diagrama-menciones-item">
+              <span class="diagrama-menciones-donde">{{ it.win }} · {{ it.where }}</span>
+              <span class="diagrama-menciones-fila"><span class="diagrama-menciones-nombre">{{ it.name }}</span><span class="diagrama-menciones-valor">{{ it.val }}</span></span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <div data-dg-ui="1" onPointerDown="{{ dgStop }}" class="diagrama-zoom">
+      <button onClick="{{ dgZoomOut }}" title="Alejar (Ctrl + rueda)" aria-label="Alejar" class="diagrama-zoom-boton">−</button>
+      <button onClick="{{ dgZoomReset }}" title="Volver al 100 %" class="diagrama-zoom-texto">{{ dgZoomTxt }}</button>
+      <button onClick="{{ dgZoomIn }}" title="Acercar (Ctrl + rueda)" aria-label="Acercar" class="diagrama-zoom-boton">+</button>
+      <button onClick="{{ dgFit }}" title="Ver todo el diagrama" class="diagrama-zoom-ajustar">Ajustar</button>
+    </div>
+  </div>
+</x-dc>

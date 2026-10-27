@@ -5,7 +5,7 @@ const EXPR_KEYS = { expr: ['expr'], toggle: ['expr'], slider: ['min', 'max'], pc
 // Índice para saber a qué entidad apunta cada referencia (mismas reglas que makeWorld).
 function refIndex(s) {
   const entries = [], bySheet = new Map();
-  [['c', s.notes], ['o', s.other.notes]].forEach(([w, list]) => list.forEach(n => n.sheets.forEach(x => {
+  winLists(s).forEach(([w, list]) => list.forEach(n => n.sheets.forEach(x => {
     const add = (id, name) => { const en = { id, name, w, sid: x.id, nid: n.id, note: normN(n.name), sheet: normN(x.name) }; entries.push(en); let m = bySheet.get(x.id); if (!m) bySheet.set(x.id, m = new Map()); if (!m.has(name)) m.set(name, en); };
     (x.entities || []).forEach(e => { if (!NOVAL(e.type)) add(e.id, e.name); });
     sheetFlags(x).forEach(f => add('f:' + x.id + ':' + f.name, f.name)); // casillas-entidad del texto
@@ -39,7 +39,7 @@ function renameIn(s, fix) {
   };
   const doEnt = (e, sid, w) => {
     let ne = e; const set = (k, v) => { if (v === ne[k]) return; if (ne === e) ne = { ...e }; ne[k] = v; };
-    if (e.type === 'text' && Array.isArray(e.lines)) set('lines', doLines(e.lines, sid, w));
+    if ((e.type === 'text' || e.type === 'node') && Array.isArray(e.lines)) set('lines', doLines(e.lines, sid, w)); // texto y formas de diagrama
     (EXPR_KEYS[e.type] || []).forEach(k => { if (typeof e[k] === 'string') set(k, inExpr(e[k], sid, w)); });
     if (e.type === 'logic' && Array.isArray(e.alts)) { let ch = false; const alts = e.alts.map(a => { let na = a; ['a', 'b', 'out'].forEach(k => { if (typeof a[k] !== 'string') return; const v = inExpr(a[k], sid, w); if (v !== na[k]) { if (na === a) na = { ...a }; na[k] = v; } }); if (na !== a) ch = true; return na; }); if (ch) set('alts', alts); }
     if (e.type === 'table' && Array.isArray(e.rows)) { let ch = false; const rows = e.rows.map(r => { let nc = null; for (const k in (r.cells || {})) { const v = inCell(r.cells[k], sid, w); if (v !== r.cells[k]) { nc = nc || { ...r.cells }; nc[k] = v; } } if (!nc) return r; ch = true; return { ...r, cells: nc }; }); if (ch) set('rows', rows); }
@@ -50,11 +50,16 @@ function renameIn(s, fix) {
     const sheets = n.sheets.map(x => {
       const lines = Array.isArray(x.lines) ? doLines(x.lines, x.id, w) : x.lines;
       let chE = false; const ents = (x.entities || []).map(e => { const ne = doEnt(e, x.id, w); if (ne !== e) chE = true; return ne; });
-      if (lines === x.lines && !chE) return x; chN = true; return { ...x, lines, entities: chE ? ents : x.entities };
+      // Conexiones de los diagramas: su etiqueta puede llevar menciones
+      let chK = false; const edges = Array.isArray(x.edges) ? x.edges.map(k => { if (typeof k.label !== 'string' || !k.label) return k; const t = inText(k.label, x.id, w); if (t === k.label) return k; chK = true; return { ...k, label: t }; }) : x.edges;
+      if (lines === x.lines && !chE && !chK) return x; chN = true; const nx = { ...x, lines, entities: chE ? ents : x.entities }; if (chK) nx.edges = edges; return nx;
     });
     return chN ? { ...n, sheets } : n;
   });
-  return { notes: doWin(s.notes, 'c'), other: { ...s.other, notes: doWin(s.other.notes, 'o') } };
+  // Devuelve los cambios de estado (notes, activeNote, mode y wins) con todas las ventanas actualizadas.
+  const all = winsOf(s), out = {};
+  WINS.forEach(k => { out[k] = { ...all[k], notes: doWin(all[k].notes || [], k) }; });
+  return winPatch(out, s.mode);
 }
 // Crea la función fix para cada tipo de cambio de nombre.
 function renameFix(before, kind, id, v) {

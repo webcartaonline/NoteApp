@@ -24,7 +24,7 @@ NoteApp.partes.push(Base => class extends Base {
       else notes = mapEnts(e => e.type !== 'table' ? e : { ...e, cols: e.cols.map(c => c.id === id ? { ...c, title: v } : c) });
       if (kind === 'ent' || kind === 'note' || kind === 'sheet') {
         // Actualiza las menciones y fórmulas que apuntaban al nombre antiguo (en Notas y en Agenda).
-        try { const r = renameIn({ ...s, notes }, renameFix(s, kind, id, v)); return { notes: r.notes, other: r.other, editing: null }; } catch (_) {}
+        try { const r = renameIn({ ...s, notes }, renameFix(s, kind, id, v)); return { ...r, editing: null }; } catch (_) {}
       }
       return { notes, editing: null };
     });

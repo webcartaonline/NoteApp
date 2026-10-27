@@ -31,7 +31,7 @@ NoteApp.partes.push(Base => class extends Base {
     window.addEventListener('pagehide', this._naFlush);
     window.addEventListener('beforeunload', this._naFlush);
     if (FS_OK) fsGetHandle().then(async h => { if (!h) return; this._fsDir = h; let p = 'prompt'; try { p = await h.queryPermission({ mode: 'readwrite' }); } catch (_) {} if (p === 'granted') this.fsStart(h, false); else this.setState({ fs: 'perm', fsName: h.name }); });
-    this._last = Date.now(); this._tick = setInterval(() => { const s = this.state; this.checkNotifs(s); if (s.mode === 'agenda' || s.other.notes.some(n => n.sheets.some(x => (x.entities || []).some(e => e.type === 'count')))) this.setState({ now: Date.now() }); }, 1000);
+    this._last = Date.now(); this._tick = setInterval(() => { const s = this.state; this.checkNotifs(s); if (s.mode === 'agenda' || winLists(s).some(([w, list]) => w !== s.mode && list.some(n => n.sheets.some(x => (x.entities || []).some(e => e.type === 'count'))))) this.setState({ now: Date.now() }); }, 1000);
   }
   componentWillUnmount() { if (this._naFlush) { this._naFlush(); window.removeEventListener('pagehide', this._naFlush); window.removeEventListener('beforeunload', this._naFlush); } clearInterval(this._tick); document.removeEventListener('mousedown', this._down, true); document.removeEventListener('keydown', this._key); document.removeEventListener('mousemove', this._move); document.removeEventListener('mouseup', this._up); document.removeEventListener('copy', this._copy); document.removeEventListener('paste', this._paste); }
   componentDidUpdate() {
@@ -50,6 +50,13 @@ NoteApp.partes.push(Base => class extends Base {
       else { const c = Math.min(k, L); ta.setSelectionRange(c, c); }
     }
     this.applySel();
+  }
+  // Cambia de ventana (notas, agenda o diagrama). Ver js/motor/ventanas.js.
+  setMode(m) {
+    if (!WINS.includes(m)) return;
+    const a = document.activeElement; if (a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT')) a.blur();
+    this._msel = null;
+    this.setState(st => st.mode === m ? null : { ...winPatch(winsOf(st), m), focusId: null, field: null, entMenu: null, colMenu: null, menu: false, editing: null, dsel: null, dedit: null, dlabel: null, dmen: null, dlink: null, dbox: null });
   }
   curNote(s) { return s.notes.find(n => n.id === s.activeNote); }
   curSheet(s) { const n = this.curNote(s); return n && n.sheets.find(x => x.id === n.activeSheet); }

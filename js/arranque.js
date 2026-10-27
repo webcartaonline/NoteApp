@@ -26,7 +26,8 @@
     'entidad-tabla',
     'entidades',
     'mensajes',
-    'confirmar'
+    'confirmar',
+    'diagrama'
   ];
   const ruta = n => 'componentes/' + n + '/' + n + '.html';
 

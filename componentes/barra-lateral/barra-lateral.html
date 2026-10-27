@@ -1,13 +1,14 @@
-<!-- Componente "barra-lateral" de NoteApp. Barra lateral: interruptor Notas/Agenda, botones para añadir entidades, carpeta de guardado y ajustes.
+<!-- Componente "barra-lateral" de NoteApp. Barra lateral: selector de ventana (Agenda, Notas, Diagrama), botones para añadir entidades o formas, carpeta de guardado y ajustes.
      Los estilos fijos están en barra-lateral.css; los que cambian ({{ }}) siguen aquí.
      Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
 <x-dc>
   <aside class="barra-lateral-lateral">
-    <button onClick="{{ toggleMode }}" aria-label="Cambiar modo" class="barra-lateral-cambiar-modo">
+    <div role="group" aria-label="Ventana" class="barra-lateral-cambiar-modo">
       <span class="barra-lateral-texto" style="left:0;top:{{ pillTop }};"></span>
-      <span class="barra-lateral-texto-2"></span>
-      <span class="barra-lateral-texto-3"></span>
-    </button>
+      <button onClick="{{ goAgenda }}" aria-label="Agenda" aria-pressed="{{ isAgenda }}" title="Agenda" class="barra-lateral-modo barra-lateral-modo-1"><span class="barra-lateral-texto-2"></span></button>
+      <button onClick="{{ goNotas }}" aria-label="Notas" aria-pressed="{{ isNotas }}" title="Notas" class="barra-lateral-modo barra-lateral-modo-2"><span class="barra-lateral-texto-3"></span></button>
+      <button onClick="{{ goDiagrama }}" aria-label="Diagrama" aria-pressed="{{ isDiagrama }}" title="Diagrama" class="barra-lateral-modo barra-lateral-modo-3"><span class="barra-lateral-texto-8"></span></button>
+    </div>
     <sc-if value="{{ isNotas }}" hint-placeholder-val="{{ true }}">
       <div class="barra-lateral-caja">
         <button onClick="{{ addTable }}" aria-label="Añadir tabla" title="Tabla" class="barra-lateral-anadir-tabla"></button>
@@ -28,6 +29,17 @@
         <button onClick="{{ addLogic }}" aria-label="Lógica" title="Lógica" class="barra-lateral-anadir-logica"></button>
         <button onClick="{{ addText }}" aria-label="Añadir texto" title="Texto" class="barra-lateral-anadir-texto"></button>
         <button onClick="{{ addSep }}" aria-label="Añadir separador" title="Separador" class="barra-lateral-anadir-separador"><span class="barra-lateral-texto-4"></span><span class="barra-lateral-texto-5"></span><span class="barra-lateral-texto-4"></span></button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isDiagrama }}" hint-placeholder-val="{{ false }}">
+      <div class="barra-lateral-caja">
+        <button onClick="{{ addProceso }}" aria-label="Añadir proceso" title="Proceso" class="barra-lateral-forma barra-lateral-forma-proceso"></button>
+        <button onClick="{{ addDecision }}" aria-label="Añadir decisión" title="Decisión" class="barra-lateral-forma barra-lateral-forma-decision"></button>
+        <button onClick="{{ addInicio }}" aria-label="Añadir inicio o fin" title="Inicio / fin" class="barra-lateral-forma barra-lateral-forma-inicio"></button>
+        <button onClick="{{ addDato }}" aria-label="Añadir dato" title="Dato (entrada / salida)" class="barra-lateral-forma barra-lateral-forma-dato"></button>
+        <button onClick="{{ addNotaDg }}" aria-label="Añadir nota" title="Nota" class="barra-lateral-forma barra-lateral-forma-nota"></button>
+        <button onClick="{{ addTextoDg }}" aria-label="Añadir texto libre" title="Texto libre" class="barra-lateral-forma barra-lateral-forma-texto"></button>
+        <button onClick="{{ addZona }}" aria-label="Añadir zona" title="Zona (agrupa formas)" class="barra-lateral-forma barra-lateral-forma-zona"></button>
       </div>
     </sc-if>
     <button onClick="{{ fsPick }}" aria-label="Carpeta de guardado" title="{{ fsTitle }}" class="barra-lateral-carpeta-guardado">

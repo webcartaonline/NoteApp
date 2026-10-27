@@ -9,7 +9,7 @@ NoteApp.partes.push(Base => class extends Base {
   }
   checkNotifs(s) {
     const now = Date.now(), last = this._last || now; this._last = now;
-    const ns = []; (s.mode === 'agenda' ? s.notes : s.other.notes).forEach(n => n.sheets.forEach(x => (x.entities || []).forEach(e => { if (e.type === 'notif') ns.push({ e, sid: x.id }); })));
+    const ns = []; winsOf(s).agenda.notes.forEach(n => n.sheets.forEach(x => (x.entities || []).forEach(e => { if (e.type === 'notif') ns.push({ e, sid: x.id }); })));
     if (!ns.length) return;
     NOW = now; const W = makeWorld(s);
     ns.forEach(({ e, sid }) => { const i = notifInfo(e, W.at(sid)); if (i && i.fire > last && i.fire <= now) this.fireNotif(e, i); });

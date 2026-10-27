@@ -39,6 +39,7 @@
 <link rel="stylesheet" href="componentes/entidades/entidades.css">
 <link rel="stylesheet" href="componentes/mensajes/mensajes.css">
 <link rel="stylesheet" href="componentes/confirmar/confirmar.css">
+<link rel="stylesheet" href="componentes/diagrama/diagrama.css">
 <script>if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));</script>
 <!-- Arranque: descarga los componentes (carpeta componentes/) y luego el motor (support.js) -->
 <script src="js/arranque.js"></script>
@@ -56,10 +57,13 @@
       <dc-import name="hoja-vacia" dc-props="{{ ui }}"></dc-import>
     </sc-if>
     <sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ true }}">
+    <sc-if value="{{ notDiagrama }}" hint-placeholder-val="{{ true }}">
     <div class="app-caja-2">
       <sc-if value="{{ isNotas }}" hint-placeholder-val="{{ true }}"><dc-import name="panel-texto" dc-props="{{ ui }}"></dc-import></sc-if>
       <sc-if value="{{ showEnts }}" hint-placeholder-val="{{ true }}"><dc-import name="entidades" dc-props="{{ ui }}"></dc-import></sc-if>
     </div>
+    </sc-if>
+    <sc-if value="{{ isDiagrama }}" hint-placeholder-val="{{ false }}"><dc-import name="diagrama" dc-props="{{ ui }}"></dc-import></sc-if>
     </sc-if>
   </main>
   <dc-import name="mensajes" dc-props="{{ ui }}"></dc-import>
@@ -71,11 +75,13 @@
 const Component = NoteApp.crearComponente(DCLogic);
 </script>
 <!-- Funciones generales (motor) y partes de la app. El orden importa. -->
+<script src="js/motor/ventanas.js"></script>
 <script src="js/motor/menciones.js"></script>
 <script src="js/motor/formulas.js"></script>
 <script src="js/motor/mkd.js"></script>
 <script src="js/motor/renombrar.js"></script>
 <script src="js/motor/ids.js"></script>
+<script src="js/motor/formas.js"></script>
 <script src="js/motor/guardado.js"></script>
 <script src="js/app/estado-inicial.js"></script>
 <script src="js/app/base.js"></script>
@@ -87,6 +93,7 @@ const Component = NoteApp.crearComponente(DCLogic);
 <script src="js/app/seleccion.js"></script>
 <script src="js/app/confirmar.js"></script>
 <script src="js/app/lineas.js"></script>
+<script src="js/app/diagrama.js"></script>
 <script src="js/app/render.js"></script>
 </body>
 </html>

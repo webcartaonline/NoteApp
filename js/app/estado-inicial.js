@@ -168,5 +168,38 @@ function naEstadoInicial() {
     newEnt('notif', 'Aviso_Pago', { desc: 'Pagar el hotel', target: 'Pago_Hotel', d: '', h: '12' })
   ]);
   const anotes = [{ id: uid('n'), name: 'Viajes', sheets: [lis, pag], activeSheet: lis.id }];
-  return naLoad({ other: { notes: anotes, activeNote: anotes[0].id }, calView: {}, now: Date.now(), lsel: {}, copied: null, entMenu: null, field: null, colMenu: null, menu: false, mode: 'notas', notes, activeNote: notes[0].id, editing: null, draft: '', dragging: false, clean: true, focusId: null, config: { mkdV2: true }, fs: 'off', fsName: '' });
+  return naLoad({ wins: { agenda: { notes: anotes, activeNote: anotes[0].id }, diagrama: naEjemplo('diagrama') }, calView: {}, now: Date.now(), lsel: {}, copied: null, entMenu: null, field: null, colMenu: null, menu: false, mode: 'notas', notes, activeNote: notes[0].id, editing: null, draft: '', dragging: false, clean: true, focusId: null, config: { mkdV2: true }, fs: 'off', fsName: '' });
+}
+
+// Ejemplo de la ventana Diagrama (también se crea si los datos guardados son de antes de esta ventana).
+// Devuelve { notes, activeNote } de la ventana pedida (solo hay ejemplo para 'diagrama').
+function naEjemplo(win) {
+  if (win !== 'diagrama') return { notes: [], activeNote: null };
+  const N = (shape, x, y, w, h, text, color) => dgNode(shape, x, y, text, Object.assign({ w, h }, color ? { color } : {}));
+  const E = (a, b, label, extra) => dgEdge(a.id, b.id, Object.assign({ label: label || '' }, extra || {}));
+  // Hoja 1: guía (un pequeño diagrama de flujo que explica cómo se usa)
+  const g1 = N('inicio', 60, 40, 220, 56, '**Empieza aquí**');
+  const g2 = N('proceso', 40, 150, 260, 90, 'Añade formas con los botones de la **barra lateral**');
+  const g3 = N('proceso', 40, 300, 260, 100, 'Arrastra desde un **punto verde** de una forma hasta otra para conectarlas');
+  const g4 = N('decision', 30, 450, 280, 150, '¿La sueltas en un hueco?');
+  const g5 = N('proceso', 400, 480, 240, 90, 'Se crea una forma nueva **ya conectada**', 'verde');
+  const g6 = N('proceso', 40, 680, 260, 90, 'Se conecta con la forma donde la sueltes');
+  const g7 = N('nota', 720, 40, 340, 310, ['### Editar', '- **Vista sucia**: editar · **vista limpia**: solo mirar', '- **Doble clic**: escribir en una forma (formato MKD)', '- **Arrastrar**: mover · **Mayús + clic**: elegir varias', '- **Supr**: borrar · **Ctrl+D**: duplicar', '- **Ctrl+Z / Ctrl+Y**: deshacer / rehacer']);
+  const g8 = N('nota', 720, 390, 340, 190, ['### Moverse por el lienzo', '- Arrastra el fondo para desplazarte', '- **Ctrl + rueda**: zoom', '- **Ajustar** (abajo a la derecha): verlo todo'], 'azul');
+  const g9 = N('nota', 720, 620, 340, 230, ['### Menciones', 'Las formas pueden mostrar entidades de Notas y Agenda: cada persona paga **=/Conoce NoteApp/Demostración/Por_Persona** €.', 'Selecciona una forma y pulsa **=** para buscarlas.'], 'verde');
+  const guia = mkDiagSheet('Guía', [g1, g2, g3, g4, g5, g6, g7, g8, g9], [E(g1, g2), E(g2, g3), E(g3, g4), E(g4, g5, 'Sí'), E(g4, g6, 'No')]);
+  // Hoja 2: ejemplo con menciones a la nota «Conoce NoteApp» y a la agenda «Viajes»
+  const z = N('zona', 20, 20, 700, 770, '#### Viaje a Lisboa');
+  const v1 = N('inicio', 60, 80, 220, 56, 'Preparar el viaje');
+  const v2 = N('proceso', 40, 190, 260, 90, 'Gasto por persona: **=/Conoce NoteApp/Demostración/Por_Persona €**');
+  const v3 = N('decision', 30, 340, 280, 150, ['¿Cabe en el presupuesto?', '=/Conoce NoteApp/Demostración/En_Presupuesto']);
+  const v4 = N('proceso', 400, 375, 260, 80, 'Revisar los gastos', 'rojo');
+  const v5 = N('proceso', 40, 560, 260, 80, 'Reservar vuelo y hotel', 'verde');
+  const v6 = N('inicio', 60, 700, 220, 56, 'Listo para viajar');
+  const v7 = N('dato', 770, 560, 300, 80, 'Faltan **=/Viajes/Lisboa/Faltan_Vuelo** días para el vuelo');
+  const v8 = N('nota', 770, 330, 300, 130, ['La agenda dice:', '**=/Viajes/Lisboa/Presupuesto**']);
+  const ej = mkDiagSheet('Ejemplo: viaje', [z, v1, v2, v3, v4, v5, v6, v7, v8], [E(v1, v2), E(v2, v3), E(v3, v4, 'No'), E(v4, v2, 'Ajustar', { dash: true }), E(v3, v5, 'Sí'), E(v5, v6), E(v5, v7, 'Cuenta atrás', { dash: true, head: 'none' })]);
+  guia.view = { x: 30, y: 20, z: 0.8 }; ej.view = { x: 30, y: 20, z: 0.8 };
+  const notes = [{ id: uid('n'), name: 'Conoce Diagrama', sheets: [guia, ej], activeSheet: guia.id }];
+  return { notes, activeNote: notes[0].id };
 }

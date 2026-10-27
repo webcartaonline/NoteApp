@@ -3,31 +3,40 @@
 // ===== Guardado =====
 // 1) Siempre en el navegador (localStorage).
 // 2) Además, si se conecta una carpeta del ordenador (Chrome/Edge), en archivos JSON:
-//    NoteApp.json (configuración, vista y orden), Notas/<nota> (id).json y Agenda/<nota> (id).json
+//    NoteApp.json (configuración, vista y orden), Notas/<nota> (id).json, Agenda/<nota> (id).json y Diagramas/<diagrama> (id).json
 // Se guarda todo: notas y agenda (hojas, textos, entidades y sus ajustes), la vista y la configuración (state.config).
 const NA_KEY = 'noteapp:datos:v1';
-const NA_KEEP = ['notes', 'activeNote', 'other', 'mode', 'clean', 'calView', 'lsel', 'config'];
+const NA_KEEP = ['notes', 'activeNote', 'wins', 'mode', 'clean', 'calView', 'lsel', 'config'];
 let NA_REV = 0;
 const naMaxId = obj => { let mx = 0; JSON.stringify(obj).replace(/"[a-z](\d+)"/g, (m, n) => { mx = Math.max(mx, +n); return m; }); return mx; };
 function naLoad(base) {
   try {
     const raw = localStorage.getItem(NA_KEY); if (!raw) return base;
     const d = JSON.parse(raw);
-    if (!d || !Array.isArray(d.notes) || !d.other || !Array.isArray(d.other.notes)) return base;
+    if (!d || !Array.isArray(d.notes)) return base;
+    // Datos de antes de la ventana Diagrama: la ventana oculta estaba en "other" (Notas o Agenda).
+    if (!d.wins && d.other && Array.isArray(d.other.notes)) d.wins = { [d.mode === 'agenda' ? 'notas' : 'agenda']: d.other };
+    if (!d.wins || typeof d.wins !== 'object') return base;
+    if (!WINS.includes(d.mode)) d.mode = 'notas';
     _uid = Math.max(_uid, naMaxId(d));
+    // Ventanas que falten en los datos guardados (p. ej. Diagrama la primera vez): se crea la de ejemplo
+    // (después de subir _uid, para que sus IDs no se repitan con los de los datos guardados).
+    WINS.forEach(k => { if (k !== d.mode && !(d.wins[k] && Array.isArray(d.wins[k].notes))) d.wins[k] = typeof naEjemplo === 'function' ? naEjemplo(k) : WIN_EMPTY(); });
     NA_REV = +d.rev || 0;
     const out = { ...base }; NA_KEEP.forEach(k => { if (d[k] !== undefined && d[k] !== null) out[k] = d[k]; });
     if (!out.notes.some(n => n.id === out.activeNote)) out.activeNote = out.notes.length ? out.notes[0].id : null;
-    if (!(d.config && d.config.mkdV2)) { out.notes = mkdMigNotes(out.notes); out.other = { ...out.other, notes: mkdMigNotes(out.other.notes) }; out.config = { ...(d.config || {}), mkdV2: true }; }
-    out.notes = refMigDeep(out.notes); out.other = { ...out.other, notes: refMigDeep(out.other.notes) };
-    return out;
+    const all = winsOf(out), mig = !(d.config && d.config.mkdV2);
+    WINS.forEach(k => { all[k] = { ...all[k], notes: refMigDeep(mig ? mkdMigNotes(all[k].notes) : all[k].notes) }; });
+    if (mig) out.config = { ...(d.config || {}), mkdV2: true };
+    delete out.other;
+    return { ...out, ...winPatch(all, out.mode) };
   } catch (_) { return base; }
 }
 function naSave(s, rev) {
   try { const d = { rev: rev || 0 }; NA_KEEP.forEach(k => { d[k] = s[k]; }); localStorage.setItem(NA_KEY, JSON.stringify(d)); } catch (_) {}
 }
 const FS_OK = typeof window.showDirectoryPicker === 'function';
-const FS_META = 'NoteApp.json', FS_SECS = [['notas', 'Notas'], ['agenda', 'Agenda']];
+const FS_META = 'NoteApp.json', FS_SECS = [['notas', 'Notas'], ['agenda', 'Agenda'], ['diagrama', 'Diagramas']];
 const FS_FILE_RX = /\(([a-z]\d+)\)\.json$/;
 function fsIdb(mode, fn) {
   return new Promise((res, rej) => {
@@ -42,7 +51,7 @@ const fsSetHandle = h => fsIdb('readwrite', st => h ? st.put(h, 'dir') : st.dele
 const fsFileName = n => (String(n.name || '').replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').replace(/\s+/g, ' ').trim().slice(0, 40) || 'Nota') + ' (' + n.id + ').json';
 async function fsReadText(dir, name) { const fh = await dir.getFileHandle(name); return (await fh.getFile()).text(); }
 async function fsWrite(dir, name, text) { const fh = await dir.getFileHandle(name, { create: true }); const w = await fh.createWritable(); await w.write(text); await w.close(); }
-const fsSections = s => { const ag = s.mode === 'agenda', cur = { notes: s.notes, activeNote: s.activeNote }; return { notas: ag ? s.other : cur, agenda: ag ? cur : s.other }; };
+const fsSections = s => winsOf(s);
 async function fsRead(dir) {
   let meta; try { meta = JSON.parse(await fsReadText(dir, FS_META)); } catch (_) { return null; }
   if (!meta || meta.app !== 'NoteApp') return null;
@@ -50,6 +59,7 @@ async function fsRead(dir) {
   for (const [key, folder] of FS_SECS) {
     const list = [];
     let d = null; try { d = await dir.getDirectoryHandle(folder); } catch (_) {}
+    if (!d && !meta[key]) { out[key] = null; continue; } // sección que aún no existía (p. ej. Diagramas): no se toca
     if (d) for await (const [name, h] of d.entries()) {
       if (h.kind !== 'file' || !name.endsWith('.json')) continue;
       try { const j = JSON.parse(await (await h.getFile()).text()), n = j && j.nota; if (n && typeof n.id === 'string' && Array.isArray(n.sheets)) list.push(n); } catch (_) {}

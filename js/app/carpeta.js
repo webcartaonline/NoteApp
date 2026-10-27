@@ -33,12 +33,16 @@ NoteApp.partes.push(Base => class extends Base {
   }
   fsApply(data) {
     const m = data.meta || {}, v = m.vista || {};
-    _uid = Math.max(_uid, naMaxId([data.notas, data.agenda]));
-    const up = !(m.config && m.config.mkdV2), notas = refMigDeep(up ? mkdMigNotes(data.notas) : data.notas), agenda = refMigDeep(up ? mkdMigNotes(data.agenda) : data.agenda);
+    _uid = Math.max(_uid, naMaxId([data.notas, data.agenda, data.diagrama]));
+    const up = !(m.config && m.config.mkdV2), mig = list => refMigDeep(up ? mkdMigNotes(list) : list);
     const act = (list, sec) => { const id = sec && sec.activa; return list.some(n => n.id === id) ? id : list.length ? list[0].id : null; };
-    const N = { notes: notas, activeNote: act(notas, m.notas) }, A = { notes: agenda, activeNote: act(agenda, m.agenda) }, ag = v.mode === 'agenda', cur = ag ? A : N;
+    // Cada ventana con sus notas de la carpeta. Si la carpeta no tiene una sección (p. ej. Diagramas en una
+    // carpeta de antes), se mantiene la que ya había en la app.
+    const now = winsOf(this.state), all = {};
+    WINS.forEach(k => { const list = data[k]; all[k] = Array.isArray(list) ? { notes: mig(list), activeNote: act(list, m[k]) } : now[k]; });
+    const mode = WINS.includes(v.mode) ? v.mode : 'notas';
     this._rev = +m.rev || 0; this._naHold = true;
-    this.setState({ mode: ag ? 'agenda' : 'notas', notes: cur.notes, activeNote: cur.activeNote, other: ag ? N : A, clean: typeof v.clean === 'boolean' ? v.clean : this.state.clean, calView: v.calView || {}, lsel: v.lsel || {}, config: up ? { ...(m.config || {}), mkdV2: true } : (m.config || {}), focusId: null, field: null, entMenu: null, colMenu: null, menu: false, editing: null, draft: '' });
+    this.setState({ ...winPatch(all, mode), clean: typeof v.clean === 'boolean' ? v.clean : this.state.clean, calView: v.calView || {}, lsel: v.lsel || {}, config: up ? { ...(m.config || {}), mkdV2: true } : (m.config || {}), focusId: null, field: null, entMenu: null, colMenu: null, menu: false, editing: null, draft: '' });
   }
   fsQueue() {
     if (!this._fsDir || this.state.fs !== 'on') return;

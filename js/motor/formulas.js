@@ -121,7 +121,7 @@ function makeWorld(s) {
   // =Nombre busca solo en la hoja donde se escribe; =/Nota/Hoja/Entidad busca en cualquier nota (primero en la ventana de quien la escribe).
   const entries = [], sheetW = new Map();
   // Primero las entidades del panel y después las casillas-entidad del texto: si se repite un nombre, gana la del panel.
-  [['c', s.notes], ['o', s.other.notes]].forEach(([w, list]) => list.forEach(n => n.sheets.forEach(x => {
+  winLists(s).forEach(([w, list]) => list.forEach(n => n.sheets.forEach(x => { // w = ventana (notas, agenda, diagrama)
     sheetW.set(x.id, w); const base = { w, sid: x.id, note: normN(n.name), sheet: normN(x.name) };
     (x.entities || []).forEach(e => { if (!NOVAL(e.type)) entries.push({ e, ...base }); });
     sheetFlags(x).forEach(f => entries.push({ e: { id: 'f:' + x.id + ':' + f.name, type: 'flag', name: f.name, on: f.on }, ...base }));
@@ -143,7 +143,7 @@ function makeWorld(s) {
   };
   const at = sid => {
     if (getters.has(sid)) return getters.get(sid);
-    const map = bySheet.get(sid) || new Map(), w = sheetW.get(sid) || 'c';
+    const map = bySheet.get(sid) || new Map(), w = sheetW.get(sid) || s.mode;
     const g = name => {
       if (isPath(name)) { const en = findPath(name, w); return en ? val(en) : null; }
       const en = map.get(name); if (en) return val(en);
@@ -257,7 +257,7 @@ function logicEval(e, get) {
   return { val: (e.els || '').trim() ? outVal(e.els, get) : anyOut ? num(0) : bool(false), hit: 'else' };
 }
 const logicOut = (e, get) => logicEval(e, get).val;
-const NOVAL = t => t === 'sep' || t === 'text';
+const NOVAL = t => t === 'sep' || t === 'text' || t === 'node'; // node = forma de un diagrama (no tiene valor)
 function notifInfo(e, get) {
   let t;
   if (e.mode === 'manual') { const ms = dateMs(e); if (isNaN(ms)) return null; t = dt(ms); }

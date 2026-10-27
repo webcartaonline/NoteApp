@@ -1,0 +1,513 @@
+/* Componente "diagrama": lienzo de la ventana Diagrama (formas, conexiones, barras, menciones y zoom). */
+
+.diagrama-lienzo {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin-top: 5px;
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: #1c1c1c;
+  background-image: radial-gradient(circle, #343434 1.1px, transparent 1.3px);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Todo lo que se mueve y se amplía con el zoom */
+.diagrama-mundo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+}
+
+.diagrama-nodo {
+  position: absolute;
+  color: #fff;
+}
+
+.diagrama-nodo[data-sel="1"] {
+  outline: 1.5px solid #00a000;
+  outline-offset: 5px;
+  border-radius: 4px;
+}
+
+.diagrama-nodo[data-hl="1"] {
+  outline: 2px dashed #00a000;
+  outline-offset: 5px;
+  border-radius: 4px;
+}
+
+.diagrama-forma {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.diagrama-texto {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+/* Mientras se escribe en una forma, su texto se puede seleccionar */
+.diagrama-nodo .diagrama-texto:has(textarea) {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.diagrama-texto-in {
+  flex: none;
+}
+
+.diagrama-zona .diagrama-texto {
+  color: #c8c8c8;
+}
+
+/* Puntos para conectar (aparecen al pasar el ratón o con la forma seleccionada) */
+.diagrama-punto {
+  position: absolute;
+  z-index: 2;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: #1c1c1c;
+  border: 2px solid #00a000;
+  cursor: crosshair;
+  opacity: 0;
+  transition: opacity .12s, transform .12s;
+}
+
+.diagrama-nodo:hover > .diagrama-punto,
+.diagrama-nodo[data-sel="1"] > .diagrama-punto {
+  opacity: 1;
+}
+
+.diagrama-punto:hover {
+  transform: scale(1.35);
+  background: #00a000 !important;
+}
+
+.diagrama-punto-n { left: 50%; top: 0; }
+.diagrama-punto-e { left: 100%; top: 50%; }
+.diagrama-punto-s { left: 50%; top: 100%; }
+.diagrama-punto-o { left: 0; top: 50%; }
+
+.diagrama-tamano {
+  position: absolute;
+  z-index: 3;
+  right: -10px;
+  bottom: -10px;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: #00a000;
+  border: 2px solid #1c1c1c;
+  cursor: nwse-resize;
+}
+
+/* Conexiones */
+.diagrama-conexiones {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.diagrama-conexion-zona {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 14px;
+  pointer-events: stroke;
+}
+
+.diagrama-etiqueta {
+  position: absolute;
+  z-index: 1;
+  transform: translate(-50%,-50%);
+  padding: 3px 9px;
+  border: 1px solid #4a4a4a;
+  border-radius: 7px;
+  background: #1c1c1c;
+  color: #e0e0e0;
+  font-size: 14px;
+  line-height: 18px;
+  white-space: nowrap;
+  max-width: 260px;
+}
+
+.diagrama-etiqueta-texto {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.diagrama-etiqueta-campo {
+  width: 170px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+}
+
+/* Mensaje del diagrama vacío */
+.diagrama-vacio {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px;
+  pointer-events: none;
+  text-align: center;
+}
+
+.diagrama-vacio-icono {
+  width: 42px;
+  height: 42px;
+  margin-bottom: 8px;
+  background: #3a3a3a;
+  mask: url(../../assets/diagrama.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/diagrama.svg) center / contain no-repeat;
+}
+
+.diagrama-vacio-texto {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #8a8a8a;
+}
+
+.diagrama-vacio-texto-2 {
+  margin: 0;
+  font-size: 14px;
+  color: #6a6a6a;
+}
+
+.diagrama-recuadro {
+  position: absolute;
+  border: 1px dashed #00a000;
+  background: rgba(0,160,0,.08);
+  pointer-events: none;
+}
+
+/* Barras de la forma y de la conexión seleccionadas */
+.diagrama-barra {
+  position: absolute;
+  z-index: 5;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: #2a2a2a;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5);
+  white-space: nowrap;
+}
+
+.diagrama-color {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.diagrama-barra-separador {
+  width: 1px;
+  height: 20px;
+  margin: 0 2px;
+  background: #444;
+  flex: none;
+}
+
+.diagrama-barra-forma {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+
+.diagrama-barra-forma:hover {
+  background: #fff !important;
+}
+
+.diagrama-forma-proceso { mask: url(../../assets/forma-proceso.svg) center / contain no-repeat; -webkit-mask: url(../../assets/forma-proceso.svg) center / contain no-repeat; }
+.diagrama-forma-decision { mask: url(../../assets/forma-decision.svg) center / contain no-repeat; -webkit-mask: url(../../assets/forma-decision.svg) center / contain no-repeat; }
+.diagrama-forma-inicio { mask: url(../../assets/forma-inicio.svg) center / contain no-repeat; -webkit-mask: url(../../assets/forma-inicio.svg) center / contain no-repeat; }
+.diagrama-forma-dato { mask: url(../../assets/forma-dato.svg) center / contain no-repeat; -webkit-mask: url(../../assets/forma-dato.svg) center / contain no-repeat; }
+.diagrama-forma-nota { mask: url(../../assets/forma-nota.svg) center / contain no-repeat; -webkit-mask: url(../../assets/forma-nota.svg) center / contain no-repeat; }
+.diagrama-forma-texto { mask: url(../../assets/forma-texto.svg) center / contain no-repeat; -webkit-mask: url(../../assets/forma-texto.svg) center / contain no-repeat; }
+
+.diagrama-boton {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+}
+
+.diagrama-boton:hover {
+  background: #3a3a3a !important;
+}
+
+.diagrama-boton::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  background: #a6a6a6;
+}
+
+.diagrama-boton:hover::after {
+  background: #fff;
+}
+
+.diagrama-boton-texto::after { mask: url(../../assets/texto.svg) center / contain no-repeat; -webkit-mask: url(../../assets/texto.svg) center / contain no-repeat; }
+.diagrama-boton-duplicar::after { mask: url(../../assets/clon.svg) center / contain no-repeat; -webkit-mask: url(../../assets/clon.svg) center / contain no-repeat; }
+.diagrama-boton-borrar::after { mask: url(../../assets/papelera.svg) center / contain no-repeat; -webkit-mask: url(../../assets/papelera.svg) center / contain no-repeat; }
+
+.diagrama-boton-mencion {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  padding: 0 0 2px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #a6a6a6;
+  font: 700 18px/1 Figtree, system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.diagrama-boton-mencion:hover {
+  background: #3a3a3a !important;
+  color: #fff !important;
+}
+
+.diagrama-boton-mencion[aria-pressed="true"] {
+  color: #00a000;
+}
+
+.diagrama-boton-texto-2 {
+  height: 26px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 6px;
+  background: #333;
+  color: #d0d0d0;
+  font: 500 13px Figtree, system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.diagrama-boton-texto-2:hover {
+  background: #444 !important;
+  color: #fff !important;
+}
+
+.diagrama-boton-flecha {
+  min-width: 34px;
+  font-size: 16px;
+}
+
+/* Buscador de menciones */
+.diagrama-menciones {
+  position: absolute;
+  z-index: 6;
+  top: 10px;
+  right: 10px;
+  width: min(340px, calc(100% - 20px));
+  max-height: calc(100% - 70px);
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  background: #2a2a2a;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.55);
+}
+
+.diagrama-menciones-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 2px 8px 4px;
+}
+
+.diagrama-menciones-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: #d0d0d0;
+}
+
+.diagrama-menciones-cerrar {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #a6a6a6;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.diagrama-menciones-cerrar:hover {
+  background: #3a3a3a !important;
+  color: #fff !important;
+}
+
+.diagrama-menciones-buscar {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  outline: none;
+  background: #1c1c1c;
+  color: #fff;
+  font: 14px Figtree, system-ui, sans-serif;
+}
+
+.diagrama-menciones-buscar:focus {
+  border-color: #008000;
+}
+
+.diagrama-menciones-lista {
+  margin-top: 8px;
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.diagrama-menciones-nada {
+  margin: 10px 4px;
+  font-size: 13px;
+  color: #8a8a8a;
+}
+
+.diagrama-menciones-item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  font-family: Figtree, system-ui, sans-serif;
+}
+
+.diagrama-menciones-item:hover {
+  background: #383838 !important;
+}
+
+.diagrama-menciones-donde {
+  font-size: 11px;
+  color: #8a8a8a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diagrama-menciones-fila {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.diagrama-menciones-nombre {
+  color: #00a000;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diagrama-menciones-valor {
+  color: #a6a6a6;
+  flex: none;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Zoom */
+.diagrama-zoom {
+  position: absolute;
+  z-index: 4;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: #2a2a2a;
+  border-radius: 9px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.4);
+}
+
+.diagrama-zoom-boton,
+.diagrama-zoom-texto,
+.diagrama-zoom-ajustar {
+  height: 26px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #c0c0c0;
+  font: 500 13px Figtree, system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.diagrama-zoom-boton {
+  width: 26px;
+  font-size: 17px;
+}
+
+.diagrama-zoom-texto {
+  min-width: 52px;
+}
+
+.diagrama-zoom-ajustar {
+  padding: 0 9px;
+}
+
+.diagrama-zoom-boton:hover,
+.diagrama-zoom-texto:hover,
+.diagrama-zoom-ajustar:hover {
+  background: #3a3a3a !important;
+  color: #fff !important;
+}

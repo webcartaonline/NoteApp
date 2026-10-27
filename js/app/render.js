@@ -6,7 +6,7 @@ NoteApp.partes.push(Base => class extends Base {
     const note = this.curNote(s);
     const sheet = this.curSheet(s);
     NOW = Date.now();
-    const W = makeWorld(s), ag = s.mode === 'agenda', get = W.at(sheet ? sheet.id : '');
+    const W = makeWorld(s), ag = s.mode === 'agenda', dg = s.mode === 'diagrama', nt = s.mode === 'notas', get = W.at(sheet ? sheet.id : '');
     RESOLVE = get;
     const dirty = !s.clean;
     const entList = sheet ? (sheet.entities || []) : [];
@@ -36,7 +36,7 @@ NoteApp.partes.push(Base => class extends Base {
       toasts: (s.toasts || []).map(t => ({ ...t, close: () => this.setState(st => ({ toasts: (st.toasts || []).filter(x => x.id !== t.id) })) })),
       dirty,
       entGap: dirty ? '34px' : '27px',
-      entities: entList.map((e, i) => Object.assign(this.entView(e, i, entList, get, dirty), { tipo: e.type })),
+      entities: dg ? [] : entList.map((e, i) => Object.assign(this.entView(e, i, entList, get, dirty), { tipo: e.type })),
       addExpr: () => this.addEnt('expr'),
       addToggle: () => this.addEnt('toggle'),
       addTable: () => this.addEnt('table'),
@@ -52,22 +52,23 @@ NoteApp.partes.push(Base => class extends Base {
       toggleMenu: () => this.setState(st => ({ menu: !st.menu })),
       deleteSheet: () => this.askDelete('sheet'), // abre la ventana de confirmación (js/app/confirmar.js)
       deleteNote: () => this.askDelete('note'),
+      deleteNoteTxt: dg ? 'Eliminar diagrama' : 'Eliminar nota',
       noSheet: !sheet,
-      addNote: () => { const n = { id: uid('n'), name: 'Nueva nota', sheets: [], activeSheet: null }; this.setState(st => ({ notes: st.notes.concat(n), activeNote: n.id, focusId: null })); },
-      addSheet: () => { if (!note) return; const x = mkSheet('Nueva hoja'); this.setState(st => ({ focusId: null, notes: st.notes.map(n => n.id !== st.activeNote ? n : { ...n, sheets: n.sheets.concat(x), activeSheet: x.id }) })); },
+      addNote: () => { const n = { id: uid('n'), name: dg ? 'Nuevo diagrama' : 'Nueva nota', sheets: [], activeSheet: null }; this.setState(st => ({ notes: st.notes.concat(n), activeNote: n.id, focusId: null })); },
+      addSheet: () => { if (!note) return; const x = dg ? mkDiagSheet('Nueva hoja') : mkSheet('Nueva hoja'); this.setState(st => ({ focusId: null, notes: st.notes.map(n => n.id !== st.activeNote ? n : { ...n, sheets: n.sheets.concat(x), activeSheet: x.id }) })); },
       taRef: this.taRef,
       clean: s.clean,
       knobLeft: s.clean ? '16px' : '0px',
       knobColor: s.clean ? '#008000' : '#8a8a8a',
-      toggleView: () => { const a = document.activeElement; if (a && a.tagName === 'TEXTAREA') a.blur(); this.setState(st => ({ clean: !st.clean, focusId: null, field: null, colMenu: null, entMenu: null })); },
+      toggleView: () => { const a = document.activeElement; if (a && a.tagName === 'TEXTAREA') a.blur(); this.setState(st => ({ clean: !st.clean, focusId: null, field: null, colMenu: null, entMenu: null, dsel: null, dedit: null, dlabel: null, dmen: null })); },
       panelCursor: s.clean ? 'default' : 'text',
       panelRef: this.panelRef,
       panelWidth: (sheet ? sheet.width : W0) + 'px',
       // Ocultar entidades (solo Notas): campo "full" de la hoja. true = el texto usa todo el ancho.
-      canFull: !ag && !!sheet,
-      full: !ag && !!(sheet && sheet.full),
-      showEnts: !(!ag && sheet && sheet.full),
-      panelFlex: !ag && sheet && sheet.full ? '1 1 0%' : '0 1 ' + (sheet ? sheet.width : W0) + 'px',
+      canFull: nt && !!sheet,
+      full: nt && !!(sheet && sheet.full),
+      showEnts: !(nt && sheet && sheet.full),
+      panelFlex: nt && sheet && sheet.full ? '1 1 0%' : '0 1 ' + (sheet ? sheet.width : W0) + 'px',
       fullColor: sheet && sheet.full ? '#008000' : '#8a8a8a',
       fullTitle: sheet && sheet.full ? 'Mostrar entidades' : 'Ocultar entidades (el texto ocupa todo el ancho)',
       toggleFull: () => this.toggleFull(),
@@ -89,12 +90,26 @@ NoteApp.partes.push(Base => class extends Base {
       fsIcon: s.fs === 'on' ? '#fff' : '#5a5a5a',
       fsDot: s.fs === 'on' ? '#00a000' : s.fs === 'perm' || s.fs === 'err' ? '#d08a00' : 'transparent',
       fsTitle: !FS_OK ? 'Guardar en carpeta: solo disponible en Chrome o Edge de ordenador' : s.fs === 'on' ? 'Guardando en la carpeta «' + s.fsName + '». Clic para cambiar de carpeta' : s.fs === 'perm' ? 'Clic para volver a dar permiso a la carpeta «' + s.fsName + '»' : s.fs === 'err' ? 'Problema con la carpeta «' + s.fsName + '». Clic para reintentar' : 'Clic para elegir la carpeta donde guardar todo',
-      isNotas: s.mode === 'notas',
-      isAgenda: s.mode === 'agenda',
-      pillTop: s.mode === 'notas' ? '37px' : '0px',
-      toggleMode: () => this.setState(st => ({ mode: st.mode === 'notas' ? 'agenda' : 'notas', notes: st.other.notes, activeNote: st.other.activeNote, other: { notes: st.notes, activeNote: st.activeNote }, focusId: null, field: null, entMenu: null, colMenu: null, menu: false, editing: null }))
+      isNotas: nt,
+      isAgenda: ag,
+      isDiagrama: dg,
+      notDiagrama: !dg,
+      // Selector de ventana (barra lateral): Agenda arriba, Notas en el centro y Diagrama abajo
+      pillTop: ag ? '0px' : nt ? '37px' : '74px',
+      goAgenda: () => this.setMode('agenda'),
+      goNotas: () => this.setMode('notas'),
+      goDiagrama: () => this.setMode('diagrama'),
+      // Formas de la ventana Diagrama (js/app/diagrama.js)
+      addProceso: () => this.dgAdd('proceso'),
+      addDecision: () => this.dgAdd('decision'),
+      addInicio: () => this.dgAdd('inicio'),
+      addDato: () => this.dgAdd('dato'),
+      addNotaDg: () => this.dgAdd('nota'),
+      addTextoDg: () => this.dgAdd('texto'),
+      addZona: () => this.dgAdd('zona')
     };
     Object.assign(v, this.confirmVals(s)); // ventana de confirmación al eliminar
+    if (dg && sheet) Object.assign(v, this.dgVals(s, sheet)); // lienzo del diagrama
     v.ui = v; // los componentes reciben todos estos valores con dc-props="{{ ui }}"
     return v;
   }

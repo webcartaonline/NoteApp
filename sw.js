@@ -1,7 +1,7 @@
 // Service worker de NoteApp: permite instalar la app y abrirla sin conexión.
 // Siempre intenta cargar la versión más reciente; la copia guardada solo se usa sin conexión.
 // Si añades o quitas archivos de la app, actualiza la lista APP y sube el número de VERSION.
-const VERSION = 'noteapp-v7';
+const VERSION = 'noteapp-v8';
 const APP = [
   '/',
   '/index.html',
@@ -10,11 +10,13 @@ const APP = [
   '/css/base.css',
   '/css/app.css',
   '/js/arranque.js',
+  '/js/motor/ventanas.js',
   '/js/motor/menciones.js',
   '/js/motor/formulas.js',
   '/js/motor/mkd.js',
   '/js/motor/renombrar.js',
   '/js/motor/ids.js',
+  '/js/motor/formas.js',
   '/js/motor/guardado.js',
   '/js/app/estado-inicial.js',
   '/js/app/base.js',
@@ -26,6 +28,7 @@ const APP = [
   '/js/app/seleccion.js',
   '/js/app/confirmar.js',
   '/js/app/lineas.js',
+  '/js/app/diagrama.js',
   '/js/app/render.js',
   '/componentes/cabecera/cabecera.html',
   '/componentes/cabecera/cabecera.css',
@@ -69,8 +72,18 @@ const APP = [
   '/componentes/mensajes/mensajes.css',
   '/componentes/confirmar/confirmar.html',
   '/componentes/confirmar/confirmar.css',
+  '/componentes/diagrama/diagrama.html',
+  '/componentes/diagrama/diagrama.css',
   '/assets/agregar-activo.svg',
   '/assets/ancho-completo.svg',
+  '/assets/diagrama.svg',
+  '/assets/forma-proceso.svg',
+  '/assets/forma-decision.svg',
+  '/assets/forma-inicio.svg',
+  '/assets/forma-dato.svg',
+  '/assets/forma-nota.svg',
+  '/assets/forma-texto.svg',
+  '/assets/forma-zona.svg',
   '/assets/agregar-barra.svg',
   '/assets/ajustes.svg',
   '/assets/angulo-pequeno-derecho.svg',

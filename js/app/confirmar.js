@@ -35,18 +35,18 @@ NoteApp.partes.push(Base => class extends Base {
     const c = s.confirm, v = { confirmOpen: !!c };
     if (!c) return v;
     const n = s.notes.find(m => m.id === c.noteId), x = n && c.kind === 'sheet' ? n.sheets.find(h => h.id === c.sheetId) : null;
-    const nm = t => (t || '').trim() || 'Sin nombre';
+    const nm = t => (t || '').trim() || 'Sin nombre', dg = s.mode === 'diagrama';
     if (c.kind === 'sheet') {
       v.confirmTitle = 'Eliminar hoja';
       v.confirmName = nm(x && x.name);
-      v.confirmDetail = 'Hoja de la nota «' + nm(n && n.name) + '»';
-      v.confirmWarn = 'Esta acción es irreversible: se borrarán la hoja, su texto y sus entidades, y no se podrán recuperar.';
+      v.confirmDetail = (dg ? 'Hoja del diagrama «' : 'Hoja de la nota «') + nm(n && n.name) + '»';
+      v.confirmWarn = dg ? 'Esta acción es irreversible: se borrarán la hoja, sus formas y sus conexiones, y no se podrán recuperar.' : 'Esta acción es irreversible: se borrarán la hoja, su texto y sus entidades, y no se podrán recuperar.';
     } else {
       const k = n ? n.sheets.length : 0;
-      v.confirmTitle = 'Eliminar nota';
+      v.confirmTitle = dg ? 'Eliminar diagrama' : 'Eliminar nota';
       v.confirmName = nm(n && n.name);
-      v.confirmDetail = 'Nota ' + (k === 0 ? 'sin hojas' : k === 1 ? 'con 1 hoja' : 'con ' + k + ' hojas');
-      v.confirmWarn = 'Esta acción es irreversible: se borrarán la nota y todas sus hojas, y no se podrán recuperar.';
+      v.confirmDetail = (dg ? 'Diagrama ' : 'Nota ') + (k === 0 ? 'sin hojas' : k === 1 ? 'con 1 hoja' : 'con ' + k + ' hojas');
+      v.confirmWarn = 'Esta acción es irreversible: se borrarán ' + (dg ? 'el diagrama' : 'la nota') + ' y todas sus hojas, y no se podrán recuperar.';
     }
     v.confirmCancel = () => this.closeConfirm();
     v.confirmOk = () => this.confirmDelete();

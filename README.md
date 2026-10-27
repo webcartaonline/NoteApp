@@ -1,6 +1,8 @@
 # NoteApp
 
-Aplicación para tomar notas y crear recordatorios.
+Aplicación para tomar notas, crear recordatorios y dibujar diagramas.
+
+Tiene tres ventanas (selector arriba a la izquierda): **Agenda**, **Notas** y **Diagrama**.
 
 Diseñada con Claude Design. Es una web estática: no necesita instalación ni compilación.
 
@@ -8,10 +10,10 @@ Diseñada con Claude Design. Es una web estática: no necesita instalación ni c
 
 - `index.html` — la página principal: carga los estilos y los scripts y coloca las partes de la app
 - `componentes/` — las partes de la pantalla, cada una en su carpeta con su `.html` (lo que se ve) y su `.css` (cómo se ve):
-  cabecera, barra lateral, barra de hojas, panel de texto, líneas, lista de entidades, una por cada tipo de entidad y mensajes
+  cabecera, barra lateral, barra de hojas, panel de texto, líneas, lista de entidades, una por cada tipo de entidad, mensajes y el lienzo de los diagramas
 - `css/` — estilos generales (`base.css`) y de la estructura principal (`app.css`)
 - `js/arranque.js` — carga los componentes y pone en marcha la app
-- `js/motor/` — funciones generales: fórmulas, menciones, formato MKD, renombrar y guardado
+- `js/motor/` — funciones generales: ventanas, fórmulas, menciones, formato MKD, renombrar, formas de los diagramas y guardado
 - `js/app/` — la lógica de la app, repartida por temas (guardado en carpeta, entidades, líneas, selección…)
 - `support.js` — el motor que hace funcionar la página (no se edita)
 - `assets/` — iconos de la interfaz
@@ -43,8 +45,10 @@ TuCarpeta/
 ├── NoteApp.json              ← configuración, vista y orden de las notas
 ├── Notas/
 │   └── <nombre> (<id>).json  ← una nota con sus hojas, textos y entidades
-└── Agenda/
-    └── <nombre> (<id>).json
+├── Agenda/
+│   └── <nombre> (<id>).json
+└── Diagramas/
+    └── <nombre> (<id>).json  ← un diagrama con sus hojas, formas y conexiones
 ```
 
 Al crear, cambiar, renombrar o borrar una nota, hoja o entidad, los archivos se actualizan solos.

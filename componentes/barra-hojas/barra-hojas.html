@@ -36,7 +36,7 @@
         <sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
           <div role="menu" class="barra-hojas-menu-2">
             <button role="menuitem" onClick="{{ deleteSheet }}" disabled="{{ noSheet }}" class="barra-hojas-opcion-menu" style="opacity:{{ sheetItemOpacity }};">Eliminar hoja</button>
-            <button role="menuitem" onClick="{{ deleteNote }}" disabled="{{ noNote }}" class="barra-hojas-opcion-menu" style="opacity:{{ noteItemOpacity }};">Eliminar nota</button>
+            <button role="menuitem" onClick="{{ deleteNote }}" disabled="{{ noNote }}" class="barra-hojas-opcion-menu" style="opacity:{{ noteItemOpacity }};">{{ deleteNoteTxt }}</button>
           </div>
         </sc-if>
       </div>
