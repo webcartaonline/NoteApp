@@ -26,7 +26,7 @@ NoteApp.partes.push(Base => class extends Base {
       lines,
       hasSheet: !!sheet,
       agendaEmpty: ag && !!sheet && !entList.length,
-      colMax: ag ? '860px' : 'none',
+      colMax: ag ? 'max(860px, 82%)' : 'none',
       clockTxt: cap(new Date(NOW).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })) + ' · ' + new Date(NOW).toLocaleTimeString('es-ES'),
       addDate: () => this.addEnt('date'),
       addCount: () => this.addEnt('count'),
