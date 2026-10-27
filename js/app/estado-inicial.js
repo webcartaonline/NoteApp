@@ -109,7 +109,7 @@ function naEstadoInicial() {
   ]), mkSheet('Guía de entidades', [
     '# Guía de entidades',
     "Las entidades viven en el panel derecho y se añaden desde la barra lateral. Cada una tiene un **nombre único dentro de su hoja** y produce un valor que puedes citar en esa misma hoja escribiendo un igual delante de su nombre: por ejemplo, el subtotal vale *=Subtotal*. Desde otra hoja u otra nota se cita con su ruta (mira el final de esta guía).",
-    '> Activa la vista sucia con el interruptor superior para editar nombres, descripciones y fórmulas. El botón de función alterna entre ver las entradas o la salida.',
+    '> Activa la vista sucia con el interruptor superior para editar nombres, descripciones y fórmulas. El botón de función alterna entre ver las entradas o la salida. El botón de al lado del interruptor oculta las entidades de la hoja para que el texto ocupe todo el ancho; vuelve a pulsarlo para verlas.',
     '## Expresión',
     'Calcula operaciones con suma, resta, multiplicación, división y paréntesis. Admite números y otras entidades por su nombre. Aquí, Precio por Unidades da **=Subtotal**. Los números van al estilo europeo: la coma separa los decimales y el punto, si quieres, los miles (10.000.000,5). Los resultados también se muestran así.',
     'El icono de comillas, junto al nombre, activa o quita los decimales. Está en todas las entidades que pueden dar números (expresión, tabla, interruptor con fórmula, lógica, deslizador y porcentaje): si lo apagas, el resultado se redondea, por ejemplo 5,3 clientes pasa a 5.',

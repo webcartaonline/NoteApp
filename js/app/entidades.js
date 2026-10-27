@@ -1,6 +1,10 @@
 // Crear, cambiar, mover, duplicar y borrar entidades (y filas/columnas de tablas, ramas de lógica...).
 NoteApp.partes.push(Base => class extends Base {
   setWidth(w) { this.setState(s => ({ notes: this.mapSheet(s, x => ({ ...x, width: w })) })); }
+  // Ocultar/mostrar las entidades de la hoja activa (campo "full": el texto ocupa todo el ancho).
+  toggleFull() { this.setState(s => ({ entMenu: null, colMenu: null, field: null, notes: this.mapSheet(s, x => { const { full, ...y } = x; return full ? y : { ...y, full: true }; }) })); }
+  // Añade una entidad al final y, si estaban ocultas, vuelve a mostrar las entidades para que se vea.
+  pushEnt(s, e) { return { notes: this.mapSheet(s, x => { const { full, ...y } = x; return { ...y, entities: (x.entities || []).concat(e) }; }) }; }
   commit(kind, id) {
     this.setState(s => {
       if (!s.editing || s.editing.kind !== kind || s.editing.id !== id) return null;
@@ -32,7 +36,7 @@ NoteApp.partes.push(Base => class extends Base {
     this.setState(s => {
       if (!this.entsOf(s)) return null;
       const e = { id: uid('e'), type: 'sep', title: 'Sección' };
-      return this.mapEnts(s, a => a.concat(e));
+      return this.pushEnt(s, e);
     });
   }
   uniqueName(base, s, skipId) {
@@ -47,7 +51,7 @@ NoteApp.partes.push(Base => class extends Base {
       const ag = s.mode === 'agenda', all = (this.entsOf(s) || []).filter(e => !NOVAL(e.type)), base = ag && type === 'toggle' ? 'Casilla' : ENT_BASE[type], flags = sheetFlags(this.curSheet(s)).map(f => f.name); let k = 1;
       while (all.some(e => e.name === base + '_' + k) || flags.includes(base + '_' + k)) k++;
       const e = newEnt(type, base + '_' + k, ag && type === 'toggle' ? { desc: 'Casilla' } : null);
-      return this.mapEnts(s, a => a.concat(e));
+      return this.pushEnt(s, e);
     });
   }
   removeEnt(id) { this.setState(s => ({ entMenu: null, field: null, colMenu: null, ...this.mapEnts(s, a => a.filter(e => e.id !== id)) })); }

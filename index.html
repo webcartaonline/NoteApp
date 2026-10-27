@@ -58,7 +58,7 @@
     <sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ true }}">
     <div class="app-caja-2">
       <sc-if value="{{ isNotas }}" hint-placeholder-val="{{ true }}"><dc-import name="panel-texto" dc-props="{{ ui }}"></dc-import></sc-if>
-      <dc-import name="entidades" dc-props="{{ ui }}"></dc-import>
+      <sc-if value="{{ showEnts }}" hint-placeholder-val="{{ true }}"><dc-import name="entidades" dc-props="{{ ui }}"></dc-import></sc-if>
     </div>
     </sc-if>
   </main>

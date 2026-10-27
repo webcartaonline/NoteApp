@@ -63,6 +63,14 @@ NoteApp.partes.push(Base => class extends Base {
       panelCursor: s.clean ? 'default' : 'text',
       panelRef: this.panelRef,
       panelWidth: (sheet ? sheet.width : W0) + 'px',
+      // Ocultar entidades (solo Notas): campo "full" de la hoja. true = el texto usa todo el ancho.
+      canFull: !ag && !!sheet,
+      full: !ag && !!(sheet && sheet.full),
+      showEnts: !(!ag && sheet && sheet.full),
+      panelFlex: !ag && sheet && sheet.full ? '1 1 0%' : '0 1 ' + (sheet ? sheet.width : W0) + 'px',
+      fullColor: sheet && sheet.full ? '#008000' : '#8a8a8a',
+      fullTitle: sheet && sheet.full ? 'Mostrar entidades' : 'Ocultar entidades (el texto ocupa todo el ancho)',
+      toggleFull: () => this.toggleFull(),
       handleColor: s.dragging ? '#008000' : 'transparent',
       panelDown: e => {
         if (s.clean) return;

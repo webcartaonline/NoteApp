@@ -63,6 +63,6 @@ NoteApp.partes.push(Base => class extends Base {
   }
   addText() {
     const ln = mkLines([''])[0];
-    this.setState(s => { if (!this.entsOf(s)) return null; return this.mapEnts(s, a => a.concat({ id: uid('e'), type: 'text', lines: [ln] })); }, () => { if (!this.state.clean) this.focusLine(ln.id, 0); });
+    this.setState(s => { if (!this.entsOf(s)) return null; return this.pushEnt(s, { id: uid('e'), type: 'text', lines: [ln] }); }, () => { if (!this.state.clean) this.focusLine(ln.id, 0); });
   }
 });

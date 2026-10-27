@@ -47,6 +47,33 @@
   transition: left .22s cubic-bezier(.4,0,.2,1),background-color .22s;
 }
 
+/* Botón para ocultar las entidades de la hoja: el texto ocupa todo el ancho (solo en Notas).
+   Icono gris = entidades visibles; verde = ocultas (texto a todo el ancho). */
+.barra-hojas-ancho {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 33px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: #2a2a2a;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.barra-hojas-ancho-icono {
+  width: 17px;
+  height: 17px;
+  mask: url(../../assets/ancho-completo.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/ancho-completo.svg) center / contain no-repeat;
+  transition: background-color .15s;
+}
+.barra-hojas-ancho:hover .barra-hojas-ancho-icono {
+  background: #fff !important;
+}
+
 .barra-hojas-caja-3 {
   flex: 1;
   min-width: 0;

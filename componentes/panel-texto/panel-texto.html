@@ -1,13 +1,16 @@
 <!-- Componente "panel-texto" de NoteApp. Panel de texto de la hoja (solo en Notas): las líneas y el asa para cambiar el ancho.
+     Si la hoja tiene las entidades ocultas (botón junto a vista limpia/sucia), ocupa todo el ancho y no muestra el asa.
      Los estilos fijos están en panel-texto.css; los que cambian ({{ }}) siguen aquí.
      Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
 <x-dc>
-  <section ref="{{ panelRef }}" onMouseDown="{{ panelDown }}" class="panel-texto-seccion" style="flex:0 1 {{ panelWidth }};cursor:{{ panelCursor }};">
+  <section ref="{{ panelRef }}" onMouseDown="{{ panelDown }}" class="panel-texto-seccion" style="flex:{{ panelFlex }};cursor:{{ panelCursor }};">
     <div data-scroll="" data-lines="sheet" class="panel-texto-lineas">
       <dc-import name="lineas" dc-props="{{ ui }}" list="{{ lines }}"></dc-import>
     </div>
+    <sc-if value="{{ showEnts }}" hint-placeholder-val="{{ true }}">
     <div data-handle="1" onPointerDown="{{ resizeDown }}" onPointerMove="{{ resizeMove }}" onPointerUp="{{ resizeUp }}" onPointerCancel="{{ resizeUp }}" onDoubleClick="{{ resizeReset }}" title="Arrastra para ajustar el ancho" class="panel-texto-arrastra-ajustar-ancho">
       <span data-handle="1" class="panel-texto-asa" style="background:{{ handleColor }};"></span>
     </div>
+    </sc-if>
   </section>
 </x-dc>
