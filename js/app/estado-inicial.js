@@ -168,7 +168,7 @@ function naEstadoInicial() {
     newEnt('notif', 'Aviso_Pago', { desc: 'Pagar el hotel', target: 'Pago_Hotel', d: '', h: '12' })
   ]);
   const anotes = [{ id: uid('n'), name: 'Viajes', sheets: [lis, pag], activeSheet: lis.id }];
-  return naLoad({ wins: { agenda: { notes: anotes, activeNote: anotes[0].id }, diagrama: naEjemplo('diagrama') }, calView: {}, now: Date.now(), lsel: {}, copied: null, entMenu: null, field: null, colMenu: null, menu: false, mode: 'notas', notes, activeNote: notes[0].id, editing: null, draft: '', dragging: false, clean: true, focusId: null, config: { mkdV2: true }, fs: 'off', fsName: '' });
+  return naLoad({ wins: { agenda: { notes: anotes, activeNote: anotes[0].id }, diagrama: naEjemplo('diagrama') }, calView: {}, now: Date.now(), lsel: {}, copied: null, search: null, exported: null, entMenu: null, field: null, colMenu: null, menu: false, mode: 'notas', notes, activeNote: notes[0].id, editing: null, draft: '', dragging: false, clean: true, focusId: null, config: { mkdV2: true }, fs: 'off', fsName: '' });
 }
 
 // Ejemplo de la ventana Diagrama (también se crea si los datos guardados son de antes de esta ventana).

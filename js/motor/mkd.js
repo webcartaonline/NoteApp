@@ -222,3 +222,119 @@ function mkdMigrate(lines) {
 
 // Conversión de las notas antiguas al formato MKD actual (se usa al cargar).
 const mkdMigNotes = notes => (notes || []).map(n => ({ ...n, sheets: (n.sheets || []).map(x => ({ ...x, lines: Array.isArray(x.lines) ? mkdMigrate(x.lines) : x.lines, entities: (x.entities || []).map(e => e.type === 'text' && Array.isArray(e.lines) ? { ...e, lines: mkdMigrate(e.lines) } : e) })) }));
+
+// ===== Exportar a Markdown estándar (botón de la barra superior del panel de texto) =====
+// Reconstruye el texto de una hoja en Markdown que se pueda abrir en cualquier programa:
+// - Las menciones se cambian por su valor (no por su ruta), igual que al copiar un cuadro copiable.
+// - El bloque de código `` se cambia a ``` (Markdown estándar solo entiende tres o más comillas invertidas,
+//   y si está en una sola línea se reparte en tres líneas, porque así lo exige el formato).
+// - `_` nunca es formato en MKD (lo usan los nombres de entidad), así que se escapa como \_ para que
+//   Markdown no lo confunda con cursiva.
+// - El valor de una mención es un dato, no un formato: se escapan en él los símbolos de Markdown
+//   (\ ` * _ ~ [ ] |) para que se vea tal cual, aunque contenga alguno de esos caracteres.
+// - Cada línea de MKD es una línea aparte (no se juntan en párrafos como en Markdown): se separan con una
+//   línea en blanco. Esto también evita que una línea --- justo debajo de un párrafo se confunda con un
+//   título (en Markdown, un guion debajo de un párrafo lo convierte en título si no hay nada en medio).
+// - Las casillas [True]/[False]/[x]/[ ] no tienen equivalente exacto fuera de una lista, así que se dejan
+//   como texto [x] / [ ] (se ven igual, pero no son interactivas).
+// - Lo copiable ('x' / '') no existe en Markdown estándar: se exporta como texto normal, con su valor y su
+//   formato (igual que se ve en la app), sin las comillas.
+const MD_ESC_VAL = /([\\`*_~\[\]|])/g;
+const mdEscVal = t => String(t == null ? '' : t).replace(MD_ESC_VAL, '\\$1');
+const mdEscUnderscore = t => String(t == null ? '' : t).replace(/_/g, '\\_');
+// Envuelve el texto con los símbolos de formato (**, *, ~~), dejando fuera los espacios de los bordes
+// (si no, Markdown no los reconoce como negrita/cursiva: "**texto **" no cierra la negrita).
+function mdWrap(text, mark) {
+  const m = /^(\s*)([^]*?)(\s*)$/.exec(text);
+  return m[2] ? m[1] + mark + m[2] + mark + m[3] : text;
+}
+// Valla de comillas invertidas para un bloque o un código en una frase: más larga que la racha más larga
+// que tenga el propio texto, para que no se cierre antes de tiempo.
+function mdFence(text) {
+  let max = 0, cur = 0;
+  for (const c of String(text)) { if (c === '`') { cur++; if (cur > max) max = cur; } else cur = 0; }
+  return '`'.repeat(Math.max(3, max + 1));
+}
+// Reconstruye el texto Markdown de una lista de "segs" (de cleanSegs): resuelve menciones, convierte
+// casillas e imágenes, y aplica negrita/cursiva/tachado. esc = también escapar | (celda de tabla).
+function mdSegsOut(segs, esc) {
+  return segs.map(sg => {
+    if (sg.t === 'box') return (sg.on ? '[x]' : '[ ]') + (sg.mr === '10px' ? ' ' : '');
+    if (sg.t === 'img') return '![' + (sg.alt || '') + '](' + sg.src + ')';
+    if (sg.t === 'code') {
+      const fence = mdFence(sg.text), pad = /^`|`$/.test(sg.text) ? ' ' : '';
+      let o = fence + pad + sg.text + pad + fence;
+      if (sg.b && sg.i) o = mdWrap(o, '***'); else if (sg.b) o = mdWrap(o, '**'); else if (sg.i) o = mdWrap(o, '*');
+      if (sg.s) o = mdWrap(o, '~~');
+      return o;
+    }
+    let text = sg.t === 'ent' ? mdEscVal(resolveEntity(sg.name)) : mdEscUnderscore(sg.text);
+    if (esc) text = text.replace(/\|/g, '\\|');
+    if (sg.b && sg.i) text = mdWrap(text, '***'); else if (sg.b) text = mdWrap(text, '**'); else if (sg.i) text = mdWrap(text, '*');
+    if (sg.s) text = mdWrap(text, '~~');
+    return sg.href ? '[' + text + '](' + sg.href + ')' : text;
+  }).join('');
+}
+// Convierte una línea (ya clasificada por blockInfo) a su línea de Markdown.
+function mdOneLine(text, b) {
+  if (b.kind === 'hr') return '---';
+  if (b.kind === 'p') {
+    const p = parseLine(text), body = mdSegsOut(cleanSegs(text, p.start, text.length), false);
+    return p.level ? '#'.repeat(p.level) + ' ' + body : body;
+  }
+  if (b.kind === 'ul' || b.kind === 'ol') {
+    const body = mdSegsOut(cleanSegs(text, b.start, b.end), false);
+    return '  '.repeat(b.lvl) + (b.kind === 'ul' ? '- ' : b.num + '. ') + body;
+  }
+  // anotación (quote)
+  const pre = '> '.repeat(b.lvl);
+  if (b.hr) return pre.trimEnd() + ' ---';
+  if (b.h) return pre + '#'.repeat(b.h) + ' ' + mdSegsOut(cleanSegs(text, b.start, b.end), false);
+  if (b.li) return pre + '  '.repeat(b.ilvl) + (b.li === 'ul' ? '- ' : b.num + '. ') + mdSegsOut(cleanSegs(text, b.start, b.end), false);
+  return pre + mdSegsOut(cleanSegs(text, b.start, b.end), false);
+}
+// Exporta una lista de líneas MKD (sheet.lines) a un texto en Markdown estándar.
+function mdExportText(lines) {
+  if (!Array.isArray(lines) || !lines.length) return '';
+  const bi = blockInfo(lines), n = lines.length, out = [];
+  let i = 0, prevB = null;
+  const pushBlank = () => { if (out.length) out.push(''); };
+  const quoteSep = lvl => Array.from({ length: Math.max(1, lvl) }, () => '>').join(' ');
+  while (i < n) {
+    const b = bi[i];
+    if (b.kind === 'code' || b.kind === 'copy') {
+      const from = b.from, to = b.to, blk = [];
+      for (let k = from; k <= to; k++) {
+        const bk = bi[k], t = lines[k].text;
+        blk.push(b.kind === 'code' ? t.slice(bk.start, Math.max(bk.start, bk.end)) : mdSegsOut(cleanSegs(t, bk.start, bk.end), false));
+      }
+      pushBlank();
+      if (b.kind === 'code') { const fence = mdFence(blk.join('\n')); out.push(fence, ...blk, fence); }
+      else blk.forEach((t, k) => { if (k) out.push(''); out.push(t); });
+      prevB = bi[to]; i = to + 1; continue;
+    }
+    if (b.kind === 'tsep') { i++; continue; }
+    if (b.kind === 'trow') {
+      const from = b.from, to = b.to, head = bi[from];
+      pushBlank();
+      for (let k = from; k <= to; k++) {
+        const bk = bi[k];
+        if (bk.kind === 'tsep') {
+          const cells = (head.aligns || []).map(al => al === 'center' ? ':---:' : al === 'right' ? '---:' : '---');
+          out.push('| ' + cells.join(' | ') + ' |');
+          continue;
+        }
+        const row = [];
+        for (let c = 0; c < bk.ncol; c++) { const cell = bk.cells[c]; row.push(cell ? mdSegsOut(cleanSegs(lines[k].text, cell.s, cell.e), true) : ''); }
+        out.push('| ' + row.join(' | ') + ' |');
+      }
+      prevB = bi[to]; i = to + 1; continue;
+    }
+    const joined = prevB && (prevB.kind === 'ul' || prevB.kind === 'ol') && (b.kind === 'ul' || b.kind === 'ol');
+    const quoteRun = prevB && prevB.kind === 'quote' && b.kind === 'quote' && !b.first;
+    if (!joined) { if (quoteRun) out.push(quoteSep(Math.max(b.lvl, prevB.lvl))); else pushBlank(); }
+    out.push(mdOneLine(lines[i].text, b));
+    prevB = b; i++;
+  }
+  return out.join('\n');
+}

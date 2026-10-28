@@ -1,8 +1,8 @@
 // Pestañas de notas y hojas: seleccionar, mover, renombrar y copiar al portapapeles.
 NoteApp.partes.push(Base => class extends Base {
   select(kind, id) {
-    if (kind === 'note') this.setState({ activeNote: id, focusId: null });
-    else this.setState(s => ({ focusId: null, notes: s.notes.map(n => n.id !== s.activeNote ? n : { ...n, activeSheet: id }) }));
+    if (kind === 'note') this.setState({ activeNote: id, focusId: null, search: null });
+    else this.setState(s => ({ focusId: null, search: null, notes: s.notes.map(n => n.id !== s.activeNote ? n : { ...n, activeSheet: id }) }));
   }
   moveSheet(id, dir) {
     this.setState(s => ({ notes: s.notes.map(n => {

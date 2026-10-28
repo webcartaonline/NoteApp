@@ -72,6 +72,21 @@ NoteApp.partes.push(Base => class extends Base {
       fullColor: sheet && sheet.full ? '#008000' : '#8a8a8a',
       fullTitle: sheet && sheet.full ? 'Mostrar entidades' : 'Ocultar entidades (el texto ocupa todo el ancho)',
       toggleFull: () => this.toggleFull(),
+      // Exportar la hoja activa a Markdown (barra superior del panel de texto).
+      exportMd: () => this.exportSheetMd(),
+      exportColor: sheet && s.exported === sheet.id ? '#008000' : '#8a8a8a',
+      exportTitle: sheet && s.exported === sheet.id ? 'Exportado' : 'Exportar esta hoja a un archivo Markdown (.md)',
+      // Buscar dentro del texto de la hoja (barra superior del panel de texto). Las coincidencias
+      // se calculan en mkdLines (js/app/lineas.js) y se guardan en this._matches.
+      stopBar: e => e.stopPropagation(),
+      searchQuery: (s.search && s.search.q) || '',
+      hasSearch: !!(s.search && s.search.q),
+      searchCountTxt: (() => { const t = (this._matches || []).length; if (!s.search || !s.search.q) return ''; if (!t) return 'Sin resultados'; const k = ((s.search.active % t) + t) % t; return (k + 1) + ' / ' + t; })(),
+      onSearchChange: e => this.setState({ search: { q: e.target.value, active: 0 } }),
+      onSearchKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.searchStep(e.shiftKey ? -1 : 1); } else if (e.key === 'Escape') { e.preventDefault(); e.target.blur(); this.setState({ search: null }); } },
+      searchPrev: () => this.searchStep(-1),
+      searchNext: () => this.searchStep(1),
+      searchClear: () => this.setState({ search: null }),
       handleColor: s.dragging ? '#008000' : 'transparent',
       panelDown: e => {
         if (s.clean) return;

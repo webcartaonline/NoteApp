@@ -101,6 +101,9 @@ NoteApp.partes.push(Base => class extends Base {
   mkdLines(src, entId, out) {
     const s = this.state, cleanV = s.clean || !!out;
     const blocks = cleanV ? blockInfo(src) : null;
+    // Búsqueda en el texto (barra superior del panel; no se aplica dentro de una entidad de texto).
+    const query = entId ? '' : ((s.search && s.search.q) || '').trim().toLowerCase();
+    if (!entId) this._matches = [];
     const isList = b => !!b && (b.kind === 'ul' || b.kind === 'ol');
     const isFence = b => !!b && (b.kind === 'code' || b.kind === 'copy');
     const isTab = b => !!b && (b.kind === 'trow' || b.kind === 'tsep');
@@ -165,6 +168,38 @@ NoteApp.partes.push(Base => class extends Base {
       }
       if (!ln.text && !focused && src.length === 1) segs = [{ t: 'text', text: 'Escribe aquí…', off: 0, color: DIM }];
       segs = segs.map(sg => segV(sg, focused, ln));
+      if (query) {
+        // Busca "query" en el texto visible de la línea (concatenando sus trozos) y marca, en cada
+        // trozo de texto normal, qué partes hay que resaltar. this._matches guarda el orden global
+        // de las coincidencias, para el contador y los botones de anterior/siguiente.
+        let plain = ''; const spans = [];
+        segs.forEach(sg => {
+          let eqLen = 0, t = null;
+          if (sg.isText || sg.isCode || sg.isLink) t = sg.text;
+          else if (sg.isEnt) { eqLen = (sg.eq || '').length; t = sg.label; }
+          if (t == null) return;
+          const full = (sg.isEnt ? (sg.eq || '') : '') + t;
+          spans.push({ sg, t, start: plain.length + eqLen, end: plain.length + eqLen + t.length });
+          plain += full;
+        });
+        const low = plain.toLowerCase();
+        let pos = 0, idx2;
+        while ((idx2 = low.indexOf(query, pos)) !== -1) {
+          const ms = idx2, me = idx2 + query.length, gi = this._matches.length;
+          const active = !!(s.search && s.search.active === gi);
+          this._matches.push({ lineId: ln.id });
+          spans.forEach(sp => { const a = Math.max(sp.start, ms), b = Math.min(sp.end, me); if (a < b) (sp.sg._hl = sp.sg._hl || []).push({ a: a - sp.start, b: b - sp.start, active }); });
+          pos = me > idx2 ? me : idx2 + 1;
+        }
+      }
+      segs.forEach(sg => {
+        if (!sg.isText) return; // solo se resalta el texto normal (no código, enlaces, menciones ni casillas)
+        if (!sg._hl || !sg._hl.length) { sg.runs = [{ t: sg.text, bg: 'transparent', off: sg.off }]; return; }
+        const hl = sg._hl.slice().sort((a, b) => a.a - b.a), runs = []; let p = 0;
+        hl.forEach(r => { if (r.a > p) runs.push({ t: sg.text.slice(p, r.a), bg: 'transparent', off: sg.off + p }); runs.push({ t: sg.text.slice(r.a, r.b), bg: r.active ? '#008000' : 'rgba(0,128,0,.45)', off: sg.off + r.a }); p = r.b; });
+        if (p < sg.text.length) runs.push({ t: sg.text.slice(p), bg: 'transparent', off: sg.off + p });
+        sg.runs = runs;
+      });
       return { id: ln.id, text: ln.text, focused, segs, fs, lh, mt, fw: head ? 700 : 400, ...v, ...this.lineHandlers(ln, idx, src, entId), ...(out ? { onDown: null } : null) };
     });
     return lines;

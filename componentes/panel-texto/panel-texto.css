@@ -1,16 +1,179 @@
-/* Componente "panel-texto": Panel de texto de la hoja (solo en Notas): las líneas y el asa para cambiar el ancho. */
+/* Componente "panel-texto": Panel de texto de la hoja (solo en Notas): barra superior (buscar, ocultar
+   entidades y exportar a Markdown), las líneas y el asa para cambiar el ancho. */
 
 .panel-texto-seccion {
   position: relative;
+  display: flex;
+  flex-direction: column;
   max-width: 100%;
   min-width: min(200px,100%);
   background: #1c1c1c;
   border-radius: 7px;
-  padding: 8px 2px 8px 0;
+  padding: 0 2px 8px 0;
+}
+
+/* Barra superior: invisible salvo su línea inferior (separa los botones del texto), con la búsqueda a la
+   izquierda y los botones de ocultar entidades / exportar a la derecha. */
+.panel-texto-barra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 31px;
+  flex: none;
+  padding: 0 14px 0 16px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.panel-texto-buscar {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 25px;
+  padding: 0 9px;
+  background: #242424;
+  border-radius: 7px;
+}
+
+.panel-texto-buscar-icono {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  background: #7a7a7a;
+  mask: url(../../assets/buscar.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/buscar.svg) center / contain no-repeat;
+}
+
+.panel-texto-buscar-campo {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  caret-color: #008000;
+}
+.panel-texto-buscar-campo::placeholder {
+  color: #7a7a7a;
+}
+
+.panel-texto-buscar-contador {
+  flex: none;
+  font-size: 12px;
+  color: #8a8a8a;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.panel-texto-buscar-nav {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel-texto-buscar-flecha {
+  width: 9px;
+  height: 9px;
+  background: #8a8a8a;
+  mask: url(../../assets/angulo-pequeno-derecho.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/angulo-pequeno-derecho.svg) center / contain no-repeat;
+  transition: background-color .15s;
+}
+.panel-texto-buscar-prev .panel-texto-buscar-flecha {
+  transform: rotate(180deg);
+}
+.panel-texto-buscar-nav:hover .panel-texto-buscar-flecha {
+  background: #fff !important;
+}
+
+.panel-texto-buscar-cerrar {
+  flex: none;
+  position: relative;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform: rotate(45deg);
+}
+
+.panel-texto-texto-2 {
+  position: absolute;
+  left: 7px;
+  top: 2px;
+  width: 2px;
+  height: 12px;
+  border-radius: 1px;
+  background: #7a7a7a;
+}
+
+.panel-texto-texto-3 {
+  position: absolute;
+  left: 2px;
+  top: 7px;
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+  background: #7a7a7a;
+}
+.panel-texto-buscar-cerrar:hover .panel-texto-texto-2,
+.panel-texto-buscar-cerrar:hover .panel-texto-texto-3 {
+  background: #fff !important;
+}
+
+.panel-texto-barra-acciones {
+  flex: none;
+  display: flex;
+  gap: 6px;
+}
+
+.panel-texto-boton {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  border: 0;
+  background: #2a2a2a;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.panel-texto-boton-icono {
+  width: 15px;
+  height: 15px;
+  transition: background-color .15s;
+}
+.panel-texto-icono-ancho {
+  mask: url(../../assets/ancho-completo.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/ancho-completo.svg) center / contain no-repeat;
+}
+.panel-texto-icono-exportar {
+  mask: url(../../assets/exportar.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/exportar.svg) center / contain no-repeat;
+}
+.panel-texto-boton:hover .panel-texto-boton-icono {
+  background: #fff !important;
 }
 
 .panel-texto-lineas {
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px 20px 27px 22px;

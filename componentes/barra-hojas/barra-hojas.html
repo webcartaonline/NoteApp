@@ -1,4 +1,5 @@
-<!-- Componente "barra-hojas" de NoteApp. Barra superior del panel: vista limpia/sucia, ocultar entidades (Notas), reloj (Agenda), pestañas de las hojas y menú de opciones.
+<!-- Componente "barra-hojas" de NoteApp. Barra superior del panel: vista limpia/sucia, reloj (Agenda), pestañas de las hojas y menú de opciones.
+     El botón de ocultar entidades vive ahora en panel-texto (su barra superior), junto con buscar y exportar.
      Los estilos fijos están en barra-hojas.css; los que cambian ({{ }}) siguen aquí.
      Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
 <x-dc>
@@ -9,11 +10,6 @@
         <span class="barra-hojas-texto" style="left:{{ knobLeft }};top:0;background:{{ knobColor }};"></span>
       </span>
     </button>
-    <sc-if value="{{ canFull }}" hint-placeholder-val="{{ true }}">
-      <button onClick="{{ toggleFull }}" aria-label="Ocultar entidades" aria-pressed="{{ full }}" title="{{ fullTitle }}" class="barra-hojas-ancho">
-        <span class="barra-hojas-ancho-icono" style="background:{{ fullColor }};"></span>
-      </button>
-    </sc-if>
     <div class="barra-hojas-caja-3"><sc-if value="{{ isAgenda }}" hint-placeholder-val="{{ false }}"><span class="barra-hojas-texto-2">{{ clockTxt }}</span></sc-if>
       <div class="barra-hojas-caja-4">
         <div class="barra-hojas-caja-5">

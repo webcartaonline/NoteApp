@@ -56,7 +56,7 @@ NoteApp.partes.push(Base => class extends Base {
     if (!WINS.includes(m)) return;
     const a = document.activeElement; if (a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT')) a.blur();
     this._msel = null;
-    this.setState(st => st.mode === m ? null : { ...winPatch(winsOf(st), m), focusId: null, field: null, entMenu: null, colMenu: null, menu: false, editing: null, dsel: null, dedit: null, dlabel: null, dmen: null, dlink: null, dbox: null });
+    this.setState(st => st.mode === m ? null : { ...winPatch(winsOf(st), m), focusId: null, search: null, field: null, entMenu: null, colMenu: null, menu: false, editing: null, dsel: null, dedit: null, dlabel: null, dmen: null, dlink: null, dbox: null });
   }
   curNote(s) { return s.notes.find(n => n.id === s.activeNote); }
   curSheet(s) { const n = this.curNote(s); return n && n.sheets.find(x => x.id === n.activeSheet); }

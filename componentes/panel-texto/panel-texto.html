@@ -1,9 +1,32 @@
-<!-- Componente "panel-texto" de NoteApp. Panel de texto de la hoja (solo en Notas): las líneas y el asa para cambiar el ancho.
-     Si la hoja tiene las entidades ocultas (botón junto a vista limpia/sucia), ocupa todo el ancho y no muestra el asa.
+<!-- Componente "panel-texto" de NoteApp. Panel de texto de la hoja (solo en Notas): barra superior (buscar,
+     ocultar entidades y exportar a Markdown), las líneas y el asa para cambiar el ancho.
+     Si la hoja tiene las entidades ocultas (botón de ancho completo), ocupa todo el ancho y no muestra el asa.
      Los estilos fijos están en panel-texto.css; los que cambian ({{ }}) siguen aquí.
      Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
 <x-dc>
   <section ref="{{ panelRef }}" onMouseDown="{{ panelDown }}" class="panel-texto-seccion" style="flex:{{ panelFlex }};cursor:{{ panelCursor }};">
+    <div onMouseDown="{{ stopBar }}" class="panel-texto-barra">
+      <div class="panel-texto-buscar">
+        <span class="panel-texto-buscar-icono"></span>
+        <input value="{{ searchQuery }}" onChange="{{ onSearchChange }}" onKeyDown="{{ onSearchKey }}" spellCheck="false" placeholder="Buscar en el texto…" aria-label="Buscar en el texto de la hoja" class="panel-texto-buscar-campo">
+        <sc-if value="{{ hasSearch }}" hint-placeholder-val="{{ false }}">
+          <span class="panel-texto-buscar-contador">{{ searchCountTxt }}</span>
+          <button onClick="{{ searchPrev }}" aria-label="Resultado anterior" title="Resultado anterior (Mayús+Intro)" class="panel-texto-buscar-nav panel-texto-buscar-prev"><span class="panel-texto-buscar-flecha"></span></button>
+          <button onClick="{{ searchNext }}" aria-label="Siguiente resultado" title="Siguiente resultado (Intro)" class="panel-texto-buscar-nav panel-texto-buscar-next"><span class="panel-texto-buscar-flecha"></span></button>
+          <button onClick="{{ searchClear }}" aria-label="Cerrar búsqueda" title="Cerrar búsqueda (Esc)" class="panel-texto-buscar-cerrar"><span class="panel-texto-texto-2"></span><span class="panel-texto-texto-3"></span></button>
+        </sc-if>
+      </div>
+      <div class="panel-texto-barra-acciones">
+        <sc-if value="{{ canFull }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ toggleFull }}" aria-label="Ocultar entidades" aria-pressed="{{ full }}" title="{{ fullTitle }}" class="panel-texto-boton">
+            <span class="panel-texto-boton-icono panel-texto-icono-ancho" style="background:{{ fullColor }};"></span>
+          </button>
+        </sc-if>
+        <button onClick="{{ exportMd }}" aria-label="Exportar a Markdown" title="{{ exportTitle }}" class="panel-texto-boton">
+          <span class="panel-texto-boton-icono panel-texto-icono-exportar" style="background:{{ exportColor }};"></span>
+        </button>
+      </div>
+    </div>
     <div data-scroll="" data-lines="sheet" class="panel-texto-lineas">
       <dc-import name="lineas" dc-props="{{ ui }}" list="{{ lines }}"></dc-import>
     </div>
