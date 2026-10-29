@@ -72,10 +72,14 @@ NoteApp.partes.push(Base => class extends Base {
       fullColor: sheet && sheet.full ? '#008000' : '#8a8a8a',
       fullTitle: sheet && sheet.full ? 'Mostrar entidades' : 'Ocultar entidades (el texto ocupa todo el ancho)',
       toggleFull: () => this.toggleFull(),
-      // Copiar todo el texto de la hoja en Markdown (barra superior del panel de texto).
+      // Copiar todo el texto de la hoja (barra superior del panel de texto): el botón abre un menú con
+      // «Copiar Markdown» y «Copiado literal». El icono se pone verde un momento tras copiar con cualquiera.
+      copyMenuOpen: !!s.copyMenu,
+      toggleCopyMenu: () => this.setState(st => ({ copyMenu: !st.copyMenu })),
       copyMd: () => this.copySheetMd(),
-      copyMdColor: sheet && s.copied === 'md:' + sheet.id ? '#008000' : '#8a8a8a',
-      copyMdTitle: sheet && s.copied === 'md:' + sheet.id ? 'Copiado' : 'Copiar todo el texto de la hoja en Markdown',
+      copyRaw: () => this.copySheetRaw(),
+      copyMdColor: sheet && (s.copied === 'md:' + sheet.id || s.copied === 'lit:' + sheet.id) ? '#008000' : s.copyMenu ? '#fff' : '#8a8a8a',
+      copyMdTitle: sheet && (s.copied === 'md:' + sheet.id || s.copied === 'lit:' + sheet.id) ? 'Copiado' : 'Copiar todo el texto de la hoja',
       // Exportar la hoja activa a Markdown (barra superior del panel de texto).
       exportMd: () => this.exportSheetMd(),
       exportColor: sheet && s.exported === sheet.id ? '#008000' : '#8a8a8a',

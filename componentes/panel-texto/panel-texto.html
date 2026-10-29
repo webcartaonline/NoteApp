@@ -1,5 +1,5 @@
 <!-- Componente "panel-texto" de NoteApp. Panel de texto de la hoja (solo en Notas): barra superior (buscar,
-     ocultar entidades, copiar en Markdown y exportar a Markdown), las líneas y el asa para cambiar el ancho.
+     ocultar entidades, copiar (menú: Markdown o literal) y exportar a Markdown), las líneas y el asa para cambiar el ancho.
      Si la hoja tiene las entidades ocultas (botón de ancho completo), ocupa todo el ancho y no muestra el asa.
      Los estilos fijos están en panel-texto.css; los que cambian ({{ }}) siguen aquí.
      Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
@@ -22,9 +22,17 @@
             <span class="panel-texto-boton-icono panel-texto-icono-ancho" style="background:{{ fullColor }};"></span>
           </button>
         </sc-if>
-        <button onClick="{{ copyMd }}" aria-label="Copiar en Markdown" title="{{ copyMdTitle }}" class="panel-texto-boton">
-          <span class="panel-texto-boton-icono panel-texto-icono-copiar" style="background:{{ copyMdColor }};"></span>
-        </button>
+        <div data-copymenu="1" class="panel-texto-menu">
+          <button onClick="{{ toggleCopyMenu }}" aria-label="Copiar" aria-haspopup="menu" aria-expanded="{{ copyMenuOpen }}" title="{{ copyMdTitle }}" class="panel-texto-boton">
+            <span class="panel-texto-boton-icono panel-texto-icono-copiar" style="background:{{ copyMdColor }};"></span>
+          </button>
+          <sc-if value="{{ copyMenuOpen }}" hint-placeholder-val="{{ false }}">
+            <div role="menu" class="panel-texto-menu-lista">
+              <button role="menuitem" onClick="{{ copyMd }}" title="Markdown estándar: las menciones con su valor y [True] como [x], igual que al exportar" class="panel-texto-opcion-menu">Copiar Markdown</button>
+              <button role="menuitem" onClick="{{ copyRaw }}" title="El texto exactamente como está, igual que en la vista sucia, con las menciones y todos los símbolos" class="panel-texto-opcion-menu">Copiado literal</button>
+            </div>
+          </sc-if>
+        </div>
         <button onClick="{{ exportMd }}" aria-label="Exportar a Markdown" title="{{ exportTitle }}" class="panel-texto-boton">
           <span class="panel-texto-boton-icono panel-texto-icono-exportar" style="background:{{ exportColor }};"></span>
         </button>
