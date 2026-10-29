@@ -111,7 +111,9 @@ function mdText(sc, s, e, f, out) {
     if (sc.cat[i] === 2) { i++; continue; }
     const code = sc.cat[i] === 3; let j = i + 1;
     while (j < e && sc.cat[j] !== 2 && (sc.cat[j] === 3) === code) j++;
-    out.push({ t: code ? 'code' : 'text', text: sc.text.slice(i, j), off: i, b: f.b, i: f.i, s: f.s });
+    // esc: el primer carácter era un signo escapado con \ (cada signo escapado empieza su propio trozo,
+    // porque la barra oculta corta el trozo anterior). Lo usa mdSegsOut para conservar la barra en Markdown.
+    out.push({ t: code ? 'code' : 'text', text: sc.text.slice(i, j), off: i, b: f.b, i: f.i, s: f.s, esc: sc.cat[i] === 1 });
     i = j;
   }
 }
@@ -264,6 +266,8 @@ const mkdMigNotes = notes => (notes || []).map(n => ({ ...n, sheets: (n.sheets |
 const MD_ESC_VAL = /([\\`*_~\[\]|])/g;
 const mdEscVal = t => String(t == null ? '' : t).replace(MD_ESC_VAL, '\\$1');
 const mdEscUnderscore = t => String(t == null ? '' : t).replace(/_/g, '\\_');
+// Signos que Markdown permite escapar con \ (puntuación ASCII). Las comillas curvas ’ ‘ no: allí la barra se vería.
+const MD_PUNCT = /[!-\/:-@\[-`{-~]/;
 // Envuelve el texto con los símbolos de formato (**, *, ~~), dejando fuera los espacios de los bordes
 // (si no, Markdown no los reconoce como negrita/cursiva: "**texto **" no cierra la negrita).
 function mdWrap(text, mark) {
@@ -292,6 +296,10 @@ function mdSegsOut(segs, esc) {
     }
     let text = sg.t === 'ent' ? mdEscVal(resolveEntity(sg.name)) : mdEscUnderscore(sg.text);
     if (esc) text = text.replace(/\|/g, '\\|');
+    // Signo escapado en MKD (\*, \#, \[True]…): se mantiene la barra para que en Markdown también se vea
+    // tal cual (si no, \*hola\* saldría en cursiva). _ y | ya llevan su barra por las líneas de arriba.
+    const c0 = sg.t === 'text' && sg.esc ? sg.text[0] : '';
+    if (c0 && c0 !== '_' && !(esc && c0 === '|') && MD_PUNCT.test(c0)) text = '\\' + text;
     if (sg.b && sg.i) text = mdWrap(text, '***'); else if (sg.b) text = mdWrap(text, '**'); else if (sg.i) text = mdWrap(text, '*');
     if (sg.s) text = mdWrap(text, '~~');
     return sg.href ? '[' + text + '](' + sg.href + ')' : text;

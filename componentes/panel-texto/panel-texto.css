@@ -1,5 +1,5 @@
 /* Componente "panel-texto": Panel de texto de la hoja (solo en Notas): barra superior (buscar, ocultar
-   entidades y exportar a Markdown), las líneas y el asa para cambiar el ancho. */
+   entidades, copiar y exportar a Markdown), las líneas y el asa para cambiar el ancho. */
 
 .panel-texto-seccion {
   position: relative;
@@ -162,6 +162,14 @@
 .panel-texto-icono-ancho {
   mask: url(../../assets/ancho-completo.svg) center / contain no-repeat;
   -webkit-mask: url(../../assets/ancho-completo.svg) center / contain no-repeat;
+}
+/* Mismo icono que el botón de copiar de los cuadros copiables. Es un icono relleno: un poco más pequeño
+   para que pese lo mismo que los otros dos, que son de línea. */
+.panel-texto-icono-copiar {
+  width: 13px;
+  height: 13px;
+  mask: url(../../assets/clon.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/clon.svg) center / contain no-repeat;
 }
 .panel-texto-icono-exportar {
   mask: url(../../assets/exportar.svg) center / contain no-repeat;

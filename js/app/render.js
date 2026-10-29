@@ -72,6 +72,10 @@ NoteApp.partes.push(Base => class extends Base {
       fullColor: sheet && sheet.full ? '#008000' : '#8a8a8a',
       fullTitle: sheet && sheet.full ? 'Mostrar entidades' : 'Ocultar entidades (el texto ocupa todo el ancho)',
       toggleFull: () => this.toggleFull(),
+      // Copiar todo el texto de la hoja en Markdown (barra superior del panel de texto).
+      copyMd: () => this.copySheetMd(),
+      copyMdColor: sheet && s.copied === 'md:' + sheet.id ? '#008000' : '#8a8a8a',
+      copyMdTitle: sheet && s.copied === 'md:' + sheet.id ? 'Copiado' : 'Copiar todo el texto de la hoja en Markdown',
       // Exportar la hoja activa a Markdown (barra superior del panel de texto).
       exportMd: () => this.exportSheetMd(),
       exportColor: sheet && s.exported === sheet.id ? '#008000' : '#8a8a8a',
