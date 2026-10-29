@@ -135,6 +135,8 @@ NoteApp.partes.push(Base => class extends Base {
     const isList = b => !!b && (b.kind === 'ul' || b.kind === 'ol');
     const isFence = b => !!b && (b.kind === 'code' || b.kind === 'copy');
     const isTab = b => !!b && (b.kind === 'trow' || b.kind === 'tsep');
+    // Bloques copiables: formato de línea de cada línea de dentro (títulos, listas, anotaciones, separadores).
+    const inner = new Map(), innerOf = b => { if (!inner.has(b.from)) inner.set(b.from, copyInner(src, blocks, b)); return inner.get(b.from); };
     const segV = (sg, focused, ln) => {
       const v = { isText: false, isLink: false, isCode: false, isImg: false, isBox: false, isEnt: false, off: sg.off };
       const fw = sg.b ? 700 : 'inherit', fst = sg.i ? 'italic' : 'normal', td = sg.s ? 'line-through' : 'none';
@@ -169,14 +171,36 @@ NoteApp.partes.push(Base => class extends Base {
       }
       else if (isFence(b)) {
         const code = b.kind === 'code', top = b.pos === 'single' || b.pos === 'first', bot = b.pos === 'single' || b.pos === 'last';
-        segs = code ? (b.end > b.start ? [{ t: 'text', text: ln.text.slice(b.start, b.end), off: b.start }] : []) : cleanSegs(ln.text, b.start, b.end);
-        Object.assign(v, { bg: code ? '#141414' : '#2a2a2a', pad: (top ? '9px' : '0px') + ' 44px ' + (bot ? '9px' : '0px') + ' 14px', rad: (top ? '7px 7px ' : '0 0 ') + (bot ? '7px 7px' : '0 0') });
-        if (code) { Object.assign(v, { ff: MONO, color: '#d6d6d6' }); fs = '14px'; lh = '22px'; }
+        const padT = top ? '9px' : '0px', padB = bot ? '9px' : '0px';
+        Object.assign(v, { bg: code ? '#141414' : '#2a2a2a', pad: padT + ' 44px ' + padB + ' 14px', rad: (top ? '7px 7px ' : '0 0 ') + (bot ? '7px 7px' : '0 0') });
+        if (code) {
+          segs = b.end > b.start ? [{ t: 'text', text: ln.text.slice(b.start, b.end), off: b.start }] : [];
+          Object.assign(v, { ff: MONO, color: '#d6d6d6' }); fs = '14px'; lh = '22px';
+        } else {
+          // Copiable: además del formato de una frase, cada línea puede ser título, punto de lista,
+          // anotación o línea separadora (ver copyInner en js/motor/mkd.js).
+          const ib = innerOf(b)[idx - b.from], at = b.start + (ib.start || 0);
+          segs = ib.kind === 'hr' || ib.hr ? [] : cleanSegs(ln.text, Math.min(at, Math.max(b.start, b.end)), b.end);
+          let left = 14;
+          const mark = (x, li, num) => Object.assign(v, { hasMarker: true, mkLeft: x + 'px', mkTop: padT, marker: li === 'ul' ? '•' : num + '.' });
+          if (ib.kind === 'hr') { v.isHr = true; v.showText = false; }
+          else if (ib.kind === 'ul' || ib.kind === 'ol') { const ind = ib.lvl * 24; mark(14 + ind, ib.kind, ib.num); left = 14 + ind + 28; }
+          else if (ib.kind === 'quote') {
+            const L = ib.lvl || 1, bars = [];
+            for (let k = 0; k < L; k++) bars.push('inset ' + (14 + k * 14) + 'px 0 0 #2a2a2a', 'inset ' + (17 + k * 14) + 'px 0 0 #008000');
+            left = 31 + (L - 1) * 14;
+            Object.assign(v, { bar: bars.join(', '), color: ib.h === 6 ? '#a6a6a6' : '#cfcfcf' });
+            if (ib.hr) { v.isHr = true; v.showText = false; }
+            else if (ib.h) { [fs, lh] = HEAD[ib.h] || ['16px', '25px']; v.fw = 700; }
+            else if (ib.li) { const ind = ib.ilvl * 24; mark(left + ind, ib.li, ib.num); left += ind + 28; }
+          } else if (ib.h) { [fs, lh] = HEAD[ib.h] || ['16px', '25px']; v.fw = 700; if (ib.h === 6) v.color = '#a6a6a6'; }
+          v.pad = padT + ' 44px ' + padB + ' ' + left + 'px';
+        }
         if (!segs.length && b.pos !== 'single' && b.pos !== 'mid') lh = '0px';
         if (top) {
           const key = ln.id, copied = s.copied === key;
           Object.assign(v, { hasCopy: true, copyTitle: copied ? 'Copiado' : 'Copiar', copyColor: copied ? '#008000' : '#8a8a8a',
-            onCopy: e => { e.stopPropagation(); const txt = []; for (let k = b.from; k <= b.to; k++) { const bk = blocks[k], t = src[k].text; txt.push(code ? t.slice(bk.start, Math.max(bk.start, bk.end)) : plainOf(cleanSegs(t, bk.start, bk.end))); } while (txt.length > 1 && !txt[0]) txt.shift(); while (txt.length > 1 && !txt[txt.length - 1]) txt.pop(); this.copyText(txt.join('\n'), key); } });
+            onCopy: e => { e.stopPropagation(); const txt = []; for (let k = b.from; k <= b.to; k++) { const bk = blocks[k], t = src[k].text; txt.push(code ? t.slice(bk.start, Math.max(bk.start, bk.end)) : copyPlainLine(innerOf(b)[k - b.from])); } while (txt.length > 1 && !txt[0]) txt.shift(); while (txt.length > 1 && !txt[txt.length - 1]) txt.pop(); this.copyText(txt.join('\n'), key); } });
         }
       } else {
         segs = cleanSegs(ln.text, b.kind === 'p' ? p.start : b.start, b.end);

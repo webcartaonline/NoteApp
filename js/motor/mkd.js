@@ -232,6 +232,28 @@ function cleanSegs(text, start, end) {
   mdFmt(sc, a, b, {}, sc.w2, out);
   return out;
 }
+// Formato dentro de un bloque copiable ('x' o ''): cada línea puede ser título, punto de lista, anotación o
+// línea separadora, igual que fuera del bloque (el código `` no: ahí todo se ve tal cual). Devuelve, para cada
+// línea del bloque (de b.from a b.to), su texto interior (sin las comillas) y su forma, como en blockInfo:
+// { kind: 'p' | 'hr' | 'quote' | 'ul' | 'ol', text, start, end }; en 'p', h = nivel del título (0 si no lo es).
+function copyInner(lines, bi, b) {
+  const txt = [];
+  for (let k = b.from; k <= b.to; k++) { const bk = bi[k], t = String(lines[k].text || ''); txt.push(t.slice(bk.start, Math.max(bk.start, bk.end))); }
+  return blockInfo(txt.map(text => ({ text }))).map((x, i) => {
+    const text = txt[i];
+    if (x.kind === 'hr' || x.kind === 'quote' || x.kind === 'ul' || x.kind === 'ol') return { ...x, text };
+    const p = parseLine(text); return { kind: 'p', h: p.level, start: p.start, end: text.length, text };
+  });
+}
+// Texto que se copia de una línea de un bloque copiable: lo que se ve (valor de las menciones, sin los signos
+// de formato). Los puntos de lista conservan su "- " o "1. " y la línea separadora se copia como ---.
+function copyPlainLine(ib) {
+  if (ib.kind === 'hr' || ib.hr) return '---';
+  const body = plainOf(cleanSegs(ib.text, ib.start || 0, ib.end));
+  if (ib.kind === 'ul' || ib.kind === 'ol') return '  '.repeat(ib.lvl) + (ib.kind === 'ul' ? '- ' : ib.num + '. ') + body;
+  if (ib.kind === 'quote' && ib.li) return '  '.repeat(ib.ilvl) + (ib.li === 'ul' ? '- ' : ib.num + '. ') + body;
+  return body;
+}
 // Conversión única de notas antiguas: el cuadro copiable pasó de `` a ''.
 function mkdMigrate(lines) {
   const out = lines.map(l => ({ ...l })), n = out.length, ends = t => /``\s*$/.test(t), fix = t => t.replace(/``(\s*)$/, "''$1");
@@ -262,7 +284,7 @@ const mkdMigNotes = notes => (notes || []).map(n => ({ ...n, sheets: (n.sheets |
 // - Las casillas [True]/[False]/[x]/[ ] no tienen equivalente exacto fuera de una lista, así que se dejan
 //   como texto [x] / [ ] (se ven igual, pero no son interactivas).
 // - Lo copiable ('x' / '') no existe en Markdown estándar: se exporta como texto normal, con su valor y su
-//   formato (igual que se ve en la app), sin las comillas.
+//   formato (igual que se ve en la app, también títulos, listas, anotaciones y separadores), sin las comillas.
 const MD_ESC_VAL = /([\\`*_~\[\]|])/g;
 const mdEscVal = t => String(t == null ? '' : t).replace(MD_ESC_VAL, '\\$1');
 const mdEscUnderscore = t => String(t == null ? '' : t).replace(/_/g, '\\_');
@@ -345,10 +367,8 @@ function mdExportText(lines) {
     const b = bi[i];
     if (b.kind === 'code' || b.kind === 'copy') {
       const from = b.from, to = b.to, blk = [];
-      for (let k = from; k <= to; k++) {
-        const bk = bi[k], t = lines[k].text;
-        blk.push(b.kind === 'code' ? t.slice(bk.start, Math.max(bk.start, bk.end)) : mdSegsOut(cleanSegs(t, bk.start, bk.end), false));
-      }
+      if (b.kind === 'copy') copyInner(lines, bi, b).forEach(ib => blk.push(mdOneLine(ib.text, ib)));
+      else for (let k = from; k <= to; k++) { const bk = bi[k], t = lines[k].text; blk.push(t.slice(bk.start, Math.max(bk.start, bk.end))); }
       pushBlank();
       if (b.kind === 'code') { const fence = mdFence(blk.join('\n')); out.push(fence, ...blk, fence); }
       else blk.forEach((t, k) => { if (k) out.push(''); out.push(t); });
