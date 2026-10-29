@@ -98,6 +98,34 @@ NoteApp.partes.push(Base => class extends Base {
     const nv = { True: 'False', False: 'True', x: ' ', X: ' ', ' ': 'x' }[m[1]], text = ln.text.slice(0, off) + '[' + nv + ']' + ln.text.slice(off + m[0].length);
     this.setLines(src.map(l => l.id === lineId ? { ...l, text } : l), undefined, undefined, entId);
   }
+  // Cómo se dibuja una celda de tabla (vista limpia). Además del formato de una frase, la celda entera puede
+  // ser copiable ('x'), de código (``x``), título (# x), punto de lista (- x), anotación (> x) o separador (---).
+  // Ver cellInfo en js/motor/mkd.js.
+  cellView(ln, b, k, segV) {
+    const c = b.cells[k], v = { segs: [], align: b.aligns[k] || 'left', fw: b.head ? 700 : 400, fs: 'inherit', ff: 'inherit', color: 'inherit', bar: 'none', pl: '12px',
+      isHr: false, hasMarker: false, marker: '', hasCopy: false, onCopy: null, copyTitle: '', copyColor: '#8a8a8a', chipBg: 'transparent', chipPad: '0px', disp: 'inline' };
+    if (!c) return v;
+    const ci = cellInfo(ln.text, c);
+    if (ci.kind === 'hr') { v.isHr = true; return v; }
+    if (ci.kind === 'code') {
+      const txt = cellCode(ln.text, ci);
+      Object.assign(v, { segs: [segV({ t: 'text', text: txt, off: ci.s }, false, ln)], ff: MONO, fs: '14px', color: '#d6d6d6', chipBg: '#141414', chipPad: '3px 4px 3px 9px' });
+      this.cellCopy(v, ln, k, () => txt);
+      return v;
+    }
+    v.segs = cleanSegs(ln.text, ci.s, ci.e).map(x => segV(x, false, ln));
+    if (ci.kind === 'copy') { Object.assign(v, { chipBg: '#333', chipPad: '3px 4px 3px 9px' }); this.cellCopy(v, ln, k, () => plainOf(cleanSegs(ln.text, ci.s, ci.e))); }
+    else if (ci.kind === 'h') Object.assign(v, { fw: 700, fs: ({ 1: '20px', 2: '18px', 3: '17px' })[ci.lvl] || '16px', color: ci.lvl === 6 ? '#a6a6a6' : 'inherit' });
+    else if (ci.kind === 'li') Object.assign(v, { hasMarker: true, marker: ci.li === 'ul' ? '•' : ci.n + '.' });
+    else if (ci.kind === 'quote') Object.assign(v, { bar: 'inset 3px 0 0 #008000', pl: '17px', color: '#cfcfcf' });
+    return v;
+  }
+  // Botón de copiar de una celda: copia el texto (con el valor de las menciones) y se pone verde un momento.
+  cellCopy(v, ln, k, get) {
+    const key = ln.id + '|' + k, copied = this.state.copied === key;
+    Object.assign(v, { hasCopy: true, disp: 'inline-flex', copyTitle: copied ? 'Copiado' : 'Copiar', copyColor: copied ? '#008000' : '#8a8a8a',
+      onCopy: e => { e.preventDefault(); e.stopPropagation(); this.copyText(get(), key); } });
+  }
   mkdLines(src, entId, out) {
     const s = this.state, cleanV = s.clean || !!out;
     const blocks = cleanV ? blockInfo(src) : null;
@@ -136,7 +164,7 @@ NoteApp.partes.push(Base => class extends Base {
       else if (b.kind === 'trow') {
         segs = []; v.showText = false;
         const cells = [];
-        for (let k = 0; k < b.ncol; k++) { const c = b.cells[k]; cells.push({ segs: c ? cleanSegs(ln.text, c.s, c.e).map(x => segV(x, false, ln)) : [], align: b.aligns[k] || 'left', fw: b.head ? 700 : 400 }); }
+        for (let k = 0; k < b.ncol; k++) cells.push(this.cellView(ln, b, k, segV));
         Object.assign(v, { isRow: true, cells, cols: 'repeat(' + b.ncol + ', minmax(0, 1fr))', bg: b.head ? '#2a2a2a' : '#222222', rad: b.head ? (b.last ? '7px' : '7px 7px 0 0') : b.last ? '0 0 7px 7px' : '0', bar: !b.head && !b.last ? 'inset 0 -1px 0 #2f2f2f' : 'none' });
       }
       else if (isFence(b)) {

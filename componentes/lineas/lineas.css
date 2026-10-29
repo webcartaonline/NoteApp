@@ -63,6 +63,49 @@
   word-break: break-word;
 }
 
+.lineas-celda {
+  max-width: 100%;
+  border-radius: 6px;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.lineas-celda-texto {
+  min-width: 0;
+}
+
+.lineas-celda-marca {
+  display: inline-block;
+  min-width: 18px;
+  margin-right: 6px;
+  color: #008000;
+  font-weight: 600;
+}
+
+.lineas-celda-linea {
+  height: 2px;
+  margin: 11px 0;
+  background: #3a3a3a;
+}
+
+.lineas-celda-copiar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-left: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.lineas-celda-copiar:hover {
+  background: #1c1c1c !important;
+}
+
 .lineas-enlace {
   cursor: pointer;
 }

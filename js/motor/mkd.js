@@ -145,6 +145,28 @@ function cellsOf(t) {
   }
   return cells;
 }
+// Formato propio de una celda de tabla. Dentro de una celda funciona el formato de una frase (negrita,
+// menciones, `código`, casillas, enlaces…) y, además, la celda entera puede usar los formatos de línea:
+// copiable 'x' (o ''x''), bloque de código ``x`` (o ```x```), título # x, punto de lista - x / 1. x,
+// anotación > x y línea separadora --- / ***. Devuelve { kind, s, e } con la parte visible (sin los signos).
+// kind: 'p' normal · 'copy' · 'code' · 'h' (lvl) · 'li' (li 'ul'|'ol', n) · 'quote' · 'hr'.
+function cellInfo(t, c) {
+  const s = c.s, e = c.e, x = t.slice(s, e), trim = (a, b) => { while (a < b && /\s/.test(t[a])) a++; while (b > a && /\s/.test(t[b - 1])) b--; return [a, b]; };
+  let m;
+  if (/^(-{3,}|\*{3,})$/.test(x)) return { kind: 'hr', s: e, e };
+  for (const fl of [3, 2]) {
+    const f = '`'.repeat(fl);
+    if (x.length > fl * 2 && x.startsWith(f) && x.endsWith(f) && x.slice(fl, -fl).trim()) { const [a, b] = trim(s + fl, e - fl); return { kind: 'code', s: a, e: b }; }
+  }
+  if (x.length >= 5 && isQ(x[0]) && isQ(x[1]) && isQ(x[x.length - 1]) && isQ(x[x.length - 2]) && x.slice(2, -2).trim()) { const [a, b] = trim(s + 2, e - 2); return { kind: 'copy', s: a, e: b }; }
+  if (x.length >= 3 && isQ(x[0]) && !isQ(x[1]) && isQ(x[x.length - 1])) { const [a, b] = trim(s + 1, e - 1); return { kind: 'copy', s: a, e: b }; }
+  if ((m = /^(>(?: ?>)*) /.exec(x))) return { kind: 'quote', s: s + m[0].length, e };
+  if ((m = /^(#{1,6}) /.exec(x))) return { kind: 'h', lvl: m[1].length, s: s + m[0].length, e };
+  if ((m = LI.exec(x)) && m[1] === '') return { kind: 'li', li: m[2] === '-' || m[2] === '*' || m[2] === '+' ? 'ul' : 'ol', n: parseInt(m[2], 10), s: s + m[2].length + 1, e };
+  return { kind: 'p', s, e };
+}
+// Texto de una celda de código: dentro de una tabla, | se escribe \| (si no, partiría la celda).
+const cellCode = (t, ci) => t.slice(ci.s, ci.e).replace(/\\\|/g, '|');
 function blockInfo(lines) {
   const n = lines.length, out = new Array(n), rtrim = t => t.replace(/\s+$/, '');
   const trail = (r, fn) => { let k = 0; while (k < r.length && fn(r[r.length - 1 - k])) k++; return k; };
@@ -293,6 +315,17 @@ function mdOneLine(text, b) {
   if (b.li) return pre + '  '.repeat(b.ilvl) + (b.li === 'ul' ? '- ' : b.num + '. ') + mdSegsOut(cleanSegs(text, b.start, b.end), false);
   return pre + mdSegsOut(cleanSegs(text, b.start, b.end), false);
 }
+// Convierte una celda de tabla a Markdown. Markdown no tiene títulos, listas, anotaciones ni copiables dentro
+// de una tabla: el título se exporta en negrita y el resto como texto normal (sin las comillas del copiable).
+function mdCellOut(t, cell) {
+  const ci = cellInfo(t, cell);
+  if (ci.kind === 'hr') return '\\-\\-\\-';
+  if (ci.kind === 'code') { const raw = t.slice(ci.s, ci.e), fence = '`'.repeat(Math.max(1, (raw.match(/`+/g) || []).reduce((a, r) => Math.max(a, r.length + 1), 1))), pad = /^`|`$/.test(raw) ? ' ' : ''; return fence + pad + raw + pad + fence; }
+  const body = mdSegsOut(cleanSegs(t, ci.s, ci.e), true);
+  if (ci.kind === 'h') return mdWrap(body, '**');
+  if (ci.kind === 'li') return (ci.li === 'ul' ? '- ' : ci.n + '. ') + body;
+  return body;
+}
 // Exporta una lista de líneas MKD (sheet.lines) a un texto en Markdown estándar.
 function mdExportText(lines) {
   if (!Array.isArray(lines) || !lines.length) return '';
@@ -325,7 +358,7 @@ function mdExportText(lines) {
           continue;
         }
         const row = [];
-        for (let c = 0; c < bk.ncol; c++) { const cell = bk.cells[c]; row.push(cell ? mdSegsOut(cleanSegs(lines[k].text, cell.s, cell.e), true) : ''); }
+        for (let c = 0; c < bk.ncol; c++) { const cell = bk.cells[c]; row.push(cell ? mdCellOut(lines[k].text, cell) : ''); }
         out.push('| ' + row.join(' | ') + ' |');
       }
       prevB = bi[to]; i = to + 1; continue;
