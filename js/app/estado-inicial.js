@@ -95,6 +95,7 @@ function naEstadoInicial() {
     "``",
     "## Cuadros copiables",
     "'Una línea lista para copiar'",
+    "También dentro de una frase: conéctate con 'npx wrangler login' y sigue. Un apóstrofo (don't, l'aigua) nunca crea un copiable.",
     "''",
     "Bloque de varias líneas.",
     "Las menciones se copian con su valor: =/Conoce NoteApp/Guía de entidades/Subtotal",
@@ -102,6 +103,12 @@ function naEstadoInicial() {
     "- títulos, listas, **negrita**, *cursiva*…",
     "> y también anotaciones.",
     "''",
+    "## Combinar formatos",
+    "Los formatos de línea se pueden combinar entre sí:",
+    "1. ## Un título numerado",
+    "2. Un punto con un 'copiable' dentro",
+    "- > Una anotación dentro de un punto",
+    "> - Un punto dentro de una anotación, con **negrita**",
     "## Menciones",
     "Escribe un igual pegado al nombre de una entidad de la misma hoja. Para una entidad de otra hoja o de otra nota, escribe su ruta: el subtotal vale =/Conoce NoteApp/Guía de entidades/Subtotal.",
     "Delante del igual no puede haber nada pegado, salvo \\* o \\~: **=/Conoce NoteApp/Guía de entidades/Subtotal** funciona, pero en 2+2=4 o en web.com/?id=5 no se crea ninguna mención.",
@@ -109,7 +116,7 @@ function naEstadoInicial() {
     "## Escapar",
     "Pon una barra \\\\ delante de un símbolo para que se vea tal cual: \\*sin cursiva\\*, \\=Subtotal, \\[True].",
     "\\# Esto no es un título",
-    "\\'Casa' y 'Coche' no es una línea copiable"
+    "\\'Casa\\' y \\'Coche\\' se ven con sus comillas, sin crear copiables."
   ]), mkSheet('Guía de entidades', [
     '# Guía de entidades',
     "Las entidades viven en el panel derecho y se añaden desde la barra lateral. Cada una tiene un **nombre único dentro de su hoja** y produce un valor que puedes citar en esa misma hoja escribiendo un igual delante de su nombre: por ejemplo, el subtotal vale *=Subtotal*. Desde otra hoja u otra nota se cita con su ruta (mira el final de esta guía).",

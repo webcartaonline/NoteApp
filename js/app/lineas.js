@@ -113,8 +113,8 @@ NoteApp.partes.push(Base => class extends Base {
       this.cellCopy(v, ln, k, () => txt);
       return v;
     }
-    v.segs = cleanSegs(ln.text, ci.s, ci.e).map(x => segV(x, false, ln));
-    if (ci.kind === 'copy') { Object.assign(v, { chipBg: '#333', chipPad: '3px 4px 3px 9px' }); this.cellCopy(v, ln, k, () => plainOf(cleanSegs(ln.text, ci.s, ci.e))); }
+    v.segs = cleanSegs(ln.text, ci.s, ci.e, ci.kind === 'copy').map(x => segV(x, false, ln));
+    if (ci.kind === 'copy') { Object.assign(v, { chipBg: '#333', chipPad: '3px 4px 3px 9px' }); this.cellCopy(v, ln, k, () => plainOf(cleanSegs(ln.text, ci.s, ci.e, true))); }
     else if (ci.kind === 'h') Object.assign(v, { fw: 700, fs: ({ 1: '20px', 2: '18px', 3: '17px' })[ci.lvl] || '16px', color: ci.lvl === 6 ? '#a6a6a6' : 'inherit' });
     else if (ci.kind === 'li') Object.assign(v, { hasMarker: true, marker: ci.li === 'ul' ? '•' : ci.n + '.' });
     else if (ci.kind === 'quote') Object.assign(v, { bar: 'inset 3px 0 0 #008000', pl: '17px', color: '#cfcfcf' });
@@ -137,8 +137,23 @@ NoteApp.partes.push(Base => class extends Base {
     const isTab = b => !!b && (b.kind === 'trow' || b.kind === 'tsep');
     // Bloques copiables: formato de línea de cada línea de dentro (títulos, listas, anotaciones, separadores).
     const inner = new Map(), innerOf = b => { if (!inner.has(b.from)) inner.set(b.from, copyInner(src, blocks, b)); return inner.get(b.from); };
+    // Rayas verdes de una anotación con un degradado (no depende del fondo): x0 = dónde va la primera raya,
+    // L = cuántas, fill = fondo detrás del texto, pre = fondo antes de la primera raya.
+    const qGrad = (x0, L, fill, pre) => {
+      const st = [(pre || 'transparent') + ' 0px'];
+      for (let k = 0; k < L; k++) { const x = x0 + k * 14; st.push((k ? fill : pre || 'transparent') + ' ' + x + 'px', '#008000 ' + x + 'px', '#008000 ' + (x + 3) + 'px', fill + ' ' + (x + 3) + 'px'); }
+      return 'linear-gradient(to right, ' + st.concat(fill + ' 100%').join(', ') + ')';
+    };
     const segV = (sg, focused, ln) => {
-      const v = { isText: false, isLink: false, isCode: false, isImg: false, isBox: false, isEnt: false, off: sg.off };
+      const v = { isText: false, isLink: false, isCode: false, isImg: false, isBox: false, isEnt: false, isChipOpen: false, isChipBtn: false, off: sg.off,
+        cbg: sg.chip ? '#333' : 'transparent', cpad: sg.chip ? '2px 0' : '0', crad: '0' };
+      // Copiable en una frase ('x'): fondo gris en su contenido, borde redondeado a la izquierda y botón de copiar a la derecha.
+      if (sg.t === 'chipopen') return { ...v, isChipOpen: true, cbg: '#333', cpad: '2px 0 2px 6px', crad: '4px 0 0 4px' };
+      if (sg.t === 'chipbtn') {
+        const key = ln.id + '@' + sg.cs, copied = s.copied === key;
+        return { ...v, isChipBtn: true, cbg: '#333', cpad: '2px 4px 2px 5px', crad: '0 4px 4px 0', copyTitle: copied ? 'Copiado' : 'Copiar', copyColor: copied ? '#008000' : '#8a8a8a',
+          onCopy: e => { e.preventDefault(); e.stopPropagation(); this.copyText(plainOf(cleanSegs(ln.text, sg.cs, sg.ce, true)), key); }, onStop: e => e.stopPropagation() };
+      }
       const fw = sg.b ? 700 : 'inherit', fst = sg.i ? 'italic' : 'normal', td = sg.s ? 'line-through' : 'none';
       if (sg.t === 'text') return sg.href
         ? { ...v, isLink: true, text: sg.text, href: sg.href, fw, fst, td: sg.s ? 'underline line-through' : 'underline' }
@@ -153,12 +168,13 @@ NoteApp.partes.push(Base => class extends Base {
     const lines = src.map((ln, idx) => {
       const focused = !s.clean && s.focusId === ln.id;
       const b = blocks ? blocks[idx] : { kind: 'p' };
-      const p = b.kind === 'p' ? parseLine(ln.text) : { level: 0, start: 0 }, head = p.level > 0;
-      let [fs, lh] = head ? (HEAD[p.level] || ['16px', '25px']) : ['16px', '25px'];
-      const cont = !!prevB && ((isFence(b) && isFence(prevB) && prevB.from === b.from) || (b.kind === 'quote' && prevB.kind === 'quote') || (isTab(b) && isTab(prevB) && prevB.from === b.from));
-      const mt = idx === 0 || cont ? '0px' : (blocks && isList(b) && isList(prevB)) ? '6px' : (head || prevHead) ? '25px' : '13px';
+      // hl: nivel de título de la línea (también un punto de lista con título: 1. ## x o ## 1. x).
+      const p = b.kind === 'p' ? parseLine(ln.text) : { level: 0, start: 0 }, hl = p.level || (isList(b) && b.h) || 0, head = hl > 0;
+      let [fs, lh] = head ? (HEAD[hl] || ['16px', '25px']) : ['16px', '25px'];
+      const cont = !!prevB && ((isFence(b) && isFence(prevB) && prevB.from === b.from) || (b.kind === 'quote' && prevB.kind === 'quote') || (isTab(b) && isTab(prevB) && prevB.from === b.from) || (isList(b) && b.iq && isList(prevB) && prevB.iq));
+      const mt = idx === 0 || cont ? '0px' : (blocks && isList(b) && isList(prevB) && !b.h && !prevB.h) ? '6px' : (head || prevHead) ? '25px' : '13px';
       prevHead = head; prevB = b;
-      const v = { pad: '0px', bg: 'transparent', rad: '0px', bar: 'none', color: head && p.level === 6 ? '#a6a6a6' : '#fff', ff: 'inherit', isHr: false, isRow: false, cells: [], cols: 'none', hasMarker: false, marker: '', mkLeft: '0px', mkTop: '0px', hasCopy: false, showText: true, onCopy: null, copyTitle: '', copyColor: '#8a8a8a' };
+      const v = { pad: '0px', bg: 'transparent', rad: '0px', bar: 'none', color: hl === 6 ? '#a6a6a6' : '#fff', ff: 'inherit', isHr: false, isRow: false, cells: [], cols: 'none', hasMarker: false, marker: '', mkLeft: '0px', mkTop: '0px', hasCopy: false, showText: true, onCopy: null, copyTitle: '', copyColor: '#8a8a8a' };
       let segs;
       if (!blocks) segs = rawSegs(ln.text);
       else if (b.kind === 'hr') { segs = []; v.isHr = true; v.showText = false; }
@@ -180,20 +196,18 @@ NoteApp.partes.push(Base => class extends Base {
           // Copiable: además del formato de una frase, cada línea puede ser título, punto de lista,
           // anotación o línea separadora (ver copyInner en js/motor/mkd.js).
           const ib = innerOf(b)[idx - b.from], at = b.start + (ib.start || 0);
-          segs = ib.kind === 'hr' || ib.hr ? [] : cleanSegs(ln.text, Math.min(at, Math.max(b.start, b.end)), b.end);
+          segs = ib.kind === 'hr' || ib.hr ? [] : cleanSegs(ln.text, Math.min(at, Math.max(b.start, b.end)), b.end, true);
           let left = 14;
           const mark = (x, li, num) => Object.assign(v, { hasMarker: true, mkLeft: x + 'px', mkTop: padT, marker: li === 'ul' ? '•' : num + '.' });
+          const hd = h => { if (!h) return; [fs, lh] = HEAD[h] || ['16px', '25px']; v.fw = 700; if (h === 6) v.color = '#a6a6a6'; };
+          const bars = L => { v.bg = qGrad(left, L, '#2a2a2a', '#2a2a2a'); left += 17 + (L - 1) * 14; v.color = '#cfcfcf'; };
           if (ib.kind === 'hr') { v.isHr = true; v.showText = false; }
-          else if (ib.kind === 'ul' || ib.kind === 'ol') { const ind = ib.lvl * 24; mark(14 + ind, ib.kind, ib.num); left = 14 + ind + 28; }
+          else if (ib.kind === 'ul' || ib.kind === 'ol') { const ind = ib.lvl * 24; mark(14 + ind, ib.kind, ib.num); left = 14 + ind + 28; if (ib.iq) bars(ib.iq); hd(ib.h); }
           else if (ib.kind === 'quote') {
-            const L = ib.lvl || 1, bars = [];
-            for (let k = 0; k < L; k++) bars.push('inset ' + (14 + k * 14) + 'px 0 0 #2a2a2a', 'inset ' + (17 + k * 14) + 'px 0 0 #008000');
-            left = 31 + (L - 1) * 14;
-            Object.assign(v, { bar: bars.join(', '), color: ib.h === 6 ? '#a6a6a6' : '#cfcfcf' });
+            bars(ib.lvl || 1);
             if (ib.hr) { v.isHr = true; v.showText = false; }
-            else if (ib.h) { [fs, lh] = HEAD[ib.h] || ['16px', '25px']; v.fw = 700; }
-            else if (ib.li) { const ind = ib.ilvl * 24; mark(left + ind, ib.li, ib.num); left += ind + 28; }
-          } else if (ib.h) { [fs, lh] = HEAD[ib.h] || ['16px', '25px']; v.fw = 700; if (ib.h === 6) v.color = '#a6a6a6'; }
+            else { if (ib.li) { const ind = ib.ilvl * 24; mark(left + ind, ib.li, ib.num); left += ind + 28; } hd(ib.h); }
+          } else hd(ib.h);
           v.pad = padT + ' 44px ' + padB + ' ' + left + 'px';
         }
         if (!segs.length && b.pos !== 'single' && b.pos !== 'mid') lh = '0px';
@@ -210,12 +224,20 @@ NoteApp.partes.push(Base => class extends Base {
           const PL = 17 + (L - 1) * 14, top = b.first ? '8px' : b.h ? '8px' : '0px';
           let left = PL;
           if (b.hr) { segs = []; v.isHr = true; v.showText = false; }
-          else if (b.h) { [fs, lh] = HEAD[b.h] || ['16px', '25px']; v.fw = 700; }
-          else if (b.li) { const ind = b.ilvl * 24; left = PL + ind + 28; Object.assign(v, { hasMarker: true, mkLeft: (PL + ind) + 'px', mkTop: top, marker: b.li === 'ul' ? '•' : b.num + '.' }); }
+          else {
+            if (b.h) { [fs, lh] = HEAD[b.h] || ['16px', '25px']; v.fw = 700; }
+            if (b.li) { const ind = b.ilvl * 24; left = PL + ind + 28; Object.assign(v, { hasMarker: true, mkLeft: (PL + ind) + 'px', mkTop: top, marker: b.li === 'ul' ? '•' : b.num + '.' }); }
+          }
           Object.assign(v, { bg: '#242424', bar: bars.join(', '), color: b.h === 6 ? '#a6a6a6' : '#cfcfcf', pad: top + ' 14px ' + (b.last ? '8px' : '0px') + ' ' + left + 'px', rad: '0 ' + (b.first ? '6px' : '0') + ' ' + (b.last ? '6px' : '0') + ' 0' });
         } else if (isList(b)) {
           const ind = b.lvl * 24;
           Object.assign(v, { pad: '0 0 0 ' + (ind + 28) + 'px', hasMarker: true, mkLeft: ind + 'px', marker: b.kind === 'ul' ? '•' : b.num + '.' });
+          if (b.iq) {
+            // Anotación dentro de un punto de lista (- > x): rayas verdes y fondo a partir del texto del punto.
+            const x0 = ind + 28, top = b.iqFirst ? '8px' : '0px';
+            Object.assign(v, { bg: qGrad(x0, b.iq, '#242424'), color: b.h === 6 ? '#a6a6a6' : '#cfcfcf', mkTop: top,
+              pad: top + ' 14px ' + (b.iqLast ? '8px' : '0px') + ' ' + (x0 + 17 + (b.iq - 1) * 14) + 'px' });
+          }
         }
       }
       if (!ln.text && !focused && src.length === 1) segs = [{ t: 'text', text: 'Escribe aquí…', off: 0, color: DIM }];

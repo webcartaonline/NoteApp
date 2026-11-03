@@ -171,3 +171,22 @@
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+/* Copiable dentro de una frase ('x'): cada trozo lleva el fondo gris (si salta de línea, cada trozo con su borde). */
+.lineas-chip {
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.lineas-chip-copiar {
+  display: inline-flex;
+  vertical-align: -2px;
+  cursor: pointer;
+}
+.lineas-chip-copiar .lineas-texto-3 {
+  width: 13px;
+  height: 13px;
+}
+.lineas-chip-copiar:hover .lineas-texto-3 {
+  background: #cfcfcf !important;
+}

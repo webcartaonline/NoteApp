@@ -1,7 +1,10 @@
 // Formato MKD (Markdown adaptado a NoteApp): análisis del texto, vista limpia y vista sucia.
 // ===== Formato MKD (Markdown adaptado a NoteApp) =====
 // Escapar: \ delante de un signo lo muestra tal cual. Código en frase: `x`. Bloque de código: `` o ```.
-// Línea copiable: 'x'. Bloque copiable: ''. Menciones: =Nombre sin nada pegado delante (salvo * o ~).
+// Copiable: 'x' (en una frase o en una línea entera). Bloque copiable: ''. Menciones: =Nombre sin nada pegado
+// delante (salvo * ~ o la comilla de un copiable).
+// Los formatos de línea se combinan: anotación > punto de lista (- / 1.) > título (#), en cualquier orden entre
+// lista y título (1. ## x o ## 1. x), y dentro de un punto de lista puede ir una anotación (- > x).
 const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
 const ESC_CH = /[!-\/:-@\[-`{-~’‘]/;
 const BOX_W = { True: true, False: false, x: true, X: true, ' ': false };
@@ -27,8 +30,34 @@ function safeUrl(u, img) {
   if (/^(https?:|mailto:)/i.test(u) || (img && /^data:image\//i.test(u))) return u;
   return /^[a-z][a-z0-9+.-]*:/i.test(u) || /^\/\//.test(u) ? null : u;
 }
+// Copiable dentro de una frase: 'x'. Normas para no confundirlo con un apóstrofo o unas comillas sueltas:
+// - la comilla que abre va al principio o tras un espacio, un paréntesis o un signo de formato (* ~), y justo
+//   detrás tiene algo que no es un espacio;
+// - la que cierra va justo detrás de algo que no es un espacio, y después solo puede haber el final, un espacio
+//   o un signo de puntuación.
+// Así don't, l'aigua o 2'5 nunca abren ni cierran nada. Para ver una comilla tal cual: \'. Dentro de un
+// copiable no hay otro copiable. w: texto de mdScan (con los escapes y el código ya ocultos).
+const CHIP_PRE = /[\s(\[{"«¿¡*~]/, CHIP_POST = /[\s.,;:!?)\]}"»*~…]/;
+function chipsIn(w, a, b) {
+  const out = [];
+  for (let i = a; i < b; i++) {
+    if (!isQ(w[i]) || (i > 0 && !CHIP_PRE.test(w[i - 1])) || i + 1 >= b || /\s/.test(w[i + 1]) || isQ(w[i + 1])) continue;
+    let close = -1;
+    for (let j = i + 2; j < b; j++) if (isQ(w[j]) && !/\s/.test(w[j - 1]) && (j + 1 >= b || CHIP_POST.test(w[j + 1]))) { close = j; break; }
+    if (close < 0) continue;
+    out.push({ s: i, e: close + 1 }); i = close;
+  }
+  return out;
+}
+// ¿El texto entre a y b es entero un solo copiable 'x'? (línea o celda copiable)
+function wholeChip(t, a, b) {
+  if (b - a < 3 || !isQ(t[a]) || !isQ(t[b - 1])) return false;
+  const c = chipsIn(mdScan(t, a, b).w, a, b)[0];
+  return !!c && c.s === a && c.e === b;
+}
 // Analiza el texto entre a y b: qué signos se ocultan, cuáles son literales y dónde hay casillas, menciones, enlaces e imágenes.
-function mdScan(text, a, b) {
+// chips: buscar también copiables en la frase ('x'); no se buscan dentro de un copiable ni en la vista sucia.
+function mdScan(text, a, b, chips) {
   const n = text.length, cat = new Uint8Array(n); // 0 normal · 1 signo escapado · 2 oculto · 3 código
   for (let i = a; i < b; i++) {
     const c = text[i];
@@ -45,7 +74,8 @@ function mdScan(text, a, b) {
   }
   let w = '';
   for (let i = 0; i < n; i++) w += i < a || i >= b ? ' ' : cat[i] === 1 || cat[i] === 3 ? '' : cat[i] === 2 ? '' : text[i];
-  const atoms = [], taken = new Uint8Array(n), seg = w.slice(a, b);
+  const atoms = [], taken = new Uint8Array(n);
+  let seg = w.slice(a, b);
   const free = (s, e) => { for (let q = s; q < e; q++) if (taken[q]) return false; return true; };
   const take = at => { for (let q = at.s; q < at.e; q++) taken[q] = 1; atoms.push(at); };
   let m;
@@ -56,6 +86,14 @@ function mdScan(text, a, b) {
     if (!url || (!img && !m[2].trim())) continue;
     take({ s, e, kind: img ? 'img' : 'link', url, ls, le });
   }
+  // Copiables en la frase: un enlace puede ir dentro de un copiable, pero no cruzarlo ni contenerlo.
+  const chipList = [], opens = new Set();
+  if (chips) chipsIn(w, a, b).forEach(c => {
+    if (atoms.some(l => l.e > c.s && l.s < c.e && !(l.s >= c.s && l.e <= c.e))) return;
+    cat[c.s] = 2; cat[c.e - 1] = 2; opens.add(c.s);
+    chipList.push({ s: c.s, e: c.e, kind: 'chip', cs: c.s + 1, ce: c.e - 1 });
+  });
+  if (chipList.length) { const ww = w.split(''); chipList.forEach(c => { ww[c.s] = ''; ww[c.e - 1] = ''; }); w = ww.join(''); seg = w.slice(a, b); }
   const GRP = /\(\[(True|False|x|X| )\]([^)]*)\)/g;
   while ((m = GRP.exec(seg))) {
     const s = a + m.index, e = s + m[0].length; if (!free(s, e)) continue;
@@ -73,13 +111,18 @@ function mdScan(text, a, b) {
   const MEN = new RegExp(ENT.source, 'g');
   while ((m = MEN.exec(seg))) {
     const s = a + m.index, e = s + m[0].length, pc = s > a ? w[s - 1] : '';
-    if (pc && !/[\s*~]/.test(pc)) continue;
+    if (pc && !/[\s*~]/.test(pc) && !opens.has(s - 1)) continue;
     if (free(s, e)) take({ s, e, kind: 'ent', name: m[1] || m[2] });
   }
+  atoms.push(...chipList);
   atoms.sort((x, y) => x.s - y.s);
   let w2 = '';
   for (let i = 0; i < n; i++) w2 += taken[i] ? '' : w[i];
-  return { text, cat, atoms, w, w2 };
+  // wOut: como w2, pero con cada copiable opaco, para que una negrita de fuera no lo pueda cruzar
+  // (**'x'** sí: el copiable entero va en negrita). Dentro del copiable se usa w2.
+  let wOut = w2;
+  if (chipList.length) { const ww = w2.split(''); chipList.forEach(c => { for (let q = c.s; q < c.e; q++) ww[q] = ''; }); wOut = ww.join(''); }
+  return { text, cat, atoms, w, w2, wOut };
 }
 const FMT = /(\*{1,3})(?=[^\s*])([^]*?[^\s*])\1(?!\*)|~~(?=[^\s~])([^]*?[^\s~])~~/g;
 function mdFmt(sc, s, e, f, W, out) {
@@ -100,6 +143,13 @@ function mdLeaf(sc, s, e, f, out) {
     if (at.kind === 'link') { const k = out.length; mdFmt(sc, at.ls, at.le, f, sc.w, out); for (let j = k; j < out.length; j++) if (out[j].t === 'text') out[j].href = at.url; }
     else if (at.kind === 'img') out.push({ t: 'img', src: at.url, alt: sc.text.slice(at.ls, at.le), off: at.s });
     else if (at.kind === 'box') out.push({ t: 'box', on: at.on, off: at.s, mr: at.mr, name: at.name || '' });
+    else if (at.kind === 'chip') {
+      // Copiable en la frase: chipopen (borde izquierdo), su contenido con formato y chipbtn (botón de copiar).
+      out.push({ t: 'chipopen', off: at.s, cs: at.cs, ce: at.ce });
+      const k = out.length; mdFmt(sc, at.cs, at.ce, f, sc.w2, out);
+      for (let j = k; j < out.length; j++) out[j].chip = true;
+      out.push({ t: 'chipbtn', off: at.ce, cs: at.cs, ce: at.ce });
+    }
     else out.push({ t: 'ent', name: at.name, off: at.s, b: f.b, i: f.i, s: f.s });
     i = at.e;
   }
@@ -161,7 +211,7 @@ function cellInfo(t, c) {
     if (x.length > fl * 2 && x.startsWith(f) && x.endsWith(f) && x.slice(fl, -fl).trim()) { const [a, b] = trim(s + fl, e - fl); return { kind: 'code', s: a, e: b }; }
   }
   if (x.length >= 5 && isQ(x[0]) && isQ(x[1]) && isQ(x[x.length - 1]) && isQ(x[x.length - 2]) && x.slice(2, -2).trim()) { const [a, b] = trim(s + 2, e - 2); return { kind: 'copy', s: a, e: b }; }
-  if (x.length >= 3 && isQ(x[0]) && !isQ(x[1]) && isQ(x[x.length - 1])) { const [a, b] = trim(s + 1, e - 1); return { kind: 'copy', s: a, e: b }; }
+  if (!isQ(x[1]) && wholeChip(t, s, e)) { const [a, b] = trim(s + 1, e - 1); return { kind: 'copy', s: a, e: b }; }
   if ((m = /^(>(?: ?>)*) /.exec(x))) return { kind: 'quote', s: s + m[0].length, e };
   if ((m = /^(#{1,6}) /.exec(x))) return { kind: 'h', lvl: m[1].length, s: s + m[0].length, e };
   if ((m = LI.exec(x)) && m[1] === '') return { kind: 'li', li: m[2] === '-' || m[2] === '*' || m[2] === '+' ? 'ul' : 'ol', n: parseInt(m[2], 10), s: s + m[2].length + 1, e };
@@ -169,6 +219,25 @@ function cellInfo(t, c) {
 }
 // Texto de una celda de código: dentro de una tabla, | se escribe \| (si no, partiría la celda).
 const cellCode = (t, ci) => t.slice(ci.s, ci.e).replace(/\\\|/g, '|');
+// Formatos de línea que se combinan (sin la anotación de fuera): punto de lista y título en cualquier orden
+// (1. ## x · ## 1. x) y, dentro de un punto de lista, una anotación (- > x, - > ## x). inQ: ya está dentro
+// de una anotación (no se pone otra dentro). Devuelve { li: 'ul'|'ol'|null, lvl, n, h, iq, start }.
+const QRX = /^(>(?: ?>)*)( |$)/;
+function lineForm(x, inQ) {
+  const f = { li: null, lvl: 0, n: 0, h: 0, iq: 0, start: 0 }; let m, p = 0;
+  const head = () => { if ((m = /^(#{1,6}) /.exec(x.slice(p)))) { f.h = m[1].length; p += m[0].length; return true; } return false; };
+  const list = () => {
+    if (!(m = LI.exec(x.slice(p)))) return false;
+    f.li = m[2] === '-' || m[2] === '*' || m[2] === '+' ? 'ul' : 'ol'; f.lvl = Math.min(6, Math.floor(m[1].length / 2)); f.n = parseInt(m[2], 10);
+    p += m[1].length + m[2].length + 1; return true;
+  };
+  if (head()) list();
+  else if (list()) {
+    if (!inQ && (m = QRX.exec(x.slice(p)))) { f.iq = (m[1].match(/>/g) || []).length; p = Math.min(x.length, p + m[0].length); }
+    head();
+  }
+  f.start = p; return f;
+}
 function blockInfo(lines) {
   const n = lines.length, out = new Array(n), rtrim = t => t.replace(/\s+$/, '');
   const trail = (r, fn) => { let k = 0; while (k < r.length && fn(r[r.length - 1 - k])) k++; return k; };
@@ -190,7 +259,8 @@ function blockInfo(lines) {
         i = j; continue;
       }
     }
-    if (isQ(t[0]) && !isQ(t[1])) { const r = rtrim(t); if (r.length >= 3 && isQ(r[r.length - 1])) { out[i] = { kind: 'copy', pos: 'single', start: 1, end: r.length - 1, from: i, to: i }; continue; } }
+    // Línea copiable: la línea entera es un solo 'x' (si hay varios, como en 'Casa' y 'Coche', son copiables en la frase).
+    if (isQ(t[0]) && !isQ(t[1])) { const r = rtrim(t); if (wholeChip(r, 0, r.length)) { out[i] = { kind: 'copy', pos: 'single', start: 1, end: r.length - 1, from: i, to: i }; continue; } }
     if (t[0] === '|' && i + 1 < n && TSEP.test(lines[i + 1].text) && lines[i + 1].text.includes('-')) {
       const head = cellsOf(t), sep = lines[i + 1].text, ncol = Math.max(1, head.length);
       const aligns = cellsOf(sep).map(c => { const x = sep.slice(c.s, c.e); return /^:.*:$/.test(x) ? 'center' : /:$/.test(x) ? 'right' : 'left'; });
@@ -199,19 +269,22 @@ function blockInfo(lines) {
       i = j - 1; continue;
     }
     if (/^(-{3,}|\*{3,})\s*$/.test(t)) out[i] = { kind: 'hr' };
-    else if ((m = /^(>(?: ?>)*)( |$)/.exec(t))) {
-      // Anotación: dentro también se aceptan títulos, listas y líneas separadoras.
-      const q = { kind: 'quote', lvl: (m[1].match(/>/g) || []).length, start: Math.min(m[0].length, t.length), end: t.length }, in2 = t.slice(q.start); let k;
+    else if ((m = QRX.exec(t))) {
+      // Anotación: dentro también se aceptan títulos, listas (y títulos dentro de ellas) y líneas separadoras.
+      const q = { kind: 'quote', lvl: (m[1].match(/>/g) || []).length, start: Math.min(m[0].length, t.length), end: t.length }, in2 = t.slice(q.start);
       if (/^(-{3,}|\*{3,})\s*$/.test(in2)) q.hr = true;
-      else if ((k = /^(#{1,6}) (.*)$/.exec(in2))) { q.h = k[1].length; q.start += k[1].length + 1; }
-      else if ((k = LI.exec(in2))) { q.li = k[2] === '-' || k[2] === '*' || k[2] === '+' ? 'ul' : 'ol'; q.ilvl = Math.min(6, Math.floor(k[1].length / 2)); q.n = parseInt(k[2], 10); q.start += k[1].length + k[2].length + 1; }
+      else { const f = lineForm(in2, true); if (f.h) q.h = f.h; if (f.li) { q.li = f.li; q.ilvl = f.lvl; q.n = f.n; } q.start += f.start; }
       out[i] = q;
     }
-    else if ((m = LI.exec(t))) out[i] = { kind: m[2] === '-' || m[2] === '*' || m[2] === '+' ? 'ul' : 'ol', lvl: Math.min(6, Math.floor(m[1].length / 2)), start: m[1].length + m[2].length + 1, end: t.length, n: parseInt(m[2], 10) };
-    else out[i] = { kind: 'p' };
+    else {
+      const f = lineForm(t, false);
+      out[i] = f.li ? { kind: f.li, lvl: f.lvl, start: f.start, end: t.length, n: f.n, h: f.h, iq: f.iq } : { kind: 'p' };
+    }
   }
   let cnt = [], qcnt = [];
   out.forEach((b, i) => {
+    // Anotación dentro de un punto de lista (- > x): primera y última línea seguidas, para sus márgenes.
+    if (b.iq) { const pv = out[i - 1], nx = out[i + 1]; b.iqFirst = !(pv && pv.iq); b.iqLast = !(nx && nx.iq); }
     if (b.kind === 'quote') {
       b.first = !(out[i - 1] && out[i - 1].kind === 'quote'); b.last = !(out[i + 1] && out[i + 1].kind === 'quote');
       if (b.first) qcnt = [];
@@ -225,11 +298,12 @@ function blockInfo(lines) {
   return out;
 }
 const plainOf = segs => segs.map(s => s.t === 'text' || s.t === 'code' ? s.text : s.t === 'ent' ? resolveEntity(s.name) : s.t === 'box' ? (s.on ? '[x]' : '[ ]') + (s.mr === '10px' ? ' ' : '') : s.t === 'img' ? s.alt : '').join('');
-function cleanSegs(text, start, end) {
+// noChip: dentro de un copiable (línea o bloque) no se buscan copiables en la frase.
+function cleanSegs(text, start, end, noChip) {
   const a = start || 0, b = end == null ? text.length : end, out = [];
   if (b <= a) return out;
-  const sc = mdScan(text, a, b);
-  mdFmt(sc, a, b, {}, sc.w2, out);
+  const sc = mdScan(text, a, b, !noChip);
+  mdFmt(sc, a, b, {}, sc.wOut, out);
   return out;
 }
 // Formato dentro de un bloque copiable ('x' o ''): cada línea puede ser título, punto de lista, anotación o
@@ -249,7 +323,7 @@ function copyInner(lines, bi, b) {
 // de formato). Los puntos de lista conservan su "- " o "1. " y la línea separadora se copia como ---.
 function copyPlainLine(ib) {
   if (ib.kind === 'hr' || ib.hr) return '---';
-  const body = plainOf(cleanSegs(ib.text, ib.start || 0, ib.end));
+  const body = plainOf(cleanSegs(ib.text, ib.start || 0, ib.end, true));
   if (ib.kind === 'ul' || ib.kind === 'ol') return '  '.repeat(ib.lvl) + (ib.kind === 'ul' ? '- ' : ib.num + '. ') + body;
   if (ib.kind === 'quote' && ib.li) return '  '.repeat(ib.ilvl) + (ib.li === 'ul' ? '- ' : ib.num + '. ') + body;
   return body;
@@ -307,6 +381,7 @@ function mdFence(text) {
 // casillas e imágenes, y aplica negrita/cursiva/tachado. esc = también escapar | (celda de tabla).
 function mdSegsOut(segs, esc) {
   return segs.map(sg => {
+    if (sg.t === 'chipopen' || sg.t === 'chipbtn') return "'"; // copiable en la frase: se conservan sus comillas
     if (sg.t === 'box') return (sg.on ? '[x]' : '[ ]') + (sg.mr === '10px' ? ' ' : '');
     if (sg.t === 'img') return '![' + (sg.alt || '') + '](' + sg.src + ')';
     if (sg.t === 'code') {
@@ -328,22 +403,23 @@ function mdSegsOut(segs, esc) {
   }).join('');
 }
 // Convierte una línea (ya clasificada por blockInfo) a su línea de Markdown.
-function mdOneLine(text, b) {
+// nc: la línea está dentro de un copiable (sin copiables en la frase). Los formatos combinados se escriben en el
+// orden de Markdown: anotación > punto de lista > anotación dentro del punto > título (## 1. x sale como 1. ## x).
+function mdOneLine(text, b, nc) {
   if (b.kind === 'hr') return '---';
+  const hd = h => h ? '#'.repeat(h) + ' ' : '';
   if (b.kind === 'p') {
-    const p = parseLine(text), body = mdSegsOut(cleanSegs(text, p.start, text.length), false);
-    return p.level ? '#'.repeat(p.level) + ' ' + body : body;
+    const p = parseLine(text), body = mdSegsOut(cleanSegs(text, p.start, text.length, nc), false);
+    return hd(p.level) + body;
   }
   if (b.kind === 'ul' || b.kind === 'ol') {
-    const body = mdSegsOut(cleanSegs(text, b.start, b.end), false);
-    return '  '.repeat(b.lvl) + (b.kind === 'ul' ? '- ' : b.num + '. ') + body;
+    const body = mdSegsOut(cleanSegs(text, b.start, b.end, nc), false);
+    return '  '.repeat(b.lvl) + (b.kind === 'ul' ? '- ' : b.num + '. ') + (b.iq ? '> '.repeat(b.iq) : '') + hd(b.h) + body;
   }
   // anotación (quote)
   const pre = '> '.repeat(b.lvl);
   if (b.hr) return pre.trimEnd() + ' ---';
-  if (b.h) return pre + '#'.repeat(b.h) + ' ' + mdSegsOut(cleanSegs(text, b.start, b.end), false);
-  if (b.li) return pre + '  '.repeat(b.ilvl) + (b.li === 'ul' ? '- ' : b.num + '. ') + mdSegsOut(cleanSegs(text, b.start, b.end), false);
-  return pre + mdSegsOut(cleanSegs(text, b.start, b.end), false);
+  return pre + (b.li ? '  '.repeat(b.ilvl) + (b.li === 'ul' ? '- ' : b.num + '. ') : '') + hd(b.h) + mdSegsOut(cleanSegs(text, b.start, b.end, nc), false);
 }
 // Convierte una celda de tabla a Markdown. Markdown no tiene títulos, listas, anotaciones ni copiables dentro
 // de una tabla: el título se exporta en negrita y el resto como texto normal (sin las comillas del copiable).
@@ -351,7 +427,7 @@ function mdCellOut(t, cell) {
   const ci = cellInfo(t, cell);
   if (ci.kind === 'hr') return '\\-\\-\\-';
   if (ci.kind === 'code') { const raw = t.slice(ci.s, ci.e), fence = '`'.repeat(Math.max(1, (raw.match(/`+/g) || []).reduce((a, r) => Math.max(a, r.length + 1), 1))), pad = /^`|`$/.test(raw) ? ' ' : ''; return fence + pad + raw + pad + fence; }
-  const body = mdSegsOut(cleanSegs(t, ci.s, ci.e), true);
+  const body = mdSegsOut(cleanSegs(t, ci.s, ci.e, ci.kind === 'copy'), true);
   if (ci.kind === 'h') return mdWrap(body, '**');
   if (ci.kind === 'li') return (ci.li === 'ul' ? '- ' : ci.n + '. ') + body;
   return body;
@@ -367,7 +443,7 @@ function mdExportText(lines) {
     const b = bi[i];
     if (b.kind === 'code' || b.kind === 'copy') {
       const from = b.from, to = b.to, blk = [];
-      if (b.kind === 'copy') copyInner(lines, bi, b).forEach(ib => blk.push(mdOneLine(ib.text, ib)));
+      if (b.kind === 'copy') copyInner(lines, bi, b).forEach(ib => blk.push(mdOneLine(ib.text, ib, true)));
       else for (let k = from; k <= to; k++) { const bk = bi[k], t = lines[k].text; blk.push(t.slice(bk.start, Math.max(bk.start, bk.end))); }
       pushBlank();
       if (b.kind === 'code') { const fence = mdFence(blk.join('\n')); out.push(fence, ...blk, fence); }
