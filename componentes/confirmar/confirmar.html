@@ -1,4 +1,5 @@
-<!-- Componente "confirmar" de NoteApp. Ventana emergente para confirmar antes de eliminar una nota o una hoja.
+<!-- Componente "confirmar" de NoteApp. Ventana emergente para confirmar antes de eliminar una nota o una hoja,
+     o para preguntar si se pasan las notas del navegador a una carpeta vacía (confirmFolder).
      Difumina (blur) el resto de la app mientras está abierta. Clic fuera o Esc = cancelar.
      Los estilos fijos están en confirmar.css; los valores {{ }} vienen de renderVals() (js/app/render.js)
      y la lógica de js/app/confirmar.js. -->
@@ -8,7 +9,12 @@
       <div role="alertdialog" aria-modal="true" aria-labelledby="confirmar-titulo" class="confirmar-ventana">
         <div class="confirmar-contenido">
           <div class="confirmar-cabeza">
-            <span class="confirmar-icono"><span class="confirmar-icono-papelera"></span></span>
+            <sc-if value="{{ confirmDel }}" hint-placeholder-val="{{ true }}">
+              <span class="confirmar-icono"><span class="confirmar-icono-papelera"></span></span>
+            </sc-if>
+            <sc-if value="{{ confirmFolder }}" hint-placeholder-val="{{ false }}">
+              <span class="confirmar-icono confirmar-icono-verde"><span class="confirmar-icono-carpeta"></span></span>
+            </sc-if>
             <span id="confirmar-titulo" class="confirmar-titulo">{{ confirmTitle }}</span>
           </div>
           <div class="confirmar-nombre-caja">
@@ -17,10 +23,19 @@
           </div>
           <span class="confirmar-aviso">{{ confirmWarn }}</span>
         </div>
-        <div class="confirmar-botones">
-          <button data-confirmar="cancelar" onClick="{{ confirmCancel }}" class="confirmar-boton confirmar-cancelar">Cancelar</button>
-          <button onClick="{{ confirmOk }}" class="confirmar-boton confirmar-eliminar">Eliminar</button>
-        </div>
+        <sc-if value="{{ confirmDel }}" hint-placeholder-val="{{ true }}">
+          <div class="confirmar-botones">
+            <button data-confirmar="cancelar" onClick="{{ confirmCancel }}" class="confirmar-boton confirmar-cancelar">Cancelar</button>
+            <button onClick="{{ confirmOk }}" class="confirmar-boton confirmar-eliminar">Eliminar</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ confirmFolder }}" hint-placeholder-val="{{ false }}">
+          <div class="confirmar-botones">
+            <button data-confirmar="vacia" onClick="{{ confirmEmpty }}" class="confirmar-boton confirmar-eliminar">Empezar vacía</button>
+            <button data-confirmar="pasar" onClick="{{ confirmCarry }}" class="confirmar-boton confirmar-aceptar">Guardarlo aquí</button>
+            <button data-confirmar="cancelar" onClick="{{ confirmCancel }}" class="confirmar-boton confirmar-cancelar confirmar-ancho">Cancelar (no conectar la carpeta)</button>
+          </div>
+        </sc-if>
       </div>
     </div>
   </sc-if>

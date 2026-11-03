@@ -112,7 +112,7 @@ NoteApp.partes.push(Base => class extends Base {
       fsPick: () => this.fsPick(),
       fsIcon: s.fs === 'on' ? '#fff' : '#5a5a5a',
       fsDot: s.fs === 'on' ? '#00a000' : s.fs === 'perm' || s.fs === 'err' ? '#d08a00' : 'transparent',
-      fsTitle: !FS_OK ? 'Guardar en carpeta: solo disponible en Chrome o Edge de ordenador' : s.fs === 'on' ? 'Guardando en la carpeta «' + s.fsName + '». Clic para cambiar de carpeta' : s.fs === 'perm' ? 'Clic para volver a dar permiso a la carpeta «' + s.fsName + '»' : s.fs === 'err' ? 'Problema con la carpeta «' + s.fsName + '». Clic para reintentar' : 'Clic para elegir la carpeta donde guardar todo',
+      fsTitle: !FS_OK ? 'Guardar en carpeta: solo disponible en Chrome o Edge de ordenador' : s.fs === 'on' ? 'Espacio de trabajo «' + s.fsName + '»: todo se guarda en esta carpeta. Clic para abrir otra carpeta (otro espacio de trabajo)' : s.fs === 'perm' ? 'Clic para volver a dar permiso a la carpeta «' + s.fsName + '»' : s.fs === 'err' ? 'Problema con la carpeta «' + s.fsName + '». Clic para reintentar' : 'Clic para elegir la carpeta (espacio de trabajo) donde guardar todo',
       isNotas: nt,
       isAgenda: ag,
       isDiagrama: dg,
@@ -132,6 +132,7 @@ NoteApp.partes.push(Base => class extends Base {
       addZona: () => this.dgAdd('zona')
     };
     Object.assign(v, this.confirmVals(s)); // ventana de confirmación al eliminar
+    Object.assign(v, this.novVals(s)); // ventana de novedades tras una actualización (js/app/novedades.js)
     if (dg && sheet) Object.assign(v, this.dgVals(s, sheet)); // lienzo del diagrama
     v.ui = v; // los componentes reciben todos estos valores con dc-props="{{ ui }}"
     return v;

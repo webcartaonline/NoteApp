@@ -1,5 +1,7 @@
-// Ventana de confirmación antes de eliminar una nota o una hoja (componente componentes/confirmar/).
-// state.confirm = { kind: 'sheet' | 'note', noteId, sheetId } mientras la ventana está abierta (no se guarda).
+// Ventana de confirmación (componente componentes/confirmar/), mientras está abierta state.confirm (no se guarda):
+// - antes de eliminar una nota o una hoja: { kind: 'sheet' | 'note', noteId, sheetId }
+// - al conectar una carpeta vacía sin carpeta anterior (o si la anterior ya no existe), para preguntar si se pasan
+//   las notas del navegador: { kind: 'folder', name, gone, count } (ver fsPick y fsAnswer en js/app/carpeta.js)
 NoteApp.partes.push(Base => class extends Base {
   // Abre la ventana para la hoja activa o la nota activa
   askDelete(kind) {
@@ -10,7 +12,7 @@ NoteApp.partes.push(Base => class extends Base {
       return { menu: false, focusId: null, confirm: { kind, noteId: n.id, sheetId: kind === 'sheet' ? n.activeSheet : null } };
     }, () => { const b = document.querySelector('[data-confirmar="cancelar"]'); if (b) b.focus(); });
   }
-  closeConfirm() { this.setState({ confirm: null }); }
+  closeConfirm() { this._fsAsk = null; this.setState({ confirm: null }); }
   // Elimina de verdad lo que se estaba confirmando
   confirmDelete() {
     this.setState(st => {
@@ -32,8 +34,24 @@ NoteApp.partes.push(Base => class extends Base {
   }
   // Valores para la plantilla (se añaden en renderVals)
   confirmVals(s) {
-    const c = s.confirm, v = { confirmOpen: !!c };
+    const c = s.confirm, v = { confirmOpen: !!c, confirmFolder: !!c && c.kind === 'folder', confirmDel: !!c && c.kind !== 'folder' };
     if (!c) return v;
+    v.confirmCancel = () => this.closeConfirm();
+    v.confirmBack = e => { if (e.target === e.currentTarget) this.closeConfirm(); };
+    if (c.kind === 'folder') {
+      const k = c.count || {}, part = (n, one, many) => n ? n + ' ' + (n === 1 ? one : many) : '';
+      const what = [part(k.notas, 'nota', 'notas'), part(k.agenda, 'nota de agenda', 'notas de agenda'), part(k.diagrama, 'diagrama', 'diagramas')].filter(Boolean);
+      const list = what.length > 1 ? what.slice(0, -1).join(', ') + ' y ' + what[what.length - 1] : what[0] || 'notas';
+      v.confirmTitle = '¿Guardar aquí lo que tienes abierto?';
+      v.confirmName = c.name;
+      v.confirmDetail = 'Carpeta vacía';
+      v.confirmWarn = c.gone
+        ? 'La carpeta «' + c.gone + '» ya no está (se ha borrado o movido). Lo último que tenías abierto de ella (' + list + ') sigue en la app. Puedes guardarlo en esta carpeta o empezar con ella vacía. Si moviste «' + c.gone + '» a otro sitio, pulsa Cancelar y ábrela desde su nuevo sitio.'
+        : 'Lo que tienes abierto ahora (' + list + ') todavía no está guardado en ninguna carpeta. Puedes guardarlo en esta carpeta o empezar con ella vacía. Si empiezas vacía, eso se descarta, porque no hay ninguna carpeta que lo guarde.';
+      v.confirmCarry = () => this.fsAnswer(true);
+      v.confirmEmpty = () => this.fsAnswer(false);
+      return v;
+    }
     const n = s.notes.find(m => m.id === c.noteId), x = n && c.kind === 'sheet' ? n.sheets.find(h => h.id === c.sheetId) : null;
     const nm = t => (t || '').trim() || 'Sin nombre', dg = s.mode === 'diagrama';
     if (c.kind === 'sheet') {
@@ -48,9 +66,7 @@ NoteApp.partes.push(Base => class extends Base {
       v.confirmDetail = (dg ? 'Diagrama ' : 'Nota ') + (k === 0 ? 'sin hojas' : k === 1 ? 'con 1 hoja' : 'con ' + k + ' hojas');
       v.confirmWarn = 'Esta acción es irreversible: se borrarán ' + (dg ? 'el diagrama' : 'la nota') + ' y todas sus hojas, y no se podrán recuperar.';
     }
-    v.confirmCancel = () => this.closeConfirm();
     v.confirmOk = () => this.confirmDelete();
-    v.confirmBack = e => { if (e.target === e.currentTarget) this.closeConfirm(); };
     return v;
   }
 });

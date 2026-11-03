@@ -1,0 +1,160 @@
+/* Componente "novedades": ventana que cuenta lo nuevo de cada versión al abrir la app tras una actualización.
+   Mismo estilo que la ventana "confirmar" (fondo difuminado, radio 18px, margen 8px, botón con radio 10px). */
+
+@keyframes novedadesFondo { from { opacity: 0; } to { opacity: 1; } }
+@keyframes novedadesVentana { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
+
+/* Capa que cubre toda la app: oscurece y difumina lo que hay detrás */
+.novedades-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(0,0,0,.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: novedadesFondo .18s ease-out;
+}
+
+.novedades-ventana {
+  width: min(420px, 100%);
+  max-height: 100%;
+  padding: 8px;
+  background: #1c1c1c;
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.6), inset 0 0 0 1px #2e2e2e;
+  display: flex;
+  flex-direction: column;
+  animation: novedadesVentana .22s cubic-bezier(.2,.8,.2,1);
+}
+
+.novedades-cabeza {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 10px 10px;
+}
+
+.novedades-icono {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(0,128,0,.2);
+}
+
+.novedades-icono-estrella {
+  width: 18px;
+  height: 18px;
+  background: #3fa63f;
+  mask: url(../../assets/novedades.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/novedades.svg) center / contain no-repeat;
+}
+
+.novedades-cabeza-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.novedades-titulo {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.novedades-sub {
+  font-size: 13px;
+  color: #8a8a8a;
+}
+
+/* Lista de cambios: si es larga, se desplaza dentro de la ventana */
+.novedades-lista {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: min(56vh, 460px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 2px 14px;
+}
+
+.novedades-fila {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Título de cada versión (solo si hay varias versiones por ver) */
+.novedades-version {
+  padding: 8px 10px 2px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: #3fa63f;
+}
+
+.novedades-cambio {
+  display: flex;
+  gap: 10px;
+  padding: 9px 12px;
+  background: #2a2a2a;
+  border-radius: 10px;
+}
+
+.novedades-punto {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: #008000;
+}
+
+.novedades-cambio-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.novedades-cambio-titulo {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.novedades-cambio-texto {
+  font-size: 14px;
+  line-height: 19px;
+  color: #a6a6a6;
+  text-wrap: pretty;
+}
+
+.novedades-boton {
+  flex: none;
+  height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #2f6f2f;
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: background-color .15s;
+}
+.novedades-boton:hover {
+  background: #367d36 !important;
+}
+.novedades-boton:focus-visible {
+  box-shadow: 0 0 0 2px #1c1c1c, 0 0 0 4px #6a6a6a;
+}

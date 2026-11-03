@@ -2,7 +2,8 @@
 // ¡Cuidado! Cambiar NA_KEY o el formato haría que no se encuentren los datos guardados.
 // ===== Guardado =====
 // 1) Siempre en el navegador (localStorage).
-// 2) Además, si se conecta una carpeta del ordenador (Chrome/Edge), en archivos JSON:
+// 2) Además, si se conecta una carpeta del ordenador (Chrome/Edge), en archivos JSON. Cada carpeta es un espacio de
+//    trabajo independiente (ver js/app/carpeta.js):
 //    NoteApp.json (configuración, vista y orden), Notas/<nota> (id).json, Agenda/<nota> (id).json y Diagramas/<diagrama> (id).json
 // Se guarda todo: notas y agenda (hojas, textos, entidades y sus ajustes), la vista y la configuración (state.config).
 const NA_KEY = 'noteapp:datos:v1';
@@ -52,6 +53,13 @@ const fsFileName = n => (String(n.name || '').replace(/[\\/:*?"<>|\x00-\x1f]/g, 
 async function fsReadText(dir, name) { const fh = await dir.getFileHandle(name); return (await fh.getFile()).text(); }
 async function fsWrite(dir, name, text) { const fh = await dir.getFileHandle(name, { create: true }); const w = await fh.createWritable(); await w.write(text); await w.close(); }
 const fsSections = s => winsOf(s);
+// Cuántas notas, agendas y diagramas hay en la app (para la ventana «¿Pasar tus notas a la carpeta?»).
+const fsNoteCount = s => { const w = winsOf(s), c = { notas: w.notas.notes.length, agenda: w.agenda.notes.length, diagrama: w.diagrama.notes.length }; c.total = c.notas + c.agenda + c.diagrama; return c; };
+// Marca (rev) de los últimos datos que llegaron a la carpeta. Antes de abrir otro espacio de trabajo sirve para
+// saber si hay cambios del navegador que aún no están guardados en la carpeta actual.
+const FS_REV_KEY = 'noteapp:carpeta:rev';
+const fsSavedRev = () => { try { return +localStorage.getItem(FS_REV_KEY) || 0; } catch (_) { return 0; } };
+const fsSetSavedRev = r => { try { localStorage.setItem(FS_REV_KEY, String(+r || 0)); } catch (_) {} };
 async function fsRead(dir) {
   let meta; try { meta = JSON.parse(await fsReadText(dir, FS_META)); } catch (_) { return null; }
   if (!meta || meta.app !== 'NoteApp') return null;

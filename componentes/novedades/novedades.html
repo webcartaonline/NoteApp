@@ -1,0 +1,39 @@
+<!-- Componente "novedades" de NoteApp. Ventana emergente que sale al abrir la app después de una actualización
+     y cuenta qué hay de nuevo. Difumina (blur) el resto de la app mientras está abierta.
+     Se cierra con «Entendido», con un clic fuera o con Esc, y ya no vuelve a salir hasta la siguiente versión.
+     Los estilos fijos están en novedades.css; los valores {{ }} vienen de renderVals() (js/app/render.js)
+     y la lógica (y la lista de novedades de cada versión) de js/app/novedades.js. -->
+<x-dc>
+  <sc-if value="{{ novOpen }}" hint-placeholder-val="{{ false }}">
+    <div onMouseDown="{{ novBack }}" class="novedades-fondo">
+      <div role="dialog" aria-modal="true" aria-labelledby="novedades-titulo" class="novedades-ventana">
+        <div class="novedades-cabeza">
+          <span class="novedades-icono"><span class="novedades-icono-estrella"></span></span>
+          <div class="novedades-cabeza-textos">
+            <span id="novedades-titulo" class="novedades-titulo">{{ novTitle }}</span>
+            <span class="novedades-sub">{{ novSub }}</span>
+          </div>
+        </div>
+        <div class="novedades-lista">
+          <sc-for list="{{ novRows }}" as="r" hint-placeholder-count="3">
+            <div class="novedades-fila">
+              <sc-if value="{{ r.head }}" hint-placeholder-val="{{ false }}">
+                <span class="novedades-version">{{ r.label }}</span>
+              </sc-if>
+              <sc-if value="{{ r.item }}" hint-placeholder-val="{{ true }}">
+                <div class="novedades-cambio">
+                  <span class="novedades-punto"></span>
+                  <div class="novedades-cambio-textos">
+                    <span class="novedades-cambio-titulo">{{ r.titulo }}</span>
+                    <span class="novedades-cambio-texto">{{ r.texto }}</span>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <button data-novedades="cerrar" onClick="{{ novClose }}" class="novedades-boton">Entendido</button>
+      </div>
+    </div>
+  </sc-if>
+</x-dc>

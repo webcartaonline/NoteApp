@@ -1,4 +1,5 @@
-/* Componente "confirmar": ventana emergente para confirmar antes de eliminar una nota o una hoja. */
+/* Componente "confirmar": ventana emergente para confirmar antes de eliminar una nota o una hoja,
+   o para preguntar si se pasan las notas del navegador a una carpeta vacía. */
 
 @keyframes confirmarFondo { from { opacity: 0; } to { opacity: 1; } }
 @keyframes confirmarVentana { from { opacity: 0; transform: translateY(6px) scale(.97); } to { opacity: 1; transform: none; } }
@@ -138,4 +139,25 @@
 }
 .confirmar-eliminar:hover {
   background: #994040 !important;
+}
+
+/* Ventana de la carpeta: icono verde, botón verde «Pasar mis notas» y «Cancelar» a todo el ancho */
+.confirmar-icono-verde {
+  background: rgba(0,128,0,.2);
+}
+.confirmar-icono-carpeta {
+  width: 16px;
+  height: 16px;
+  background: #3fa63f;
+  mask: url(../../assets/carpeta.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/carpeta.svg) center / contain no-repeat;
+}
+.confirmar-aceptar {
+  background: #2f6f2f;
+}
+.confirmar-aceptar:hover {
+  background: #367d36 !important;
+}
+.confirmar-ancho {
+  grid-column: 1 / -1;
 }
