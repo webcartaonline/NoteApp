@@ -8,6 +8,14 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '1.1',
+    fecha: '5 de noviembre de 2026',
+    cambios: [
+      { titulo: 'El cursor, en su sitio', texto: 'Al escribir dentro de una forma del diagrama, la barra que marca dónde escribes salía en otro lugar (por ejemplo, a la izquierda de la palabra en vez de al final). Ahora aparece justo detrás de la última letra que escribes.' },
+      { titulo: 'Un cursor que se ve mejor', texto: 'La barra de escritura es más gruesa y de un verde más claro, en las notas, en los textos y en el diagrama, para que no la pierdas de vista.' }
+    ]
+  },
+  {
     version: '1.0',
     fecha: '3 de noviembre de 2026',
     cambios: [

@@ -40,7 +40,7 @@
   background: transparent;
   font: inherit;
   color: #fff;
-  caret-color: #008000;
+  caret-color: #1fe85c;
 }
 
 .entidad-calendario-caja-4 {
@@ -249,7 +249,7 @@
   font-size: 15px;
   font-weight: 600;
   color-scheme: dark;
-  caret-color: #008000;
+  caret-color: #1fe85c;
 }
 
 .entidad-calendario-hoy {

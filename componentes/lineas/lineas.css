@@ -164,8 +164,12 @@
   overflow: hidden;
   background: transparent;
   color: transparent;
-  caret-color: #008000;
+  /* El cursor se dibuja aparte, más grueso y claro (js/app/cursor.js, .cursor-escritura más abajo) */
+  caret-color: transparent;
   font: inherit;
+  /* Igual que el texto que se ve (p. ej. centrado en las formas del diagrama): si no, el cursor y los clics no caen sobre la letra real */
+  text-align: inherit;
+  overflow-wrap: inherit;
   line-height: inherit;
   letter-spacing: inherit;
   white-space: pre-wrap;
@@ -189,4 +193,20 @@
 }
 .lineas-chip-copiar:hover .lineas-texto-3 {
   background: #cfcfcf !important;
+}
+
+/* Cursor de escritura de las líneas (lo dibuja js/app/cursor.js encima del texto). */
+.cursor-escritura {
+  position: fixed;
+  z-index: 150;
+  display: none;
+  border-radius: 1px;
+  background: #1fe85c;
+  box-shadow: 0 0 4px rgba(31, 232, 92, .55);
+  pointer-events: none;
+  animation: cursor-parpadeo 1.06s steps(1) infinite;
+}
+@keyframes cursor-parpadeo {
+  0%, 55% { opacity: 1; }
+  56%, 100% { opacity: 0; }
 }

@@ -40,7 +40,7 @@
   background: transparent;
   font: inherit;
   color: #fff;
-  caret-color: #008000;
+  caret-color: #1fe85c;
 }
 
 .entidad-aviso-caja-4 {
@@ -139,7 +139,7 @@
   font-weight: 600;
   color: #008000;
   text-align: right;
-  caret-color: #008000;
+  caret-color: #1fe85c;
 }
 
 .entidad-aviso-fecha {
@@ -193,7 +193,7 @@
   background: transparent;
   font: inherit;
   color: #fff;
-  caret-color: #008000;
+  caret-color: #1fe85c;
 }
 
 .entidad-aviso-texto-4 {
@@ -220,7 +220,7 @@
   background: #1c1c1c;
   color: #fff;
   font: inherit;
-  caret-color: #008000;
+  caret-color: #1fe85c;
 }
 
 .entidad-aviso-lanza-aviso-ahora {
