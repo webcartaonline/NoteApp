@@ -100,12 +100,12 @@ NoteApp.partes.push(Base => class extends Base {
   }
   // Cómo se dibuja una celda de tabla (vista limpia). Además del formato de una frase, la celda entera puede
   // ser copiable ('x'), de código (``x``), título (# x), punto de lista (- x), anotación (> x) o separador (---).
-  // Ver cellInfo en js/motor/mkd.js.
+  // Ver mdCellInfo en js/motor/mkd.js (no confundir con cellInfo de formulas.js, que es la de las entidades Tabla).
   cellView(ln, b, k, segV) {
     const c = b.cells[k], v = { segs: [], align: b.aligns[k] || 'left', fw: b.head ? 700 : 400, fs: 'inherit', ff: 'inherit', color: 'inherit', bar: 'none', pl: '12px',
       isHr: false, hasMarker: false, marker: '', hasCopy: false, onCopy: null, copyTitle: '', copyColor: '#8a8a8a', chipBg: 'transparent', chipPad: '0px', disp: 'inline' };
     if (!c) return v;
-    const ci = cellInfo(ln.text, c);
+    const ci = mdCellInfo(ln.text, c);
     if (ci.kind === 'hr') { v.isHr = true; return v; }
     if (ci.kind === 'code') {
       const txt = cellCode(ln.text, ci);
@@ -156,9 +156,10 @@ NoteApp.partes.push(Base => class extends Base {
       }
       const fw = sg.b ? 700 : 'inherit', fst = sg.i ? 'italic' : 'normal', td = sg.s ? 'line-through' : 'none';
       if (sg.t === 'text') return sg.href
-        ? { ...v, isLink: true, text: sg.text, href: sg.href, fw, fst, td: sg.s ? 'underline line-through' : 'underline' }
-        : { ...v, isText: true, text: sg.text, color: sg.color || 'inherit', fw, fst, td };
-      if (sg.t === 'code') return { ...v, isCode: true, text: sg.text, fw, fst, td };
+        ? { ...v, isLink: true, text: sg.text, href: sg.href, fw, fst, td: sg.s ? 'underline line-through' : 'underline', lcol: sg.c ? '#008000' : '#fff' }
+        : { ...v, isText: true, text: sg.text, color: sg.c ? '#008000' : sg.color || 'inherit', fw, fst, td };
+      // _texto_: color principal (verde) también en el código de una frase y en los enlaces.
+      if (sg.t === 'code') return { ...v, isCode: true, text: sg.text, fw, fst, td, ccol: sg.c ? '#008000' : '#e6e6e6' };
       if (sg.t === 'img') return { ...v, isImg: true, src: sg.src, alt: sg.alt };
       if (sg.t === 'ent') return { ...v, isEnt: true, off2: sg.off + 1, eq: sg.raw ? '=' : '', label: sg.raw ? (isPath(sg.name) ? sg.name.slice(1) : sg.name) : resolveEntity(sg.name), fw: focused ? 'inherit' : sg.b ? 800 : 600, fst, td, pad: sg.raw ? '4px 0' : '4px 4px', title: sg.raw ? '' : isPath(sg.name) ? sg.name : '=' + sg.name };
       const can = !!blocks && !!ln;

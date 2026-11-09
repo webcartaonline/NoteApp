@@ -37,7 +37,7 @@ function safeUrl(u, img) {
 //   o un signo de puntuación.
 // Así don't, l'aigua o 2'5 nunca abren ni cierran nada. Para ver una comilla tal cual: \'. Dentro de un
 // copiable no hay otro copiable. w: texto de mdScan (con los escapes y el código ya ocultos).
-const CHIP_PRE = /[\s(\[{"«¿¡*~]/, CHIP_POST = /[\s.,;:!?)\]}"»*~…]/;
+const CHIP_PRE = /[\s(\[{"«¿¡*~_]/, CHIP_POST = /[\s.,;:!?)\]}"»*~_…]/;
 function chipsIn(w, a, b) {
   const out = [];
   for (let i = a; i < b; i++) {
@@ -111,8 +111,12 @@ function mdScan(text, a, b, chips) {
   const MEN = new RegExp(ENT.source, 'g');
   while ((m = MEN.exec(seg))) {
     const s = a + m.index, e = s + m[0].length, pc = s > a ? w[s - 1] : '';
-    if (pc && !/[\s*~]/.test(pc) && !opens.has(s - 1)) continue;
-    if (free(s, e)) take({ s, e, kind: 'ent', name: m[1] || m[2] });
+    if (pc && !/[\s*~_]/.test(pc) && !opens.has(s - 1)) continue;
+    // _=Precio_ (mención en color): el _ del final no es parte del nombre, salvo que exista una entidad que se
+    // llame así de verdad (=Precio_).
+    let name = m[1] || m[2], e2 = e;
+    if (!m[1] && /_$/.test(name)) { const base = name.replace(/_+$/, ''); if (base && !(RESOLVE.has && RESOLVE.has(name))) { e2 = e - (name.length - base.length); name = base; } }
+    if (free(s, e2)) take({ s, e: e2, kind: 'ent', name });
   }
   atoms.push(...chipList);
   atoms.sort((x, y) => x.s - y.s);
@@ -124,13 +128,17 @@ function mdScan(text, a, b, chips) {
   if (chipList.length) { const ww = w2.split(''); chipList.forEach(c => { for (let q = c.s; q < c.e; q++) ww[q] = ''; }); wOut = ww.join(''); }
   return { text, cat, atoms, w, w2, wOut };
 }
-const FMT = /(\*{1,3})(?=[^\s*])([^]*?[^\s*])\1(?!\*)|~~(?=[^\s~])([^]*?[^\s~])~~/g;
+// Formato en una frase: *cursiva* **negrita** ***ambas*** ~~tachado~~ _color_ (texto en el color principal, verde).
+// El _ solo da color si no está pegado a una letra o número por fuera (como en Markdown): así los nombres con
+// guion bajo (Por_Persona, mi_archivo_nuevo) nunca se colorean. Para ver un _ tal cual: \_.
+const FMT = /(\*{1,3})(?=[^\s*])([^]*?[^\s*])\1(?!\*)|~~(?=[^\s~])([^]*?[^\s~])~~|(?<![\p{L}\p{N}_])_(?=[^\s_])([^]*?[^\s_])_(?![\p{L}\p{N}_])/gu;
 function mdFmt(sc, s, e, f, W, out) {
-  const re = new RegExp(FMT.source, 'g'), str = W.slice(s, e); let last = 0, m;
+  const re = new RegExp(FMT.source, FMT.flags), str = W.slice(s, e); let last = 0, m;
   while ((m = re.exec(str))) {
     if (m.index > last) mdLeaf(sc, s + last, s + m.index, f, out);
     if (m[1]) { const L = m[1].length, is = s + m.index + L; mdFmt(sc, is, is + m[2].length, { ...f, b: f.b || L >= 2, i: f.i || L !== 2 }, W, out); }
-    else { const is = s + m.index + 2; mdFmt(sc, is, is + m[3].length, { ...f, s: true }, W, out); }
+    else if (m[3] !== undefined) { const is = s + m.index + 2; mdFmt(sc, is, is + m[3].length, { ...f, s: true }, W, out); }
+    else { const is = s + m.index + 1; mdFmt(sc, is, is + m[4].length, { ...f, c: true }, W, out); }
     last = m.index + m[0].length;
   }
   if (last < str.length) mdLeaf(sc, s + last, e, f, out);
@@ -150,7 +158,7 @@ function mdLeaf(sc, s, e, f, out) {
       for (let j = k; j < out.length; j++) out[j].chip = true;
       out.push({ t: 'chipbtn', off: at.ce, cs: at.cs, ce: at.ce });
     }
-    else out.push({ t: 'ent', name: at.name, off: at.s, b: f.b, i: f.i, s: f.s });
+    else out.push({ t: 'ent', name: at.name, off: at.s, b: f.b, i: f.i, s: f.s, c: f.c });
     i = at.e;
   }
   if (i < e) mdText(sc, i, e, f, out);
@@ -163,7 +171,7 @@ function mdText(sc, s, e, f, out) {
     while (j < e && sc.cat[j] !== 2 && (sc.cat[j] === 3) === code) j++;
     // esc: el primer carácter era un signo escapado con \ (cada signo escapado empieza su propio trozo,
     // porque la barra oculta corta el trozo anterior). Lo usa mdSegsOut para conservar la barra en Markdown.
-    out.push({ t: code ? 'code' : 'text', text: sc.text.slice(i, j), off: i, b: f.b, i: f.i, s: f.s, esc: sc.cat[i] === 1 });
+    out.push({ t: code ? 'code' : 'text', text: sc.text.slice(i, j), off: i, b: f.b, i: f.i, s: f.s, c: f.c, esc: sc.cat[i] === 1 });
     i = j;
   }
 }
@@ -202,7 +210,7 @@ function cellsOf(t) {
 // copiable 'x' (o ''x''), bloque de código ``x`` (o ```x```), título # x, punto de lista - x / 1. x,
 // anotación > x y línea separadora --- / ***. Devuelve { kind, s, e } con la parte visible (sin los signos).
 // kind: 'p' normal · 'copy' · 'code' · 'h' (lvl) · 'li' (li 'ul'|'ol', n) · 'quote' · 'hr'.
-function cellInfo(t, c) {
+function mdCellInfo(t, c) {
   const s = c.s, e = c.e, x = t.slice(s, e), trim = (a, b) => { while (a < b && /\s/.test(t[a])) a++; while (b > a && /\s/.test(t[b - 1])) b--; return [a, b]; };
   let m;
   if (/^(-{3,}|\*{3,})$/.test(x)) return { kind: 'hr', s: e, e };
@@ -424,7 +432,7 @@ function mdOneLine(text, b, nc) {
 // Convierte una celda de tabla a Markdown. Markdown no tiene títulos, listas, anotaciones ni copiables dentro
 // de una tabla: el título se exporta en negrita y el resto como texto normal (sin las comillas del copiable).
 function mdCellOut(t, cell) {
-  const ci = cellInfo(t, cell);
+  const ci = mdCellInfo(t, cell);
   if (ci.kind === 'hr') return '\\-\\-\\-';
   if (ci.kind === 'code') { const raw = t.slice(ci.s, ci.e), fence = '`'.repeat(Math.max(1, (raw.match(/`+/g) || []).reduce((a, r) => Math.max(a, r.length + 1), 1))), pad = /^`|`$/.test(raw) ? ' ' : ''; return fence + pad + raw + pad + fence; }
   const body = mdSegsOut(cleanSegs(t, ci.s, ci.e, ci.kind === 'copy'), true);

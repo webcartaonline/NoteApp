@@ -16,7 +16,7 @@ const PATH_RX = '=\\/(?! )[^\\/\\n=]+\\/(?! )[^\\/\\n=]+\\/[' + NAME_START + '][
 const ENT = new RegExp('(' + PATH_RX + ')|=([' + ID_CH + ']+)', 'g');
 const isPath = n => /^=\//.test(n);
 // Al escribir una mención, el espacio se convierte en _ (para salir: Esc o dos espacios seguidos).
-const MEN_END = new RegExp('(?:^|(?<=[\\s*~]))=(?:\\/(?! )[^\\/\\n=]+\\/(?! )[^\\/\\n=]+\\/)?[' + NAME_START + '][' + ID_CH + ']*$');
+const MEN_END = new RegExp('(?:^|(?<=[\\s*~_]))=(?:\\/(?! )[^\\/\\n=]+\\/(?! )[^\\/\\n=]+\\/)?[' + NAME_START + '][' + ID_CH + ']*$');
 // Devuelve dónde empieza la mención que acaba justo antes del cursor (o -1 si no hay ninguna).
 function menAt(lines, idx, before) {
   const m = MEN_END.exec(before); if (!m) return -1;
