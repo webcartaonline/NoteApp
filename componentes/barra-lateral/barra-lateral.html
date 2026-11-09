@@ -1,4 +1,4 @@
-<!-- Componente "barra-lateral" de NoteApp. Barra lateral: selector de ventana (Agenda, Notas, Diagrama), botones para añadir entidades o formas, carpeta de guardado y ajustes.
+<!-- Componente "barra-lateral" de NoteApp. Barra lateral: selector de ventana (Agenda, Notas, Diagrama), botones para añadir entidades o formas, calculadora, carpeta de guardado y ajustes.
      Los estilos fijos están en barra-lateral.css; los que cambian ({{ }}) siguen aquí.
      Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
 <x-dc>
@@ -42,6 +42,7 @@
         <button onClick="{{ addZona }}" aria-label="Añadir zona" title="Zona (agrupa formas)" class="barra-lateral-forma barra-lateral-forma-zona"></button>
       </div>
     </sc-if>
+    <button onClick="{{ calcAbrir }}" aria-label="Calculadora" title="Calculadora: porcentajes, clientes, IVA, despejar la x…" class="barra-lateral-calculadora"></button>
     <button onClick="{{ fsPick }}" aria-label="Carpeta de guardado" title="{{ fsTitle }}" class="barra-lateral-carpeta-guardado">
       <span class="barra-lateral-texto-6" style="background:{{ fsIcon }};"></span>
       <span class="barra-lateral-texto-7" style="background:{{ fsDot }};"></span>

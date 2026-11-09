@@ -2,6 +2,8 @@
 // - antes de eliminar una nota o una hoja: { kind: 'sheet' | 'note', noteId, sheetId }
 // - al conectar una carpeta vacía sin carpeta anterior (o si la anterior ya no existe), para preguntar si se pasan
 //   las notas del navegador: { kind: 'folder', name, gone, count } (ver fsPick y fsAnswer en js/app/carpeta.js)
+// - al pulsar el botón de copiar de algo copiable ('x', '' o celda copiable), para elegir cómo copiarlo:
+//   { kind: 'copy', md, lit, key, what } (md = en Markdown, lit = tal cual está escrito; ver askCopy)
 NoteApp.partes.push(Base => class extends Base {
   // Abre la ventana para la hoja activa o la nota activa
   askDelete(kind) {
@@ -13,6 +15,12 @@ NoteApp.partes.push(Base => class extends Base {
     }, () => { const b = document.querySelector('[data-confirmar="cancelar"]'); if (b) b.focus(); });
   }
   closeConfirm() { this._fsAsk = null; this.setState({ confirm: null }); }
+  // Menú de copiar de lo copiable: { md, lit, key, what }. Al elegir, copia y el botón de copiar se pone verde.
+  askCopy(c) {
+    const a = document.activeElement; if (a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT')) a.blur();
+    this.setState({ menu: false, copyMenu: false, confirm: { kind: 'copy', ...c } }, () => { const b = document.querySelector('[data-confirmar="md"]'); if (b) b.focus(); });
+  }
+  doCopy(lit) { const c = this.state.confirm; if (!c || c.kind !== 'copy') return; this.setState({ confirm: null }); this.copyText(lit ? c.lit : c.md, c.key); }
   // Elimina de verdad lo que se estaba confirmando
   confirmDelete() {
     this.setState(st => {
@@ -34,10 +42,20 @@ NoteApp.partes.push(Base => class extends Base {
   }
   // Valores para la plantilla (se añaden en renderVals)
   confirmVals(s) {
-    const c = s.confirm, v = { confirmOpen: !!c, confirmFolder: !!c && c.kind === 'folder', confirmDel: !!c && c.kind !== 'folder' };
+    const c = s.confirm, v = { confirmOpen: !!c, confirmFolder: !!c && c.kind === 'folder', confirmCopy: !!c && c.kind === 'copy', confirmDel: !!c && c.kind !== 'folder' && c.kind !== 'copy' };
     if (!c) return v;
     v.confirmCancel = () => this.closeConfirm();
     v.confirmBack = e => { if (e.target === e.currentTarget) this.closeConfirm(); };
+    if (c.kind === 'copy') {
+      const first = (c.lit.split('\n').find(l => l.trim()) || '').trim();
+      v.confirmTitle = 'Copiar';
+      v.confirmName = first || '(vacío)';
+      v.confirmDetail = c.what || 'Copiable';
+      v.confirmWarn = 'Copiar Markdown: con el formato en Markdown estándar y las menciones con su valor, igual que al exportar. Copiado literal: tal cual está escrito, con las menciones y todos los símbolos.';
+      v.confirmMd = () => this.doCopy(false);
+      v.confirmLit = () => this.doCopy(true);
+      return v;
+    }
     if (c.kind === 'folder') {
       const k = c.count || {}, part = (n, one, many) => n ? n + ' ' + (n === 1 ? one : many) : '';
       const what = [part(k.notas, 'nota', 'notas'), part(k.agenda, 'nota de agenda', 'notas de agenda'), part(k.diagrama, 'diagrama', 'diagramas')].filter(Boolean);

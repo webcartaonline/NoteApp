@@ -1,0 +1,218 @@
+<!-- Componente "calculadora" de NoteApp. Calculadora rápida con historial, en una ventana emergente que difumina el resto.
+     A la izquierda, la lista de cálculos (con buscador); en el centro, los datos, el resultado y cómo se calcula
+     (fórmula y pasos); a la derecha, el historial. En pantallas estrechas se ve una parte cada vez (pestañas arriba).
+     Se cierra con la X, con Esc o con un clic fuera.
+     Los estilos fijos están en calculadora.css; los valores {{ }} vienen de renderVals() (js/app/render.js),
+     la lógica de js/app/calculadora.js y los cálculos de js/motor/calculos.js. -->
+<x-dc>
+  <sc-if value="{{ calcOn }}" hint-placeholder-val="{{ false }}">
+    <div onMouseDown="{{ calcFondo }}" class="calculadora-fondo">
+      <div role="dialog" aria-modal="true" aria-labelledby="calculadora-titulo" class="calculadora-ventana {{ calcVista }}">
+        <div class="calculadora-cabeza">
+          <span class="calculadora-icono"><span class="calculadora-icono-calc"></span></span>
+          <div class="calculadora-cabeza-textos">
+            <span id="calculadora-titulo" class="calculadora-titulo">Calculadora</span>
+            <span class="calculadora-sub">Elige qué quieres saber, rellena los datos y mira cómo se hace la cuenta.</span>
+          </div>
+          <button onClick="{{ calcCerrar }}" aria-label="Cerrar la calculadora" title="Cerrar (Esc)" class="calculadora-cerrar"><span class="calculadora-x calculadora-x-1"></span><span class="calculadora-x calculadora-x-2"></span></button>
+        </div>
+        <div role="tablist" class="calculadora-pestanas">
+          <sc-for list="{{ calcTabs }}" as="t" hint-placeholder-count="3">
+            <button role="tab" onClick="{{ t.pick }}" class="calculadora-pestana {{ t.cls }}">{{ t.txt }}</button>
+          </sc-for>
+        </div>
+        <div class="calculadora-cuerpo">
+
+          <!-- Lista de cálculos -->
+          <nav aria-label="Cálculos" class="calculadora-lista">
+            <div class="calculadora-buscar">
+              <span class="calculadora-buscar-icono"></span>
+              <input value="{{ calcQ }}" onChange="{{ calcOnQ }}" onKeyDown="{{ calcQKey }}" spellCheck="false" autoComplete="off" placeholder="Buscar: IVA, clientes, x…" aria-label="Buscar un cálculo" class="calculadora-buscar-campo">
+            </div>
+            <div data-scroll="" class="calculadora-lista-scroll">
+              <sc-for list="{{ calcGrupos }}" as="g" hint-placeholder-count="3">
+                <div class="calculadora-grupo">
+                  <span class="calculadora-grupo-nombre">{{ g.nombre }}</span>
+                  <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4">
+                    <button onClick="{{ it.pick }}" aria-pressed="{{ it.on }}" class="calculadora-item {{ it.cls }}">{{ it.nombre }}</button>
+                  </sc-for>
+                </div>
+              </sc-for>
+              <sc-if value="{{ calcSinRes }}" hint-placeholder-val="{{ false }}">
+                <span class="calculadora-vacio">No hay ningún cálculo con esas palabras.</span>
+              </sc-if>
+            </div>
+          </nav>
+
+          <!-- El cálculo elegido -->
+          <section data-scroll="" class="calculadora-centro">
+            <div class="calculadora-pregunta">
+              <span class="calculadora-pregunta-titulo">{{ calcTitulo }}</span>
+              <span class="calculadora-pregunta-desc">{{ calcDesc }}</span>
+            </div>
+
+            <sc-for list="{{ calcOpts }}" as="o" hint-placeholder-count="0">
+              <div class="calculadora-opciones-caja">
+                <sc-if value="{{ o.hasLabel }}" hint-placeholder-val="{{ true }}"><span class="calculadora-etiqueta">{{ o.label }}</span></sc-if>
+                <div role="group" class="calculadora-opciones">
+                  <sc-for list="{{ o.ops }}" as="b" hint-placeholder-count="2">
+                    <button onClick="{{ b.pick }}" aria-pressed="{{ b.on }}" class="calculadora-opcion {{ b.cls }}">{{ b.txt }}</button>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+
+            <sc-for list="{{ calcExprs }}" as="f" hint-placeholder-count="0">
+              <div class="calculadora-expr">
+                <span class="calculadora-etiqueta">{{ f.label }}</span>
+                <input data-calc-campo="{{ f.k }}" value="{{ f.value }}" onChange="{{ f.onChange }}" onKeyDown="{{ f.onKey }}" placeholder="{{ f.ph }}" spellCheck="false" autoComplete="off" class="calculadora-expr-campo">
+                <div class="calculadora-teclas">
+                  <sc-for list="{{ f.teclas }}" as="t" hint-placeholder-count="8">
+                    <button onMouseDown="{{ t.down }}" onClick="{{ t.click }}" title="{{ t.title }}" class="calculadora-tecla {{ t.cls }}">{{ t.txt }}</button>
+                  </sc-for>
+                </div>
+                <div class="calculadora-chips">
+                  <span class="calculadora-chips-txt">Prueba con:</span>
+                  <sc-for list="{{ f.chips }}" as="ch" hint-placeholder-count="3">
+                    <button onClick="{{ ch.click }}" class="calculadora-chip">{{ ch.txt }}</button>
+                  </sc-for>
+                </div>
+                <span class="calculadora-ayuda">{{ f.ayuda }}</span>
+              </div>
+            </sc-for>
+
+            <sc-if value="{{ calcHayCampos }}" hint-placeholder-val="{{ true }}">
+              <div class="calculadora-campos">
+                <sc-for list="{{ calcCampos }}" as="f" hint-placeholder-count="2">
+                  <label class="calculadora-campo {{ f.cls }}">
+                    <span class="calculadora-etiqueta">{{ f.label }}<sc-if value="{{ f.opc }}" hint-placeholder-val="{{ false }}"><span class="calculadora-opcional"> · opcional</span></sc-if></span>
+                    <span class="calculadora-caja-campo">
+                      <input data-calc-campo="{{ f.k }}" value="{{ f.value }}" onChange="{{ f.onChange }}" onKeyDown="{{ f.onKey }}" placeholder="{{ f.ph }}" inputMode="{{ f.im }}" spellCheck="false" autoComplete="off" class="calculadora-input">
+                      <sc-if value="{{ f.hasU }}" hint-placeholder-val="{{ true }}"><span class="calculadora-unidad">{{ f.u }}</span></sc-if>
+                    </span>
+                    <sc-if value="{{ f.hasAyuda }}" hint-placeholder-val="{{ false }}"><span class="calculadora-ayuda">{{ f.ayuda }}</span></sc-if>
+                  </label>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <div class="calculadora-acciones">
+              <sc-if value="{{ calcPuedeEjemplo }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ calcVerEjemplo }}" title="Pone los números del ejemplo en los datos, para cambiarlos a partir de ahí" class="calculadora-accion">Rellenar con el ejemplo</button>
+              </sc-if>
+              <sc-if value="{{ calcPuedeVaciar }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ calcVaciar }}" class="calculadora-accion">Borrar los datos</button>
+              </sc-if>
+            </div>
+
+            <!-- Resultado -->
+            <div aria-live="polite" class="calculadora-resultado {{ calcResCls }}">
+              <sc-if value="{{ calcHayRes }}" hint-placeholder-val="{{ true }}">
+                <div class="calculadora-res-cabeza">
+                  <span class="calculadora-res-etq">{{ calcResEtq }}</span>
+                  <sc-if value="{{ calcPuedeCopiar }}" hint-placeholder-val="{{ true }}">
+                    <button onClick="{{ calcCopiar }}" title="{{ calcCopiarTitle }}" aria-label="Copiar el resultado" class="calculadora-copiar"><span class="calculadora-copiar-icono" style="background:{{ calcCopiarColor }};"></span></button>
+                  </sc-if>
+                </div>
+                <div class="calculadora-res-valor">
+                  <span class="calculadora-res-num">{{ calcValor }}</span>
+                  <sc-if value="{{ calcHayUni }}" hint-placeholder-val="{{ false }}"><span class="calculadora-res-uni">{{ calcUni }}</span></sc-if>
+                </div>
+                <span class="calculadora-res-frase">{{ calcFrase }}</span>
+                <sc-if value="{{ calcHayExtra }}" hint-placeholder-val="{{ false }}">
+                  <div class="calculadora-extra">
+                    <sc-for list="{{ calcExtra }}" as="x" hint-placeholder-count="3">
+                      <div class="calculadora-extra-item"><span class="calculadora-extra-l">{{ x.l }}</span><span class="calculadora-extra-v">{{ x.v }}</span></div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ calcOk }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ calcGuardar }}" title="{{ calcGuardarTitle }}" class="calculadora-guardar {{ calcGuardarCls }}"><span class="calculadora-guardar-icono"></span>{{ calcGuardarTxt }}</button>
+                </sc-if>
+                <sc-if value="{{ calcEsEjemplo }}" hint-placeholder-val="{{ false }}">
+                  <span class="calculadora-res-nota">{{ calcNotaEjemplo }}</span>
+                </sc-if>
+              </sc-if>
+              <sc-if value="{{ calcFalta }}" hint-placeholder-val="{{ false }}"><span class="calculadora-res-aviso">{{ calcFaltaTxt }}</span></sc-if>
+              <sc-if value="{{ calcError }}" hint-placeholder-val="{{ false }}"><span class="calculadora-res-aviso">{{ calcErrorTxt }}</span></sc-if>
+            </div>
+
+            <!-- Cómo se calcula -->
+            <sc-if value="{{ calcHayRes }}" hint-placeholder-val="{{ true }}">
+              <div class="calculadora-como">
+                <div class="calculadora-como-cabeza"><span class="calculadora-como-icono"></span><span class="calculadora-como-titulo">Cómo se calcula</span></div>
+                <sc-if value="{{ calcHayFormula }}" hint-placeholder-val="{{ true }}">
+                  <div class="calculadora-formula">
+                    <span class="calculadora-formula-etq">Fórmula</span>
+                    <span class="calculadora-formula-txt">{{ calcFormula }}</span>
+                    <sc-if value="{{ calcHayCon }}" hint-placeholder-val="{{ true }}">
+                      <span class="calculadora-formula-etq calculadora-formula-etq-2">{{ calcConEtq }}</span>
+                      <span class="calculadora-formula-con">{{ calcCon }}</span>
+                    </sc-if>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ calcHayPasos }}" hint-placeholder-val="{{ true }}">
+                  <div role="list" class="calculadora-pasos">
+                    <sc-for list="{{ calcPasos }}" as="p" hint-placeholder-count="2">
+                      <div role="listitem" class="calculadora-paso">
+                        <span class="calculadora-paso-n">{{ p.n }}</span>
+                        <div class="calculadora-paso-textos">
+                          <span class="calculadora-paso-t">{{ p.t }}</span>
+                          <sc-if value="{{ p.hasOp }}" hint-placeholder-val="{{ true }}">
+                            <div class="calculadora-paso-op">
+                              <span class="{{ p.opCls }}">{{ p.op }}</span>
+                              <sc-if value="{{ p.hasOp2 }}" hint-placeholder-val="{{ false }}"><span>{{ p.op2 }}</span></sc-if>
+                              <sc-if value="{{ p.hasQueda }}" hint-placeholder-val="{{ false }}"><span class="calculadora-paso-queda">{{ p.queda }}</span></sc-if>
+                            </div>
+                          </sc-if>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ calcHayTruco }}" hint-placeholder-val="{{ true }}">
+                  <div class="calculadora-truco"><span class="calculadora-truco-icono"></span><span class="calculadora-truco-txt">{{ calcTruco }}</span></div>
+                </sc-if>
+                <sc-if value="{{ calcAprox }}" hint-placeholder-val="{{ false }}">
+                  <span class="calculadora-aprox">≈ quiere decir «más o menos»: ese número tiene más decimales y aquí sale redondeado.</span>
+                </sc-if>
+              </div>
+            </sc-if>
+          </section>
+
+          <!-- Historial -->
+          <aside aria-label="Historial" class="calculadora-historial">
+            <div class="calculadora-hist-cabeza">
+              <span class="calculadora-hist-icono"></span>
+              <span class="calculadora-hist-titulo">Historial</span>
+              <span class="calculadora-hist-n">{{ calcHistN }}</span>
+              <sc-if value="{{ calcNoPregunta }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ calcPreguntarBorrar }}" class="calculadora-hist-borrar">Borrar todo</button>
+              </sc-if>
+              <sc-if value="{{ calcPregunta }}" hint-placeholder-val="{{ false }}">
+                <span class="calculadora-hist-pregunta">¿Borrar todo?</span>
+                <button onClick="{{ calcBorrarSi }}" class="calculadora-hist-si">Sí</button>
+                <button onClick="{{ calcBorrarNo }}" class="calculadora-hist-no">No</button>
+              </sc-if>
+            </div>
+            <div data-scroll="" class="calculadora-hist-lista">
+              <sc-if value="{{ calcHistVacio }}" hint-placeholder-val="{{ false }}">
+                <span class="calculadora-vacio">Aquí aparecerán los cálculos que guardes con el botón «Guardar en el historial» (o con la tecla Intro). Pulsa uno para volver a verlo con sus números.</span>
+              </sc-if>
+              <sc-for list="{{ calcHist }}" as="h" hint-placeholder-count="3">
+                <div class="calculadora-hist-item {{ h.cls }}">
+                  <button onClick="{{ h.open }}" title="Volver a ver este cálculo" class="calculadora-hist-abrir">
+                    <span class="calculadora-hist-nombre">{{ h.nombre }}</span>
+                    <span class="calculadora-hist-res">{{ h.res }}</span>
+                    <span class="calculadora-hist-hora">{{ h.hora }}</span>
+                  </button>
+                  <button onClick="{{ h.del }}" aria-label="Quitar del historial" title="Quitar del historial" class="calculadora-hist-quitar"><span class="calculadora-hist-quitar-icono"></span></button>
+                </div>
+              </sc-for>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</x-dc>

@@ -114,17 +114,18 @@ NoteApp.partes.push(Base => class extends Base {
       return v;
     }
     v.segs = cleanSegs(ln.text, ci.s, ci.e, ci.kind === 'copy').map(x => segV(x, false, ln));
-    if (ci.kind === 'copy') { Object.assign(v, { chipBg: '#333', chipPad: '3px 4px 3px 9px' }); this.cellCopy(v, ln, k, () => plainOf(cleanSegs(ln.text, ci.s, ci.e, true))); }
+    if (ci.kind === 'copy') { Object.assign(v, { chipBg: '#333', chipPad: '3px 4px 3px 9px' }); this.cellCopy(v, ln, k, null, () => ({ ...copyRangeTexts(ln.text, ci.s, ci.e), what: 'Celda copiable' })); }
     else if (ci.kind === 'h') Object.assign(v, { fw: 700, fs: ({ 1: '20px', 2: '18px', 3: '17px' })[ci.lvl] || '16px', color: ci.lvl === 6 ? '#a6a6a6' : 'inherit' });
     else if (ci.kind === 'li') Object.assign(v, { hasMarker: true, marker: ci.li === 'ul' ? '•' : ci.n + '.' });
     else if (ci.kind === 'quote') Object.assign(v, { bar: 'inset 3px 0 0 #008000', pl: '17px', color: '#cfcfcf' });
     return v;
   }
-  // Botón de copiar de una celda: copia el texto (con el valor de las menciones) y se pone verde un momento.
-  cellCopy(v, ln, k, get) {
+  // Botón de copiar de una celda: se pone verde un momento al copiar. get: copia directa (celda de código);
+  // menu: celda copiable, abre el menú «Copiar Markdown» / «Copiado literal» (askCopy en js/app/confirmar.js).
+  cellCopy(v, ln, k, get, menu) {
     const key = ln.id + '|' + k, copied = this.state.copied === key;
     Object.assign(v, { hasCopy: true, disp: 'inline-flex', copyTitle: copied ? 'Copiado' : 'Copiar', copyColor: copied ? '#008000' : '#8a8a8a',
-      onCopy: e => { e.preventDefault(); e.stopPropagation(); this.copyText(get(), key); } });
+      onCopy: e => { e.preventDefault(); e.stopPropagation(); if (menu) this.askCopy({ ...menu(), key }); else this.copyText(get(), key); } });
   }
   mkdLines(src, entId, out) {
     const s = this.state, cleanV = s.clean || !!out;
@@ -152,7 +153,7 @@ NoteApp.partes.push(Base => class extends Base {
       if (sg.t === 'chipbtn') {
         const key = ln.id + '@' + sg.cs, copied = s.copied === key;
         return { ...v, isChipBtn: true, cbg: '#333', cpad: '2px 4px 2px 5px', crad: '0 4px 4px 0', copyTitle: copied ? 'Copiado' : 'Copiar', copyColor: copied ? '#008000' : '#8a8a8a',
-          onCopy: e => { e.preventDefault(); e.stopPropagation(); this.copyText(plainOf(cleanSegs(ln.text, sg.cs, sg.ce, true)), key); }, onStop: e => e.stopPropagation() };
+          onCopy: e => { e.preventDefault(); e.stopPropagation(); this.askCopy({ ...copyRangeTexts(ln.text, sg.cs, sg.ce), what: 'Copiable en una frase', key }); }, onStop: e => e.stopPropagation() };
       }
       const fw = sg.b ? 700 : 'inherit', fst = sg.i ? 'italic' : 'normal', td = sg.s ? 'line-through' : 'none';
       if (sg.t === 'text') return sg.href
@@ -215,7 +216,13 @@ NoteApp.partes.push(Base => class extends Base {
         if (top) {
           const key = ln.id, copied = s.copied === key;
           Object.assign(v, { hasCopy: true, copyTitle: copied ? 'Copiado' : 'Copiar', copyColor: copied ? '#008000' : '#8a8a8a',
-            onCopy: e => { e.stopPropagation(); const txt = []; for (let k = b.from; k <= b.to; k++) { const bk = blocks[k], t = src[k].text; txt.push(code ? t.slice(bk.start, Math.max(bk.start, bk.end)) : copyPlainLine(innerOf(b)[k - b.from])); } while (txt.length > 1 && !txt[0]) txt.shift(); while (txt.length > 1 && !txt[txt.length - 1]) txt.pop(); this.copyText(txt.join('\n'), key); } });
+            onCopy: e => {
+              e.stopPropagation();
+              // Copiable: menú «Copiar Markdown» / «Copiado literal». Código: siempre tal cual, sin menú.
+              if (!code) { const tx = copyBlockTexts(src, blocks, b); return this.askCopy({ ...tx, key, what: b.pos === 'single' ? 'Línea copiable' : 'Bloque copiable · ' + tx.lit.split('\n').length + (tx.lit.split('\n').length === 1 ? ' línea' : ' líneas') }); }
+              const txt = []; for (let k = b.from; k <= b.to; k++) { const bk = blocks[k], t = src[k].text; txt.push(t.slice(bk.start, Math.max(bk.start, bk.end))); }
+              while (txt.length > 1 && !txt[0]) txt.shift(); while (txt.length > 1 && !txt[txt.length - 1]) txt.pop(); this.copyText(txt.join('\n'), key);
+            } });
         }
       } else {
         segs = cleanSegs(ln.text, b.kind === 'p' ? p.start : b.start, b.end);

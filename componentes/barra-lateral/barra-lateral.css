@@ -1,4 +1,4 @@
-/* Componente "barra-lateral": Barra lateral: selector de ventana (Agenda, Notas, Diagrama), botones para añadir entidades, carpeta de guardado y ajustes. */
+/* Componente "barra-lateral": Barra lateral: selector de ventana (Agenda, Notas, Diagrama), botones para añadir entidades, calculadora, carpeta de guardado y ajustes. */
 
 .barra-lateral-lateral {
   display: flex;
@@ -231,8 +231,22 @@
   -webkit-mask: url(../../assets/texto.svg) center / contain no-repeat;
 }
 
-.barra-lateral-carpeta-guardado {
+/* Calculadora (abre la ventana componentes/calculadora/). Con margin-top:auto empuja abajo calculadora, carpeta y ajustes. */
+.barra-lateral-calculadora {
   margin-top: auto;
+  width: 19px;
+  height: 19px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  flex: none;
+  background: #fff;
+  mask: url(../../assets/calculadora.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/calculadora.svg) center / contain no-repeat;
+}
+
+.barra-lateral-carpeta-guardado {
+  margin-top: 24px;
   position: relative;
   width: 20px;
   height: 20px;

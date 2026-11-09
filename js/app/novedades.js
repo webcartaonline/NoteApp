@@ -8,6 +8,16 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '1.2',
+    fecha: '9 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Calculadora rápida', texto: 'Nuevo botón con forma de calculadora en la barra de la izquierda. Elige qué quieres saber (un porcentaje, cuántos clientes necesitas, cuánto te falta para una meta, el IVA, despejar la x…), rellena los datos y verás el resultado, la fórmula y cada paso de la cuenta explicado.' },
+      { titulo: 'Historial de cálculos', texto: 'Guarda un cálculo con el botón «Guardar en el historial» o con la tecla Intro. Después puedes volver a abrirlo con sus números, por ejemplo para cambiar solo un dato.' },
+      { titulo: 'Texto de color', texto: 'Escribe un texto entre guiones bajos, por ejemplo _importante_, y se verá en verde.' },
+      { titulo: 'Elige cómo copiar', texto: 'El botón de copiar de un recuadro copiable te deja elegir: copiarlo en Markdown o tal cual está escrito.' }
+    ]
+  },
+  {
     version: '1.1',
     fecha: '5 de noviembre de 2026',
     cambios: [

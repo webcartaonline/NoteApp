@@ -441,9 +441,10 @@ function mdCellOut(t, cell) {
   return body;
 }
 // Exporta una lista de líneas MKD (sheet.lines) a un texto en Markdown estándar.
-function mdExportText(lines) {
+// nc + bi: para exportar el interior de un copiable (sin copiables en la frase, con sus líneas ya clasificadas).
+function mdExportText(lines, nc, bi0) {
   if (!Array.isArray(lines) || !lines.length) return '';
-  const bi = blockInfo(lines), n = lines.length, out = [];
+  const bi = bi0 || blockInfo(lines), n = lines.length, out = [];
   let i = 0, prevB = null;
   const pushBlank = () => { if (out.length) out.push(''); };
   const quoteSep = lvl => Array.from({ length: Math.max(1, lvl) }, () => '>').join(' ');
@@ -478,8 +479,20 @@ function mdExportText(lines) {
     const joined = prevB && (prevB.kind === 'ul' || prevB.kind === 'ol') && (b.kind === 'ul' || b.kind === 'ol');
     const quoteRun = prevB && prevB.kind === 'quote' && b.kind === 'quote' && !b.first;
     if (!joined) { if (quoteRun) out.push(quoteSep(Math.max(b.lvl, prevB.lvl))); else pushBlank(); }
-    out.push(mdOneLine(lines[i].text, b));
+    out.push(mdOneLine(lines[i].text, b, nc));
     prevB = b; i++;
   }
   return out.join('\n');
 }
+// ===== Menú de copiar de lo copiable: «Copiar Markdown» o «Copiado literal» =====
+// Quita las líneas vacías del principio y del final.
+const trimLines = a => { a = a.slice(); while (a.length > 1 && !a[0].trim()) a.shift(); while (a.length > 1 && !a[a.length - 1].trim()) a.pop(); return a; };
+// Línea o bloque copiable ('x' / ''): md = su contenido en Markdown (igual que al exportar, menciones con su valor);
+// lit = el texto tal cual está escrito entre las comillas, con todos sus símbolos.
+function copyBlockTexts(lines, bi, b) {
+  const inn = copyInner(lines, bi, b), lit = [];
+  for (let k = b.from; k <= b.to; k++) { const bk = bi[k], t = String(lines[k].text || ''); lit.push(t.slice(bk.start, Math.max(bk.start, bk.end))); }
+  return { md: trimLines(mdExportText(inn.map(x => ({ text: x.text })), true, inn).split('\n')).join('\n'), lit: trimLines(lit).join('\n') };
+}
+// Copiable en una frase o celda copiable: el trozo de texto entre a y b.
+const copyRangeTexts = (t, a, b) => ({ md: mdSegsOut(cleanSegs(t, a, b, true), false), lit: t.slice(a, b) });

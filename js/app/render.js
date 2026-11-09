@@ -133,6 +133,7 @@ NoteApp.partes.push(Base => class extends Base {
     };
     Object.assign(v, this.confirmVals(s)); // ventana de confirmación al eliminar
     Object.assign(v, this.novVals(s)); // ventana de novedades tras una actualización (js/app/novedades.js)
+    Object.assign(v, this.calcVals(s)); // calculadora rápida con historial (js/app/calculadora.js)
     if (dg && sheet) Object.assign(v, this.dgVals(s, sheet)); // lienzo del diagrama
     v.ui = v; // los componentes reciben todos estos valores con dc-props="{{ ui }}"
     return v;

@@ -28,6 +28,7 @@
     'mensajes',
     'confirmar',
     'novedades',
+    'calculadora',
     'diagrama'
   ];
   const ruta = n => 'componentes/' + n + '/' + n + '.html';

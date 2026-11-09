@@ -1,5 +1,6 @@
 <!-- Componente "confirmar" de NoteApp. Ventana emergente para confirmar antes de eliminar una nota o una hoja,
-     o para preguntar si se pasan las notas del navegador a una carpeta vacía (confirmFolder).
+     para preguntar si se pasan las notas del navegador a una carpeta vacía (confirmFolder) o para elegir cómo
+     copiar algo copiable: «Copiar Markdown» o «Copiado literal» (confirmCopy).
      Difumina (blur) el resto de la app mientras está abierta. Clic fuera o Esc = cancelar.
      Los estilos fijos están en confirmar.css; los valores {{ }} vienen de renderVals() (js/app/render.js)
      y la lógica de js/app/confirmar.js. -->
@@ -15,6 +16,9 @@
             <sc-if value="{{ confirmFolder }}" hint-placeholder-val="{{ false }}">
               <span class="confirmar-icono confirmar-icono-verde"><span class="confirmar-icono-carpeta"></span></span>
             </sc-if>
+            <sc-if value="{{ confirmCopy }}" hint-placeholder-val="{{ false }}">
+              <span class="confirmar-icono confirmar-icono-verde"><span class="confirmar-icono-copiar"></span></span>
+            </sc-if>
             <span id="confirmar-titulo" class="confirmar-titulo">{{ confirmTitle }}</span>
           </div>
           <div class="confirmar-nombre-caja">
@@ -27,6 +31,13 @@
           <div class="confirmar-botones">
             <button data-confirmar="cancelar" onClick="{{ confirmCancel }}" class="confirmar-boton confirmar-cancelar">Cancelar</button>
             <button onClick="{{ confirmOk }}" class="confirmar-boton confirmar-eliminar">Eliminar</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ confirmCopy }}" hint-placeholder-val="{{ false }}">
+          <div class="confirmar-botones">
+            <button data-confirmar="md" onClick="{{ confirmMd }}" class="confirmar-boton confirmar-aceptar">Copiar Markdown</button>
+            <button data-confirmar="lit" onClick="{{ confirmLit }}" class="confirmar-boton confirmar-aceptar">Copiado literal</button>
+            <button data-confirmar="cancelar" onClick="{{ confirmCancel }}" class="confirmar-boton confirmar-cancelar confirmar-ancho">Cancelar</button>
           </div>
         </sc-if>
         <sc-if value="{{ confirmFolder }}" hint-placeholder-val="{{ false }}">

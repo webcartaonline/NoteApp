@@ -161,3 +161,12 @@
 .confirmar-ancho {
   grid-column: 1 / -1;
 }
+
+/* Ventana de copiar (algo copiable): icono de copiar verde y dos botones verdes */
+.confirmar-icono-copiar {
+  width: 15px;
+  height: 15px;
+  background: #3fa63f;
+  mask: url(../../assets/clon.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/clon.svg) center / contain no-repeat;
+}
