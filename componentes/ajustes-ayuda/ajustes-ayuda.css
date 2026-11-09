@@ -1,0 +1,284 @@
+/* Componente "ajustes-ayuda": guías de la Ayuda dentro del panel gris (#262626) de Ajustes.
+   El texto y los ejemplos se dibujan con el componente "lineas" (el mismo de las notas). La caja «Se ve así»
+   usa el gris de las hojas (#333) para que el ejemplo se vea igual que en una nota. */
+
+.ajustes-ayuda {
+  max-width: 860px;
+  padding: 30px 34px 26px;
+}
+
+/* ===== Cabecera de la sección ===== */
+.ajustes-ayuda-cabeza {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 22px;
+}
+
+.ajustes-ayuda-titulo {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.ajustes-ayuda-intro {
+  max-width: 680px;
+  font-size: 15.5px;
+  line-height: 23px;
+  color: #b0b0b0;
+  text-wrap: pretty;
+}
+
+/* Índice: un botón por tema, lleva hasta él */
+.ajustes-ayuda-indice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.ajustes-ayuda-indice-boton {
+  padding: 5px 11px;
+  border: 0;
+  border-radius: 999px;
+  background: #303030;
+  color: #cfcfcf;
+  font: inherit;
+  font-size: 13px;
+  line-height: 18px;
+  cursor: pointer;
+  transition: background-color .15s, color .15s;
+}
+.ajustes-ayuda-indice-boton:hover {
+  background: #3a3a3a !important;
+  color: #fff !important;
+}
+
+/* ===== Cada tema ===== */
+.ajustes-ayuda-tema {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 0 26px;
+  border-top: 1px solid #333;
+  scroll-margin-top: 12px;
+}
+
+.ajustes-ayuda-tema-cabeza {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.ajustes-ayuda-tema-icono {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: rgba(0,128,0,.18);
+}
+
+.ajustes-ayuda-tema-icono-in {
+  width: 17px;
+  height: 17px;
+  background: #3fa63f;
+}
+
+.ajustes-ayuda-tema-titulo {
+  font-size: 19px;
+  font-weight: 600;
+}
+
+/* Texto del tema (líneas MKD con letra algo más pequeña y gris; js/app/ajustes-ayuda.js) */
+.ajustes-ayuda-texto {
+  max-width: 700px;
+}
+
+/* Ficha: datos de ejemplo de una entidad (nombre, fórmula, resultado…) */
+.ajustes-ayuda-ficha {
+  display: flex;
+  flex-direction: column;
+  max-width: 520px;
+  padding: 4px 0;
+  border-radius: 10px;
+  background: #1e1e1e;
+}
+
+.ajustes-ayuda-ficha-fila {
+  display: grid;
+  grid-template-columns: 150px minmax(0,1fr);
+  gap: 12px;
+  padding: 7px 14px;
+  font-size: 14px;
+  line-height: 20px;
+}
+.ajustes-ayuda-ficha-fila + .ajustes-ayuda-ficha-fila {
+  box-shadow: inset 0 1px 0 #2a2a2a;
+}
+
+.ajustes-ayuda-ficha-k {
+  color: #8a8a8a;
+}
+
+.ajustes-ayuda-ficha-v {
+  color: #e6e6e6;
+  overflow-wrap: anywhere;
+}
+
+/* ===== Ejemplo: «Escribes» (texto tal cual) y «Se ve así» (resultado) ===== */
+.ajustes-ayuda-ejemplo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 8px;
+}
+
+.ajustes-ayuda-ej-caja {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ajustes-ayuda-ej-escribes {
+  background: #1a1a1a;
+}
+
+.ajustes-ayuda-ej-ves {
+  background: #333;
+}
+
+.ajustes-ayuda-ej-etiqueta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 32px;
+  padding: 6px 8px 0 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #7a7a7a;
+}
+
+.ajustes-ayuda-copiar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+.ajustes-ayuda-copiar:hover {
+  background: #2a2a2a !important;
+}
+.ajustes-ayuda-copiar:hover .ajustes-ayuda-copiar-icono {
+  filter: brightness(1.6);
+}
+
+.ajustes-ayuda-copiar-icono {
+  width: 13px;
+  height: 13px;
+  mask: url(../../assets/clon.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/clon.svg) center / contain no-repeat;
+}
+
+/* Texto tal cual (como en la vista sucia) */
+.ajustes-ayuda-crudo {
+  padding: 6px 14px 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13.5px;
+  line-height: 22px;
+  color: #d6d6d6;
+  user-select: text;
+}
+
+.ajustes-ayuda-crudo-linea {
+  min-height: 22px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Resultado (como en la vista limpia) */
+.ajustes-ayuda-vista {
+  padding: 6px 14px 14px;
+  overflow-wrap: anywhere;
+}
+
+/* Las imágenes de los ejemplos, más pequeñas que en una nota */
+.ajustes-ayuda-vista .lineas-imagen {
+  max-height: 96px;
+}
+
+/* Un símbolo entre comillas invertidas (`---:`) no se parte en dos líneas */
+.ajustes-ayuda-texto .lineas-codigo,
+.ajustes-ayuda-nota .lineas-codigo {
+  white-space: nowrap;
+}
+
+/* Truco (anotación con la raya verde) */
+.ajustes-ayuda-nota {
+  max-width: 700px;
+}
+
+/* ===== Pie: ir a la siguiente sección ===== */
+.ajustes-ayuda-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 22px;
+  border-top: 1px solid #333;
+}
+
+.ajustes-ayuda-pie-texto {
+  font-size: 13.5px;
+  color: #7a7a7a;
+}
+
+.ajustes-ayuda-sig {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px 0 16px;
+  border: 0;
+  border-radius: 10px;
+  background: #2f6f2f;
+  color: #fff;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color .15s;
+}
+.ajustes-ayuda-sig:hover {
+  background: #367d36 !important;
+}
+
+.ajustes-ayuda-sig-icono {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  mask: url(../../assets/angulo-pequeno-derecho.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/angulo-pequeno-derecho.svg) center / contain no-repeat;
+}
+
+@media (max-width: 699px) {
+  .ajustes-ayuda {
+    padding: 20px 16px 20px;
+  }
+  .ajustes-ayuda-titulo {
+    font-size: 22px;
+  }
+  .ajustes-ayuda-ficha-fila {
+    grid-template-columns: 110px minmax(0,1fr);
+  }
+}

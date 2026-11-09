@@ -1,0 +1,52 @@
+<!-- Componente "ajustes" de NoteApp. Página de Ajustes: ocupa toda la pantalla, encima de la app.
+     Arriba a la izquierda, el nombre del menú elegido; arriba a la derecha, sus secciones y el botón de cerrar.
+     A la izquierda, los menús (cada uno con su icono, título y descripción); a la derecha, el panel gris con el
+     contenido de la sección elegida (componentes ajustes-ayuda y ajustes-actualizaciones).
+     En el móvil se ve una parte cada vez: primero los menús y, al elegir uno, su contenido (con una flecha para volver).
+     Se cierra con la X o con Esc. Los estilos fijos están en ajustes.css; los valores {{ }} vienen de renderVals()
+     (js/app/render.js) y la lógica de js/app/ajustes.js. -->
+<x-dc>
+  <sc-if value="{{ ajOn }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" aria-labelledby="ajustes-titulo" class="ajustes-pagina {{ ajVista }}">
+
+      <!-- Cabecera: título (menú elegido), secciones del menú y cerrar -->
+      <div class="ajustes-cabeza">
+        <button onClick="{{ ajVolver }}" aria-label="Volver a los menús de ajustes" title="Volver" class="ajustes-volver"><span class="ajustes-volver-icono"></span></button>
+        <span id="ajustes-titulo" class="ajustes-titulo"><span class="ajustes-titulo-menu">{{ ajTitulo }}</span><span class="ajustes-titulo-ajustes">Ajustes</span></span>
+        <div role="tablist" aria-label="Secciones" class="ajustes-secciones">
+          <sc-for list="{{ ajSecs }}" as="t" hint-placeholder-count="2">
+            <button role="tab" aria-selected="{{ t.on }}" onClick="{{ t.pick }}" class="ajustes-seccion {{ t.cls }}">{{ t.txt }}</button>
+          </sc-for>
+        </div>
+        <button onClick="{{ ajCerrar }}" aria-label="Cerrar ajustes" title="Cerrar (Esc)" class="ajustes-cerrar"><span class="ajustes-x ajustes-x-1"></span><span class="ajustes-x ajustes-x-2"></span></button>
+      </div>
+
+      <!-- Menús. El icono de cada uno va donde el diseño tiene el círculo. -->
+      <nav aria-label="Menús de ajustes" class="ajustes-menu">
+        <sc-for list="{{ ajMenus }}" as="m" hint-placeholder-count="5">
+          <button onClick="{{ m.pick }}" aria-current="{{ m.cur }}" class="ajustes-item {{ m.cls }}">
+            <span class="ajustes-item-icono" style="mask:{{ m.ic }};-webkit-mask:{{ m.ic }};"></span>
+            <span class="ajustes-item-textos">
+              <span class="ajustes-item-nombre">{{ m.nombre }}</span>
+              <span class="ajustes-item-desc">{{ m.desc }}</span>
+            </span>
+          </button>
+        </sc-for>
+      </nav>
+
+      <!-- Panel con el contenido de la sección elegida -->
+      <div ref="{{ ajScrollRef }}" data-scroll="" class="ajustes-panel">
+        <sc-if value="{{ ajEsAyuda }}" hint-placeholder-val="{{ true }}"><dc-import name="ajustes-ayuda" dc-props="{{ ui }}"></dc-import></sc-if>
+        <sc-if value="{{ ajEsAct }}" hint-placeholder-val="{{ false }}"><dc-import name="ajustes-actualizaciones" dc-props="{{ ui }}"></dc-import></sc-if>
+        <sc-if value="{{ ajPronto }}" hint-placeholder-val="{{ false }}">
+          <div class="ajustes-pronto">
+            <span class="ajustes-pronto-icono"><span class="ajustes-pronto-icono-in" style="mask:{{ ajProntoIc }};-webkit-mask:{{ ajProntoIc }};"></span></span>
+            <span class="ajustes-pronto-titulo">{{ ajTitulo }}</span>
+            <span class="ajustes-pronto-texto">{{ ajProntoTxt }}</span>
+            <span class="ajustes-pronto-chip">Próximamente</span>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</x-dc>

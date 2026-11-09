@@ -41,6 +41,9 @@
 <link rel="stylesheet" href="componentes/confirmar/confirmar.css">
 <link rel="stylesheet" href="componentes/novedades/novedades.css">
 <link rel="stylesheet" href="componentes/calculadora/calculadora.css">
+<link rel="stylesheet" href="componentes/ajustes/ajustes.css">
+<link rel="stylesheet" href="componentes/ajustes-ayuda/ajustes-ayuda.css">
+<link rel="stylesheet" href="componentes/ajustes-actualizaciones/ajustes-actualizaciones.css">
 <link rel="stylesheet" href="componentes/diagrama/diagrama.css">
 <script>if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));</script>
 <!-- Arranque: descarga los componentes (carpeta componentes/) y luego el motor (support.js) -->
@@ -69,6 +72,7 @@
     </sc-if>
   </main>
   <dc-import name="mensajes" dc-props="{{ ui }}"></dc-import>
+  <dc-import name="ajustes" dc-props="{{ ui }}"></dc-import>
   <dc-import name="calculadora" dc-props="{{ ui }}"></dc-import>
   <dc-import name="confirmar" dc-props="{{ ui }}"></dc-import>
   <dc-import name="novedades" dc-props="{{ ui }}"></dc-import>
@@ -101,6 +105,9 @@ const Component = NoteApp.crearComponente(DCLogic);
 <script src="js/app/confirmar.js"></script>
 <script src="js/app/novedades.js"></script>
 <script src="js/app/calculadora.js"></script>
+<script src="js/app/ajustes.js"></script>
+<script src="js/app/ajustes-ayuda.js"></script>
+<script src="js/app/ajustes-actualizaciones.js"></script>
 <script src="js/app/lineas.js"></script>
 <script src="js/app/diagrama.js"></script>
 <script src="js/app/render.js"></script>

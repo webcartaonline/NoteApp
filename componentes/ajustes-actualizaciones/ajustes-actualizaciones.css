@@ -1,0 +1,303 @@
+/* Componente "ajustes-actualizaciones": versión actual e historial de versiones, dentro del panel gris (#262626)
+   de Ajustes. Las tarjetas de cambios siguen el estilo de la ventana de novedades. */
+
+.ajustes-act {
+  max-width: 820px;
+  padding: 30px 34px 30px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Versión actual ===== */
+.ajustes-act-tarjeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 18px;
+  padding: 18px 18px 18px 18px;
+  border-radius: 14px;
+  background: #1e1e1e;
+}
+
+.ajustes-act-logo {
+  flex: none;
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+}
+
+.ajustes-act-tarjeta-textos {
+  flex: 1 1 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ajustes-act-etiqueta {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #7a7a7a;
+}
+
+.ajustes-act-version {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.ajustes-act-fecha {
+  font-size: 14px;
+  color: #a6a6a6;
+}
+
+.ajustes-act-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ajustes-act-boton {
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  background: #2f2f2f;
+  color: #fff;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: background-color .15s, opacity .15s;
+}
+.ajustes-act-boton:hover {
+  background: #3a3a3a !important;
+}
+.ajustes-act-boton:focus-visible {
+  box-shadow: 0 0 0 2px #1e1e1e, 0 0 0 4px #6a6a6a;
+}
+.ajustes-act-boton:disabled {
+  opacity: .6;
+  cursor: default;
+}
+
+/* Botón verde: «Actualizar ahora» (y «Buscar» mientras no se ha comprobado) */
+.ajustes-act-boton-nueva,
+.ajustes-act-boton-verde {
+  background: #2f6f2f;
+}
+.ajustes-act-boton-nueva:hover,
+.ajustes-act-boton-verde:hover {
+  background: #367d36 !important;
+}
+
+/* Resultado de la comprobación */
+.ajustes-act-estado {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-top: 12px;
+  padding: 0 4px;
+  font-size: 14px;
+  line-height: 20px;
+  color: #a6a6a6;
+  text-wrap: pretty;
+}
+
+.ajustes-act-punto {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: #5a5a5a;
+}
+
+.ajustes-act-estado-ok { color: #cfcfcf; }
+.ajustes-act-estado-ok .ajustes-act-punto { background: #00a000; }
+.ajustes-act-estado-nueva { color: #fff; }
+.ajustes-act-estado-nueva .ajustes-act-punto { background: #1fe85c; box-shadow: 0 0 0 4px rgba(31,232,92,.18); }
+.ajustes-act-estado-aviso { color: #cfcfcf; }
+.ajustes-act-estado-aviso .ajustes-act-punto { background: #d08a00; }
+
+@keyframes ajustesActLatido { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+.ajustes-act-estado-buscando .ajustes-act-punto {
+  background: #8a8a8a;
+  animation: ajustesActLatido 1s ease-in-out infinite;
+}
+
+.ajustes-act-subtitulo {
+  margin: 30px 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: #3fa63f;
+}
+
+/* Lista de cambios (como en la ventana de novedades) */
+.ajustes-act-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ajustes-act-cambio {
+  display: flex;
+  gap: 11px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: #2f2f2f;
+}
+
+.ajustes-act-cambio-punto {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin-top: 8px;
+  border-radius: 50%;
+  background: #008000;
+}
+
+.ajustes-act-cambio-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.ajustes-act-cambio-titulo {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.ajustes-act-cambio-texto {
+  font-size: 14px;
+  line-height: 20px;
+  color: #a6a6a6;
+  text-wrap: pretty;
+  user-select: text;
+}
+
+.ajustes-act-pie {
+  margin-top: 22px;
+  padding: 0 4px;
+  font-size: 13px;
+  line-height: 19px;
+  color: #757575;
+  text-wrap: pretty;
+}
+
+/* ===== Historial ===== */
+.ajustes-act-cabeza {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 24px;
+}
+
+.ajustes-act-titulo {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.ajustes-act-intro {
+  font-size: 15.5px;
+  line-height: 23px;
+  color: #b0b0b0;
+  text-wrap: pretty;
+}
+
+.ajustes-act-hitos {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cada versión: marca a la izquierda unida a la siguiente por una línea */
+.ajustes-act-hito {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  padding-bottom: 28px;
+}
+.ajustes-act-hito::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 18px;
+  bottom: 0;
+  width: 2px;
+  background: #333;
+}
+.ajustes-act-hito:last-child::before {
+  display: none;
+}
+
+.ajustes-act-hito-marca {
+  flex: none;
+  position: relative;
+  width: 14px;
+  height: 14px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: #262626;
+  box-shadow: inset 0 0 0 2px #5a5a5a;
+}
+.ajustes-act-hito-marca-actual {
+  background: #008000;
+  box-shadow: 0 0 0 4px rgba(0,128,0,.22);
+}
+
+.ajustes-act-hito-cuerpo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ajustes-act-hito-cabeza {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.ajustes-act-hito-num {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.ajustes-act-chip {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(0,128,0,.2);
+  color: #3fa63f;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ajustes-act-hito-fecha {
+  font-size: 13.5px;
+  color: #8a8a8a;
+}
+
+@media (max-width: 699px) {
+  .ajustes-act {
+    padding: 20px 16px 24px;
+  }
+  .ajustes-act-version,
+  .ajustes-act-titulo {
+    font-size: 22px;
+  }
+  .ajustes-act-botones {
+    flex: 1 1 100%;
+  }
+  .ajustes-act-boton {
+    flex: 1;
+  }
+}

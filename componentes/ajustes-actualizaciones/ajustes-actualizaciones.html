@@ -1,0 +1,72 @@
+<!-- Componente "ajustes-actualizaciones" de NoteApp. Contenido del menú Actualizaciones de la página de Ajustes:
+     · Versión actual: la versión que se usa, su fecha, un botón para comprobar si hay otra más nueva y sus novedades.
+     · Historial: las 5 últimas versiones (la actual y 4 más), de la más nueva a la más antigua, con sus cambios.
+     Las versiones salen de NA_NOVEDADES (js/app/novedades.js); la lógica está en js/app/ajustes-actualizaciones.js. -->
+<x-dc>
+  <sc-if value="{{ actEsVersion }}" hint-placeholder-val="{{ true }}">
+    <div class="ajustes-act">
+      <div class="ajustes-act-tarjeta">
+        <img src="icons/icon.svg" alt="" class="ajustes-act-logo">
+        <div class="ajustes-act-tarjeta-textos">
+          <span class="ajustes-act-etiqueta">Versión que estás usando</span>
+          <span class="ajustes-act-version">NoteApp {{ actNum }}</span>
+          <span class="ajustes-act-fecha">{{ actFecha }}</span>
+        </div>
+        <div class="ajustes-act-botones">
+          <sc-if value="{{ actHayNueva }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ actRecargar }}" class="ajustes-act-boton ajustes-act-boton-nueva">Actualizar ahora</button>
+          </sc-if>
+          <button onClick="{{ actBuscar }}" disabled="{{ actBuscando }}" class="ajustes-act-boton {{ actBuscarCls }}">{{ actBotonTxt }}</button>
+        </div>
+      </div>
+      <div role="status" class="ajustes-act-estado {{ actEstadoCls }}"><span class="ajustes-act-punto"></span><span>{{ actEstadoTxt }}</span></div>
+
+      <span class="ajustes-act-subtitulo">Novedades de esta versión</span>
+      <div class="ajustes-act-lista">
+        <sc-for list="{{ actCambios }}" as="c" hint-placeholder-count="3">
+          <div class="ajustes-act-cambio">
+            <span class="ajustes-act-cambio-punto"></span>
+            <div class="ajustes-act-cambio-textos">
+              <span class="ajustes-act-cambio-titulo">{{ c.titulo }}</span>
+              <span class="ajustes-act-cambio-texto">{{ c.texto }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <span class="ajustes-act-pie">NoteApp se actualiza sola: cada vez que la abres con internet, carga la versión más reciente. Si la tienes abierta mucho tiempo, aquí puedes comprobar si ha salido otra. Al actualizar, tus notas no se tocan.</span>
+    </div>
+  </sc-if>
+  <sc-if value="{{ actEsHistorial }}" hint-placeholder-val="{{ false }}">
+    <div class="ajustes-act">
+      <div class="ajustes-act-cabeza">
+        <span class="ajustes-act-titulo">Historial de versiones</span>
+        <span class="ajustes-act-intro">La versión que usas y hasta 4 anteriores, de la más nueva a la más antigua, con lo que trajo cada una.</span>
+      </div>
+      <div class="ajustes-act-hitos">
+        <sc-for list="{{ actVersiones }}" as="h" hint-placeholder-count="3">
+          <div class="ajustes-act-hito">
+            <span class="ajustes-act-hito-marca {{ h.cls }}"></span>
+            <div class="ajustes-act-hito-cuerpo">
+              <div class="ajustes-act-hito-cabeza">
+                <span class="ajustes-act-hito-num">{{ h.nombre }}</span>
+                <sc-if value="{{ h.actual }}" hint-placeholder-val="{{ false }}"><span class="ajustes-act-chip">Actual</span></sc-if>
+                <span class="ajustes-act-hito-fecha">{{ h.fecha }} · {{ h.cuantos }}</span>
+              </div>
+              <div class="ajustes-act-lista">
+                <sc-for list="{{ h.cambios }}" as="c" hint-placeholder-count="2">
+                  <div class="ajustes-act-cambio">
+                    <span class="ajustes-act-cambio-punto"></span>
+                    <div class="ajustes-act-cambio-textos">
+                      <span class="ajustes-act-cambio-titulo">{{ c.titulo }}</span>
+                      <span class="ajustes-act-cambio-texto">{{ c.texto }}</span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+</x-dc>

@@ -1,14 +1,39 @@
 // Ventana de novedades (componente componentes/novedades/). Al abrir la app después de una actualización,
 // cuenta qué hay de nuevo. Sale una sola vez por versión en cada navegador (se recuerda en localStorage).
 //
-// CÓMO AÑADIR UNA VERSIÓN NUEVA:
-//   1. Añade un bloque AL PRINCIPIO de NA_NOVEDADES con un número de versión nuevo (que no se repita),
-//      la fecha y la lista de cambios (titulo + texto), escritos para cualquier persona, sin tecnicismos.
-//   2. Sube VERSION en sw.js.
+// Los textos de cada versión (titulo y texto de cada punto) se pueden cambiar aquí mismo antes de publicar.
+//
+// NÚMERO DE VERSIÓN (forma de numerar de Camilo): cuatro cifras, Global.Visual.Estructural.Correcciones (p. ej. 6.12.3.2).
+//   · Global: cambio grande, que afecta mucho al aspecto y al funcionamiento (p. ej. añadir la Personalización).
+//     Sube la global y las otras tres vuelven a 0: 6.12.3.2 → 7.0.0.0.
+//   · Visual: cada mejora que se ve (p. ej. otro color para una entidad, si el código apenas cambia): 6.12.3.2 → 6.13.3.0.
+//   · Estructural: cada mejora interna que no se ve (p. ej. otra forma de guardar los resultados): 6.12.3.2 → 6.12.4.0.
+//     Si una mejora visual también cambia bastante el funcionamiento, suben las dos: 6.12.3.2 → 6.13.4.0.
+//   · Correcciones: arreglar algo que no funcionaba, sin cambiar la idea: 6.13.4.0 → 6.13.4.1.
+//     Vuelve a 0 cada vez que sube la global, la visual o la estructural.
+//
+// CÓMO CAMBIAR LA VERSIÓN (Camilo publica él los cambios):
+//   1. Mira si la versión de arriba de NA_NOVEDADES ya está publicada: git show origin/main:js/app/novedades.js
+//      (la primera versión de ahí es la que tienen los usuarios).
+//   2. Si NO está publicada, no se crea otro bloque: se sube su número según el cambio nuevo y se añaden sus puntos a su
+//      lista. Así, de una publicada 6.12.3.2, una mejora da 6.13.4.0 y una corrección después, 6.13.4.1: al publicar,
+//      llega la 6.13.4.1 con todos sus puntos.
+//   3. Si YA está publicada, añade un bloque AL PRINCIPIO con el número nuevo, la fecha y los cambios (titulo + texto),
+//      escritos para cualquier persona, sin tecnicismos. Sube también VERSION en sw.js.
+//   4. Solo se guardan 5 versiones (la actual y 4 más): borra la más antigua. Si se olvida, se recorta sola (NOV_GUARDAR).
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
-    version: '1.2',
+    version: '3.0.0.0',
+    fecha: '9 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Página de Ajustes', texto: 'El botón del engranaje, abajo a la izquierda, abre los Ajustes. De momento tienen dos apartados, Ayuda y Actualizaciones; los demás llegarán poco a poco.' },
+      { titulo: 'Ayuda siempre a mano', texto: 'En Ajustes › Ayuda tienes guías con ejemplos de todo: el formato del texto, las entidades, la Agenda, el Diagrama, las herramientas y cómo se guarda todo. Puedes copiar cada ejemplo y pegarlo en una nota para probarlo.' },
+      { titulo: 'Tu versión y su historial', texto: 'En Ajustes › Actualizaciones ves qué versión usas, puedes comprobar si ha salido una más nueva y repasar las novedades de las últimas versiones.' }
+    ]
+  },
+  {
+    version: '2.0',
     fecha: '9 de noviembre de 2026',
     cambios: [
       { titulo: 'Calculadora rápida', texto: 'Nuevo botón con forma de calculadora en la barra de la izquierda. Elige qué quieres saber (un porcentaje, cuántos clientes necesitas, cuánto te falta para una meta, el IVA, despejar la x…), rellena los datos y verás el resultado, la fórmula y cada paso de la cuenta explicado.' },
@@ -39,6 +64,10 @@ const NA_NOVEDADES = [
     ]
   }
 ];
+// Solo se guardan las 5 últimas versiones: la actual y 4 más (son las que salen en Ajustes › Actualizaciones › Historial).
+// Si la lista tiene más, las más antiguas se quitan aquí.
+const NOV_GUARDAR = 5;
+NA_NOVEDADES.splice(NOV_GUARDAR);
 const NOV_KEY = 'noteapp:novedades:vista'; // última versión cuyas novedades ya se vieron en este navegador
 const NOV_MAX = 5;                          // como mucho se enseñan las 5 versiones más recientes
 // ¿Es la primera vez que se abre la app en este navegador (todavía no hay datos guardados)? Se mira al cargar

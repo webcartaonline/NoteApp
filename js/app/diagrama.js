@@ -285,7 +285,7 @@ NoteApp.partes.push(Base => class extends Base {
   }
   // Rueda: mover el lienzo. Ctrl + rueda (o pellizcar en el panel táctil): zoom.
   dgWheel(e) {
-    const s = this.state; if (s.mode !== 'diagrama' || s.confirm || s.calc) return;
+    const s = this.state; if (s.mode !== 'diagrama' || s.confirm || s.calc || s.ajustes) return;
     const el = this.dgEl(); if (!el || !el.contains(e.target)) return;
     if (e.target.closest && e.target.closest('[data-dg-scroll]')) return; // listas con su propio desplazamiento
     e.preventDefault();
@@ -317,7 +317,7 @@ NoteApp.partes.push(Base => class extends Base {
   // Teclado: Supr borrar · Ctrl+Z / Ctrl+Y deshacer y rehacer · Ctrl+D duplicar · Ctrl+A seleccionar todo ·
   // Intro editar el texto · flechas mover · Esc salir / quitar selección
   dgKey(e) {
-    const s = this.state; if (s.mode !== 'diagrama' || s.confirm || s.calc || e.defaultPrevented) return;
+    const s = this.state; if (s.mode !== 'diagrama' || s.confirm || s.calc || s.ajustes || e.defaultPrevented) return;
     const ae = document.activeElement, typing = ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable);
     const k = e.key, mod = e.ctrlKey || e.metaKey, sel = s.dsel, nodes = (sel && sel.nodes) || [];
     if (k === 'Escape') {

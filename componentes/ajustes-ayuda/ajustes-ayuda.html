@@ -1,0 +1,62 @@
+<!-- Componente "ajustes-ayuda" de NoteApp. Contenido del menú Ayuda de la página de Ajustes: una sección cada vez
+     (Primeros pasos, Campo MKD, Entidades…, se eligen arriba a la derecha). Cada sección tiene un título, una
+     introducción, un índice de temas y los temas. Cada tema puede llevar: texto, una ficha (datos de ejemplo),
+     un ejemplo «Escribes / Se ve así» (dibujado con el mismo motor MKD que las notas, con el componente lineas) y un truco.
+     El contenido está en js/app/ajustes-ayuda.js (lista AYUDA); los valores {{ }} vienen de renderVals(). -->
+<x-dc>
+  <div class="ajustes-ayuda">
+    <div class="ajustes-ayuda-cabeza">
+      <span class="ajustes-ayuda-titulo">{{ ayTitulo }}</span>
+      <span class="ajustes-ayuda-intro">{{ ayIntro }}</span>
+      <div class="ajustes-ayuda-indice">
+        <sc-for list="{{ ayIndice }}" as="x" hint-placeholder-count="4">
+          <button onClick="{{ x.ir }}" class="ajustes-ayuda-indice-boton">{{ x.t }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <sc-for list="{{ ayTemas }}" as="t" hint-placeholder-count="3">
+      <section id="{{ t.anchor }}" class="ajustes-ayuda-tema">
+        <div class="ajustes-ayuda-tema-cabeza">
+          <sc-if value="{{ t.hasIc }}" hint-placeholder-val="{{ false }}"><span class="ajustes-ayuda-tema-icono"><span class="ajustes-ayuda-tema-icono-in" style="mask:{{ t.ic }};-webkit-mask:{{ t.ic }};"></span></span></sc-if>
+          <span class="ajustes-ayuda-tema-titulo">{{ t.titulo }}</span>
+        </div>
+        <sc-if value="{{ t.hasP }}" hint-placeholder-val="{{ true }}">
+          <div class="ajustes-ayuda-texto"><dc-import name="lineas" dc-props="{{ ui }}" list="{{ t.p }}"></dc-import></div>
+        </sc-if>
+        <sc-if value="{{ t.hasFicha }}" hint-placeholder-val="{{ false }}">
+          <div class="ajustes-ayuda-ficha">
+            <sc-for list="{{ t.ficha }}" as="f" hint-placeholder-count="3">
+              <div class="ajustes-ayuda-ficha-fila"><span class="ajustes-ayuda-ficha-k">{{ f.k }}</span><span class="ajustes-ayuda-ficha-v">{{ f.v }}</span></div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ t.hasEj }}" hint-placeholder-val="{{ false }}">
+          <div class="ajustes-ayuda-ejemplo">
+            <div class="ajustes-ayuda-ej-caja ajustes-ayuda-ej-escribes">
+              <div class="ajustes-ayuda-ej-etiqueta">
+                <span>Escribes</span>
+                <button onClick="{{ t.copiar }}" aria-label="Copiar el ejemplo" title="{{ t.copyTitle }}" class="ajustes-ayuda-copiar"><span class="ajustes-ayuda-copiar-icono" style="background:{{ t.copyColor }};"></span></button>
+              </div>
+              <div class="ajustes-ayuda-crudo">
+                <sc-for list="{{ t.crudo }}" as="c" hint-placeholder-count="2"><div class="ajustes-ayuda-crudo-linea">{{ c.t }}</div></sc-for>
+              </div>
+            </div>
+            <div class="ajustes-ayuda-ej-caja ajustes-ayuda-ej-ves">
+              <div class="ajustes-ayuda-ej-etiqueta"><span>Se ve así</span></div>
+              <div class="ajustes-ayuda-vista"><dc-import name="lineas" dc-props="{{ ui }}" list="{{ t.vista }}"></dc-import></div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ t.hasNota }}" hint-placeholder-val="{{ false }}">
+          <div class="ajustes-ayuda-nota"><dc-import name="lineas" dc-props="{{ ui }}" list="{{ t.nota }}"></dc-import></div>
+        </sc-if>
+      </section>
+    </sc-for>
+    <div class="ajustes-ayuda-pie">
+      <span class="ajustes-ayuda-pie-texto">{{ ayPieTxt }}</span>
+      <sc-if value="{{ ayHaySig }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ aySig }}" class="ajustes-ayuda-sig">{{ aySigTxt }}<span class="ajustes-ayuda-sig-icono"></span></button>
+      </sc-if>
+    </div>
+  </div>
+</x-dc>

@@ -29,6 +29,9 @@
     'confirmar',
     'novedades',
     'calculadora',
+    'ajustes',
+    'ajustes-ayuda',
+    'ajustes-actualizaciones',
     'diagrama'
   ];
   const ruta = n => 'componentes/' + n + '/' + n + '.html';

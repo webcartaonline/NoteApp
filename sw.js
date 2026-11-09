@@ -1,7 +1,7 @@
 // Service worker de NoteApp: permite instalar la app y abrirla sin conexión.
 // Siempre intenta cargar la versión más reciente; la copia guardada solo se usa sin conexión.
 // Si añades o quitas archivos de la app, actualiza la lista APP y sube el número de VERSION.
-const VERSION = 'noteapp-v22';
+const VERSION = 'noteapp-v23';
 const APP = [
   '/',
   '/index.html',
@@ -32,6 +32,9 @@ const APP = [
   '/js/app/confirmar.js',
   '/js/app/novedades.js',
   '/js/app/calculadora.js',
+  '/js/app/ajustes.js',
+  '/js/app/ajustes-ayuda.js',
+  '/js/app/ajustes-actualizaciones.js',
   '/js/app/lineas.js',
   '/js/app/cursor.js',
   '/js/app/diagrama.js',
@@ -82,6 +85,12 @@ const APP = [
   '/componentes/novedades/novedades.css',
   '/componentes/calculadora/calculadora.html',
   '/componentes/calculadora/calculadora.css',
+  '/componentes/ajustes/ajustes.html',
+  '/componentes/ajustes/ajustes.css',
+  '/componentes/ajustes-ayuda/ajustes-ayuda.html',
+  '/componentes/ajustes-ayuda/ajustes-ayuda.css',
+  '/componentes/ajustes-actualizaciones/ajustes-actualizaciones.html',
+  '/componentes/ajustes-actualizaciones/ajustes-actualizaciones.css',
   '/componentes/diagrama/diagrama.html',
   '/componentes/diagrama/diagrama.css',
   '/assets/agregar-activo.svg',
@@ -119,6 +128,11 @@ const APP = [
   '/assets/texto.svg',
   '/assets/novedades.svg',
   '/assets/calculadora.svg',
+  '/assets/ayuda.svg',
+  '/assets/sincronizacion.svg',
+  '/assets/seguridad.svg',
+  '/assets/personalizacion.svg',
+  '/assets/actualizaciones.svg',
   '/icons/apple-touch-icon.png',
   '/icons/favicon-32.png',
   '/icons/icon-192.png',
