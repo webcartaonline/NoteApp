@@ -29,7 +29,7 @@ const AYUDA = [
         'Una **nota** es como un cuaderno y sus **hojas** son las páginas. Las notas son las pestañas de arriba y las hojas, las de la barra gris.',
         '- El **+** de arriba crea una nota nueva y el de la barra gris, una hoja nueva.',
         '- **Doble clic** en una pestaña para cambiarle el nombre. Intro para terminar, Esc para cancelar.',
-        '- Al elegir una hoja salen dos flechas pequeñas a sus lados para moverla a la izquierda o a la derecha.',
+        '- Al elegir una nota o una hoja salen dos flechas pequeñas a sus lados para moverla a la izquierda o a la derecha.',
         '- El **punto gris** a la derecha de las hojas abre las opciones para eliminar la hoja o la nota. Antes te pide confirmación, porque no se puede deshacer.'
       ] },
       { t: 'Vista limpia y vista sucia', p: [
@@ -103,8 +103,17 @@ const AYUDA = [
         'Tres guiones `---` solos en una línea dibujan una línea que separa partes del texto. También vale `***`.'
       ], ej: ['Arriba', '---', 'Abajo'] },
       { t: 'Enlaces e imágenes', p: [
-        'Para un enlace, escribe el texto entre corchetes y, pegada, la dirección entre paréntesis. Para una imagen, lo mismo con una exclamación delante.'
-      ], ej: ['[Abrir Wikipedia](https://es.wikipedia.org)', '![Logo de NoteApp](icons/icon-192.png)'] },
+        'Para un enlace, escribe el texto entre corchetes y, pegada, la dirección entre paréntesis. Para una imagen, lo mismo con una exclamación delante.',
+        '**Pegar una imagen:** copia cualquier imagen (una captura de pantalla, una foto, una imagen de una web…) y pégala con Ctrl+V en la línea donde quieras. Sale en su propia línea y en el texto solo queda una referencia corta que empieza por `![Imagen](Imágenes/…)`.'
+      ], ej: ['[Abrir Wikipedia](https://es.wikipedia.org)', '![Logo de NoteApp](icons/icon-192.png)'],
+        nota: ['Las imágenes pegadas se guardan en el navegador y, si tienes una carpeta conectada, también en su carpeta «Imágenes». Si borras la línea, la imagen sigue en esa carpeta por si la necesitas.'] },
+      { t: 'Tamaño y recorte de las imágenes', p: [
+        'En la vista para editar, cada imagen se ve justo debajo de su línea. Haz clic en ella y aparecen unos puntos en sus bordes.',
+        '**Esquinas:** arrástralas para hacer la imagen más grande o más pequeña. Cambia de tamaño entera, sin deformarse ni recortarse.',
+        '**Lados** (izquierda, derecha, arriba y abajo): arrástralos hacia dentro para recortar esa parte de la imagen; hacia fuera, para recuperarla.',
+        'El tamaño y el recorte se apuntan al final de la dirección de la imagen, detrás de una almohadilla: `#w=320` es el ancho y `c=10,0,5,0` lo recortado de cada lado (izquierda, arriba, derecha y abajo, en tanto por ciento).'
+      ], ej: ['![Logo de NoteApp](icons/icon-192.png#w=120&c=15,15,15,15)'],
+        nota: ['Doble clic en la imagen: vuelve a su tamaño original, sin recorte.'] },
       { t: 'Tablas', ic: 'lista-de-tablas', p: [
         'Separa las columnas con barras verticales `|`. La segunda fila, hecha de guiones, separa los títulos del resto.',
         'Dentro de una celda funcionan la negrita, las menciones, las casillas, los copiables…'

@@ -149,6 +149,8 @@ NoteApp.partes.push(Base => class extends Base {
     if (!this._msel) return;
     const ae = document.activeElement; if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) return;
     const t = (e.clipboardData || window.clipboardData).getData('text/plain'); e.preventDefault(); this._pasted = true;
+    const files = t ? [] : imgFiles(e);
+    if (files.length) { this.replaceSel(files.map(f => { const im = imgNew(f); im.ready.then(() => this.fsQueue()); return imgLine(im.name); }).join('\n')); return; }
     this.replaceSel(t || '');
   }
   selKey(e) {

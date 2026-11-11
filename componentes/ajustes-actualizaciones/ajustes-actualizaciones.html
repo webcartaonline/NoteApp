@@ -1,10 +1,11 @@
 <!-- Componente "ajustes-actualizaciones" de NoteApp. Contenido del menú Actualizaciones de la página de Ajustes:
-     · Versión actual: la versión que se usa, su fecha, un botón para comprobar si hay otra más nueva y sus novedades.
+     · Versión actual: la versión que se usa, su fecha, un botón para comprobar si hay otra más nueva y sus novedades,
+       a la izquierda, con una raya de color por tipo (visual, estructural, corrección), y la leyenda de los colores a la derecha.
      · Historial: las 5 últimas versiones (la actual y 4 más), de la más nueva a la más antigua, con sus cambios.
      Las versiones salen de NA_NOVEDADES (js/app/novedades.js); la lógica está en js/app/ajustes-actualizaciones.js. -->
 <x-dc>
   <sc-if value="{{ actEsVersion }}" hint-placeholder-val="{{ true }}">
-    <div class="ajustes-act">
+    <div class="ajustes-act ajustes-act-ancha">
       <div class="ajustes-act-tarjeta">
         <img src="icons/icon.svg" alt="" class="ajustes-act-logo">
         <div class="ajustes-act-tarjeta-textos">
@@ -22,16 +23,40 @@
       <div role="status" class="ajustes-act-estado {{ actEstadoCls }}"><span class="ajustes-act-punto"></span><span>{{ actEstadoTxt }}</span></div>
 
       <span class="ajustes-act-subtitulo">Novedades de esta versión</span>
-      <div class="ajustes-act-lista">
-        <sc-for list="{{ actCambios }}" as="c" hint-placeholder-count="3">
-          <div class="ajustes-act-cambio">
-            <span class="ajustes-act-cambio-punto"></span>
-            <div class="ajustes-act-cambio-textos">
-              <span class="ajustes-act-cambio-titulo">{{ c.titulo }}</span>
-              <span class="ajustes-act-cambio-texto">{{ c.texto }}</span>
+      <div class="ajustes-act-novedades">
+        <div class="ajustes-act-lista">
+          <sc-for list="{{ actLista }}" as="c" hint-placeholder-count="3">
+            <div class="ajustes-act-cambio">
+              <span class="ajustes-act-rayas"><sc-for list="{{ c.rayas }}" as="r" hint-placeholder-count="1"><span class="ajustes-act-raya {{ r.cls }}"></span></sc-for></span>
+              <div class="ajustes-act-cambio-textos">
+                <sc-if value="{{ c.varios }}" hint-placeholder-val="{{ false }}">
+                  <span class="ajustes-act-chips"><sc-for list="{{ c.chips }}" as="k" hint-placeholder-count="2"><span class="ajustes-act-chip-tipo {{ k.cls }}"><span class="ajustes-act-chip-punto"></span>{{ k.nombre }}</span></sc-for></span>
+                </sc-if>
+                <span class="ajustes-act-cambio-titulo">{{ c.titulo }}</span>
+                <span class="ajustes-act-cambio-texto">{{ c.texto }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <aside class="ajustes-act-leyenda" aria-label="Qué significa cada color">
+          <span class="ajustes-act-leyenda-titulo">Qué significa cada color</span>
+          <sc-for list="{{ actLeyenda }}" as="l" hint-placeholder-count="3">
+            <div class="ajustes-act-leyenda-fila {{ l.apagado }}">
+              <span class="ajustes-act-leyenda-raya {{ l.cls }}"></span>
+              <div class="ajustes-act-leyenda-textos">
+                <span class="ajustes-act-leyenda-nombre">{{ l.nombre }}<span class="ajustes-act-leyenda-num">{{ l.cuantos }}</span></span>
+                <span class="ajustes-act-leyenda-desc">{{ l.desc }}</span>
+              </div>
+            </div>
+          </sc-for>
+          <div class="ajustes-act-leyenda-fila ajustes-act-leyenda-varios">
+            <span class="ajustes-act-rayas ajustes-act-leyenda-rayas"><span class="ajustes-act-raya ajustes-act-tipo-visual"></span><span class="ajustes-act-raya ajustes-act-tipo-estructural"></span></span>
+            <div class="ajustes-act-leyenda-textos">
+              <span class="ajustes-act-leyenda-nombre">Varias rayas</span>
+              <span class="ajustes-act-leyenda-desc">La mejora es de varios tipos a la vez: lleva una raya por cada tipo y sus nombres encima del título.</span>
             </div>
           </div>
-        </sc-for>
+        </aside>
       </div>
       <span class="ajustes-act-pie">NoteApp se actualiza sola: cada vez que la abres con internet, carga la versión más reciente. Si la tienes abierta mucho tiempo, aquí puedes comprobar si ha salido otra. Al actualizar, tus notas no se tocan.</span>
     </div>
@@ -55,8 +80,11 @@
               <div class="ajustes-act-lista">
                 <sc-for list="{{ h.cambios }}" as="c" hint-placeholder-count="2">
                   <div class="ajustes-act-cambio">
-                    <span class="ajustes-act-cambio-punto"></span>
+                    <span class="ajustes-act-rayas"><sc-for list="{{ c.rayas }}" as="r" hint-placeholder-count="1"><span class="ajustes-act-raya {{ r.cls }}"></span></sc-for></span>
                     <div class="ajustes-act-cambio-textos">
+                      <sc-if value="{{ c.tieneTipo }}" hint-placeholder-val="{{ false }}">
+                        <span class="ajustes-act-chips"><sc-for list="{{ c.chips }}" as="k" hint-placeholder-count="1"><span class="ajustes-act-chip-tipo {{ k.cls }}"><span class="ajustes-act-chip-punto"></span>{{ k.nombre }}</span></sc-for></span>
+                      </sc-if>
                       <span class="ajustes-act-cambio-titulo">{{ c.titulo }}</span>
                       <span class="ajustes-act-cambio-texto">{{ c.texto }}</span>
                     </div>

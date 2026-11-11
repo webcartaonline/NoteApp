@@ -29,17 +29,50 @@
 .cabecera-caja {
   display: flex;
   align-items: center;
-  gap: clamp(13px,2.8vw,53px);
+  gap: clamp(18px,2.8vw,53px); /* mínimo 18 px: cabe la flecha de mover entre dos pestañas */
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
+  padding: 0 16px;  /* sitio para las flechas de la primera y la última pestaña (si no, el desplazamiento las corta)… */
+  margin: 0 -16px;  /* …sin mover nada de sitio */
 }
 
 .cabecera-caja-2 {
+  position: relative;
   display: inline-grid;
   flex: none;
   font-size: 16px;
   line-height: 21px;
+  scroll-margin-inline: 18px; /* al mover la nota, deja ver también sus flechas */
+}
+
+/* Flechas para mover la nota elegida (como las de las hojas, en barra-hojas.css). Van por fuera del nombre,
+   en el hueco entre pestañas, para que el resto de pestañas no se muevan de sitio. */
+.cabecera-mover-izquierda,
+.cabecera-mover-derecha {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 20px;
+  margin-top: -10px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: #8a8a8a;
+  mask: url(../../assets/angulo-pequeno-derecho.svg) center / 11px no-repeat;
+  -webkit-mask: url(../../assets/angulo-pequeno-derecho.svg) center / 11px no-repeat;
+  transition: background-color .15s;
+}
+.cabecera-mover-izquierda {
+  left: -15px;
+  transform: rotate(180deg);
+}
+.cabecera-mover-derecha {
+  right: -15px;
+}
+.cabecera-mover-izquierda:hover,
+.cabecera-mover-derecha:hover {
+  background: #fff !important;
 }
 
 .cabecera-texto {

@@ -130,7 +130,7 @@
 }
 
 .ajustes-act-subtitulo {
-  margin: 30px 0 10px;
+  margin: 30px 0 14px;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: .04em;
@@ -147,19 +147,136 @@
 
 .ajustes-act-cambio {
   display: flex;
-  gap: 11px;
-  padding: 11px 14px;
+  gap: 12px;
+  padding: 12px 14px 12px 12px;
   border-radius: 10px;
   background: #2f2f2f;
 }
 
-.ajustes-act-cambio-punto {
+/* ===== Tipos de novedad: un color por tipo (ACT_TIPOS en js/app/ajustes-actualizaciones.js) ===== */
+.ajustes-act-tipo-visual      { --tipo: #3fb950; --tipo-fondo: rgba(63,185,80,.15); }
+.ajustes-act-tipo-estructural { --tipo: #58a6ff; --tipo-fondo: rgba(88,166,255,.15); }
+.ajustes-act-tipo-correccion  { --tipo: #e3a33b; --tipo-fondo: rgba(227,163,59,.15); }
+.ajustes-act-tipo-otros       { --tipo: #5a5a5a; --tipo-fondo: rgba(255,255,255,.06); }
+
+/* Rayas a la izquierda de cada novedad: una por tipo (una novedad de dos tipos lleva dos rayas de colores) */
+.ajustes-act-rayas {
   flex: none;
-  width: 6px;
-  height: 6px;
-  margin-top: 8px;
+  align-self: stretch;
+  display: flex;
+  gap: 3px;
+}
+.ajustes-act-raya {
+  width: 4px;
+  border-radius: 2px;
+  background: var(--tipo);
+}
+
+/* Etiquetas de tipo (en las novedades de varios tipos y en el historial) */
+.ajustes-act-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+.ajustes-act-chip-tipo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 9px 2px 8px;
+  border-radius: 999px;
+  background: var(--tipo-fondo);
+  color: var(--tipo);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 17px;
+}
+.ajustes-act-chip-punto {
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: #008000;
+  background: var(--tipo);
+}
+
+/* Versión actual: lista de novedades a la izquierda y leyenda de colores a la derecha */
+.ajustes-act-ancha {
+  max-width: 1040px;
+}
+.ajustes-act-novedades {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  align-items: start;
+  gap: 18px;
+}
+
+.ajustes-act-leyenda {
+  position: sticky;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 16px 18px;
+  border-radius: 12px;
+  background: #1e1e1e;
+}
+.ajustes-act-leyenda-titulo {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #7a7a7a;
+}
+.ajustes-act-leyenda-fila {
+  display: flex;
+  gap: 11px;
+}
+.ajustes-act-leyenda-raya {
+  flex: none;
+  align-self: stretch;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--tipo);
+}
+.ajustes-act-leyenda-rayas {
+  min-height: 0;
+}
+.ajustes-act-leyenda-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.ajustes-act-leyenda-nombre {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #e6e6e6;
+}
+.ajustes-act-leyenda-num {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #333;
+  color: #b0b0b0;
+  font-size: 11.5px;
+  line-height: 17px;
+  text-align: center;
+}
+.ajustes-act-leyenda-desc {
+  font-size: 13px;
+  line-height: 18px;
+  color: #8a8a8a;
+  text-wrap: pretty;
+}
+/* Tipo que no tiene ninguna novedad en esta versión: se ve más apagado */
+.ajustes-act-leyenda-apagado {
+  opacity: .45;
+}
+.ajustes-act-leyenda-varios {
+  padding-top: 13px;
+  border-top: 1px solid #2c2c2c;
 }
 
 .ajustes-act-cambio-textos {
@@ -284,6 +401,26 @@
 .ajustes-act-hito-fecha {
   font-size: 13.5px;
   color: #8a8a8a;
+}
+
+/* Pantallas estrechas: la leyenda va encima de la lista, en dos columnas */
+@media (max-width: 899px) {
+  .ajustes-act-novedades {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ajustes-act-leyenda {
+    position: static;
+    order: -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 16px;
+  }
+  .ajustes-act-leyenda-titulo {
+    grid-column: 1 / -1;
+  }
+  .ajustes-act-leyenda-varios {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 699px) {

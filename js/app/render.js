@@ -10,7 +10,11 @@ NoteApp.partes.push(Base => class extends Base {
     RESOLVE = get;
     const dirty = !s.clean;
     const entList = sheet ? (sheet.entities || []) : [];
-    const tabs = s.notes.map(n => this.makeTab('note', n.id, n.name, n.id === s.activeNote, false));
+    const tabs = s.notes.map((n, i, all) => {
+      const t = this.makeTab('note', n.id, n.name, n.id === s.activeNote, false), on = n.id === s.activeNote && t.readOnly;
+      return { ...t, nid: n.id, canLeft: on && i > 0, canRight: on && i < all.length - 1,
+        noFocus: e => e.preventDefault(), moveLeft: () => this.moveNote(n.id, -1), moveRight: () => this.moveNote(n.id, 1) };
+    });
     const sheets = note ? note.sheets.map((x, i, all) => {
       const t = this.makeTab('sheet', x.id, x.name, x.id === note.activeSheet, true), on = x.id === note.activeSheet && t.readOnly;
       return { ...t, sid: x.id, canLeft: on && i > 0, canRight: on && i < all.length - 1,

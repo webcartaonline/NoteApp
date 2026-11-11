@@ -1,4 +1,4 @@
-<!-- Componente "cabecera" de NoteApp. Cabecera: título de la ventana (Notas / Agenda), pestañas de las notas y botón para añadir una nota.
+<!-- Componente "cabecera" de NoteApp. Cabecera: título de la ventana (Notas / Agenda / Diagrama), pestañas de las notas (la elegida, con flechas para moverla) y botón para añadir una nota.
      Los estilos fijos están en cabecera.css; los que cambian ({{ }}) siguen aquí.
      Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
 <x-dc>
@@ -11,7 +11,9 @@
     <nav class="cabecera-navegacion">
       <div class="cabecera-caja">
         <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
-          <div class="cabecera-caja-2">
+          <div data-note="{{ t.nid }}" class="cabecera-caja-2">
+            <sc-if value="{{ t.canLeft }}" hint-placeholder-val="{{ false }}"><button onMouseDown="{{ t.noFocus }}" onClick="{{ t.moveLeft }}" aria-label="Mover nota a la izquierda" title="Mover a la izquierda" class="cabecera-mover-izquierda"></button></sc-if>
+            <sc-if value="{{ t.canRight }}" hint-placeholder-val="{{ false }}"><button onMouseDown="{{ t.noFocus }}" onClick="{{ t.moveRight }}" aria-label="Mover nota a la derecha" title="Mover a la derecha" class="cabecera-mover-derecha"></button></sc-if>
             <span class="cabecera-texto" style="font-weight:{{ t.weight }};">{{ t.display }}</span>
             <input value="{{ t.text }}" readOnly="{{ t.readOnly }}" maxLength="22" spellCheck="false" title="Doble clic para editar" onDoubleClick="{{ t.onDbl }}" onChange="{{ t.onChange }}" onKeyDown="{{ t.onKey }}" onBlur="{{ t.onBlur }}" onMouseDown="{{ t.onDown }}" onClick="{{ t.onClick }}" class="cabecera-nombre" style="font:inherit;font-weight:{{ t.weight }};color:{{ t.color }};cursor:{{ t.cursor }};box-shadow:{{ t.underline }};">
           </div>

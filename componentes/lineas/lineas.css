@@ -124,6 +124,62 @@
   vertical-align: middle;
 }
 
+/* Imagen con tamaño y recorte (js/app/imagen-editor.js, imgView): el marco tiene el tamaño de lo que se ve,
+   el recorte esconde lo que sobra y la imagen se coloca dentro con porcentajes. */
+.lineas-img-marco {
+  position: relative;
+  max-width: 100%;
+  vertical-align: middle;
+  line-height: 0;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.lineas-img-recorte {
+  inset: 0;
+  overflow: hidden;
+  border-radius: 6px;
+}
+.lineas-img-recorte .lineas-imagen {
+  border-radius: 0;
+}
+
+/* Vista sucia: imágenes de la línea, debajo de su texto, con los puntos para cambiar el tamaño y recortar. */
+.lineas-img-lista {
+  margin-top: 8px;
+  line-height: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.lineas-img-lista .lineas-img-marco {
+  margin: 4px 12px 4px 0;
+  touch-action: none;
+}
+.lineas-img-punto {
+  position: absolute;
+  z-index: 2;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border: 2px solid #008000;
+  border-radius: 3px;
+  touch-action: none;
+}
+.lineas-img-punto:hover {
+  background: #1fe85c;
+}
+.lineas-img-p-nw { left: -6px; top: -6px; cursor: nwse-resize; }
+.lineas-img-p-ne { right: -6px; top: -6px; cursor: nesw-resize; }
+.lineas-img-p-se { right: -6px; bottom: -6px; cursor: nwse-resize; }
+.lineas-img-p-sw { left: -6px; bottom: -6px; cursor: nesw-resize; }
+/* Los de los lados (recortar) son rayas, para distinguirlos de las esquinas (tamaño). */
+.lineas-img-p-n, .lineas-img-p-s { left: 50%; width: 26px; height: 8px; margin-left: -13px; cursor: ns-resize; }
+.lineas-img-p-n { top: -4px; }
+.lineas-img-p-s { bottom: -4px; }
+.lineas-img-p-e, .lineas-img-p-w { top: 50%; width: 8px; height: 26px; margin-top: -13px; cursor: ew-resize; }
+.lineas-img-p-e { right: -4px; }
+.lineas-img-p-w { left: -4px; }
+
 .lineas-texto-4 {
   background: #1d2b1d;
   border-radius: 2px;

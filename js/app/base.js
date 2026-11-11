@@ -13,6 +13,7 @@ NoteApp.partes.push(Base => class extends Base {
       if (this.state.entMenu && !(e.target.closest && e.target.closest('[data-entmenu]'))) this.setState({ entMenu: null });
       if (this.state.copyMenu && !(e.target.closest && e.target.closest('[data-copymenu]'))) this.setState({ copyMenu: false });
       if (this._msel && !(e.target.closest && e.target.closest('[data-lid]'))) this._msel = null;
+      if (this.state.imgSel && !(e.target.closest && e.target.closest('[data-imged]'))) this.setState({ imgSel: null });
     };
     // Selección libre de texto entre varias líneas (arrastrar, Mayús+clic, Mayús+flechas, Ctrl+A)
     this._move = e => this.selMove(e);
@@ -26,6 +27,7 @@ NoteApp.partes.push(Base => class extends Base {
     document.addEventListener('mousedown', this._down, true);
     this._key = e => { if (this.state.novedades) { if (e.key === 'Escape') { e.preventDefault(); this.closeNovedades(); } return; } if (this.state.confirm) { if (e.key === 'Escape') { e.preventDefault(); this.closeConfirm(); } return; } if (this.state.calc) { if (e.key === 'Escape') { e.preventDefault(); this.calcEsc(); } return; } if (this.state.ajustes) { if (e.key === 'Escape') { e.preventDefault(); this.ajEsc(); } return; } if (this.selKey(e)) return; if (e.key === 'Escape' && (this.state.menu || this.state.entMenu || this.state.copyMenu)) this.setState({ menu: false, entMenu: null, copyMenu: false }); };
     document.addEventListener('keydown', this._key);
+    IMG_ON = () => this.setState({ imgTick: Date.now() });
     this._rev = NA_REV;
     this._naFlush = () => { clearTimeout(this._naT); naSave(this.state, this._rev); this.fsQueue(); };
     this._naPrev = this.state;

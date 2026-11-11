@@ -1,4 +1,4 @@
-// Pestañas de notas y hojas: seleccionar, mover, renombrar y copiar al portapapeles.
+// Pestañas de notas y hojas: seleccionar, mover (notas y hojas), renombrar y copiar al portapapeles.
 NoteApp.partes.push(Base => class extends Base {
   select(kind, id) {
     if (kind === 'note') this.setState({ activeNote: id, focusId: null, search: null });
@@ -12,6 +12,15 @@ NoteApp.partes.push(Base => class extends Base {
       const sh = n.sheets.slice(); [sh[k], sh[j]] = [sh[j], sh[k]];
       return { ...n, sheets: sh };
     }) }), () => { try { const el = document.querySelector('[data-sheet="' + id + '"]'); el && el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (_) {} });
+  }
+  // Igual que moveSheet, pero con las notas de la ventana visible (el orden se guarda también en la carpeta).
+  moveNote(id, dir) {
+    this.setState(s => {
+      const k = s.notes.findIndex(x => x.id === id), j = k + dir;
+      if (k < 0 || j < 0 || j >= s.notes.length) return { notes: s.notes };
+      const ns = s.notes.slice(); [ns[k], ns[j]] = [ns[j], ns[k]];
+      return { notes: ns };
+    }, () => { try { const el = document.querySelector('[data-note="' + id + '"]'); el && el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (_) {} });
   }
   makeTab(kind, id, name, active, isSheet) {
     const s = this.state;

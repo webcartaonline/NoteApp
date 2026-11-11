@@ -36,6 +36,19 @@ NoteApp.partes.push(Base => class extends Base {
       onBlur: () => this.setState(st => st.focusId === ln.id ? { focusId: null } : null),
       onPaste: e => {
         const t = (e.clipboardData || window.clipboardData).getData('text/plain');
+        // Imagen en el portapapeles (y ningún texto): se guarda aparte y en el texto queda ![Imagen](Imágenes/…).
+        const files = t ? [] : imgFiles(e);
+        if (files.length) {
+          e.preventDefault();
+          const ta = e.target, a = ta.selectionStart, b = ta.selectionEnd, before = ln.text.slice(0, a), after = ln.text.slice(b);
+          const refs = files.map(f => { const im = imgNew(f); im.ready.then(() => this.fsQueue()); return imgLine(im.name); });
+          // En una fila de tabla la imagen va dentro de la celda; en el resto, cada imagen en su propia línea
+          // (el texto de antes y el de después quedan en sus líneas) y el cursor pasa a la línea de debajo.
+          if (/^\s*\|/.test(before)) { const ins = refs.join(' '); return setL(lines.map(l => l.id === ln.id ? { ...l, text: before + ins + after } : l), ln.id, (before + ins).length); }
+          const parts = (before.trim() ? [before.replace(/\s+$/, '')] : []).concat(refs, [after.replace(/^\s+/, '')]);
+          const made = parts.map((p, k) => ({ id: k === 0 ? ln.id : uid('l'), text: p }));
+          return setL(lines.slice(0, idx).concat(made, lines.slice(idx + 1)), made[made.length - 1].id, 0);
+        }
         if (!/\n/.test(t)) return;
         e.preventDefault();
         const ta = e.target, a = ta.selectionStart, b = ta.selectionEnd;
@@ -130,6 +143,8 @@ NoteApp.partes.push(Base => class extends Base {
   mkdLines(src, entId, out) {
     const s = this.state, cleanV = s.clean || !!out;
     const blocks = cleanV ? blockInfo(src) : null;
+    // Vista sucia: las imágenes se dibujan debajo de su línea para poder cambiar su tamaño y recortarlas (no dentro del código).
+    const dbi = !cleanV && src.some(l => l.text.includes('![')) ? blockInfo(src) : null;
     // Búsqueda en el texto (barra superior del panel; no se aplica dentro de una entidad de texto).
     const query = entId ? '' : ((s.search && s.search.q) || '').trim().toLowerCase();
     if (!entId) this._matches = [];
@@ -161,7 +176,7 @@ NoteApp.partes.push(Base => class extends Base {
         : { ...v, isText: true, text: sg.text, color: sg.c ? '#008000' : sg.color || 'inherit', fw, fst, td };
       // _texto_: color principal (verde) también en el código de una frase y en los enlaces.
       if (sg.t === 'code') return { ...v, isCode: true, text: sg.text, fw, fst, td, ccol: sg.c ? '#008000' : '#e6e6e6' };
-      if (sg.t === 'img') return { ...v, isImg: true, src: sg.src, alt: sg.alt };
+      if (sg.t === 'img') return { ...v, isImg: true, alt: sg.alt, cur: 'default', ...this.imgView(sg.src) }; // tamaño y recorte: js/app/imagen-editor.js
       if (sg.t === 'ent') return { ...v, isEnt: true, off2: sg.off + 1, eq: sg.raw ? '=' : '', label: sg.raw ? (isPath(sg.name) ? sg.name.slice(1) : sg.name) : resolveEntity(sg.name), fw: focused ? 'inherit' : sg.b ? 800 : 600, fst, td, pad: sg.raw ? '4px 0' : '4px 4px', title: sg.raw ? '' : isPath(sg.name) ? sg.name : '=' + sg.name };
       const can = !!blocks && !!ln;
       return { ...v, isBox: true, on: sg.on, mr: sg.mr, bg: sg.on ? '#008000' : 'transparent', cur: can ? 'pointer' : 'default', title: sg.name || '', onToggle: e => { e.preventDefault(); e.stopPropagation(); if (can && e.button === 0) this.toggleBox(ln.id, sg.off, src, entId); } };
@@ -282,7 +297,8 @@ NoteApp.partes.push(Base => class extends Base {
         if (p < sg.text.length) runs.push({ t: sg.text.slice(p), bg: 'transparent', off: sg.off + p });
         sg.runs = runs;
       });
-      return { id: ln.id, text: ln.text, focused, segs, fs, lh, mt, fw: head ? 700 : 400, ...v, ...this.lineHandlers(ln, idx, src, entId), ...(out ? { onDown: null } : null) };
+      const imgs = dbi && dbi[idx].kind !== 'code' && ln.text.includes('![') ? this.imgEditors(ln, entId) : [];
+      return { id: ln.id, text: ln.text, focused, segs, fs, lh, mt, fw: head ? 700 : 400, hasImgs: imgs.length > 0, imgs, ...v, ...this.lineHandlers(ln, idx, src, entId), ...(out ? { onDown: null } : null) };
     });
     return lines;
   }

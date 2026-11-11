@@ -74,7 +74,7 @@ NoteApp.partes.push(Base => class extends Base {
       const data = await fsRead(dir);
       const has = !!data, fresh = !!prev || !!empty;
       const load = has && (chosen || (+data.meta.rev || 0) > (this._rev || 0));
-      this._fsDir = dir; this._fsCache = {};
+      this._fsDir = dir; this._fsCache = {}; this._fsImgs = new Set(); imgFolder(dir);
       if (load) this.fsApply(data, fresh);
       else if (fresh) this.fsBlank();
       await fsSetHandle(dir);
@@ -127,7 +127,7 @@ NoteApp.partes.push(Base => class extends Base {
     if (err && err.name === 'NotFoundError') {
       const name = this.state.fsName;
       this._fsGone = name; // para avisar en la ventana de fsPick de dónde venían las notas del navegador
-      this._fsDir = null; this._fsCache = {}; fsSetHandle(null);
+      this._fsDir = null; this._fsCache = {}; this._fsImgs = new Set(); imgFolder(null); fsSetHandle(null);
       this.setState({ fs: 'off', fsName: '' });
       this.fsToast('La carpeta «' + name + '» ya no existe', 'Lo que tenías abierto sigue en la app. Pulsa el botón de la carpeta (abajo a la izquierda) para elegir dónde guardarlo; si la moviste, elígela en su nuevo sitio.');
       return;
@@ -137,7 +137,7 @@ NoteApp.partes.push(Base => class extends Base {
     this.fsToast('No se pudo guardar en la carpeta', perm ? 'Pulsa el botón de la carpeta (abajo a la izquierda) para dar permiso de nuevo. Tus cambios siguen guardados en el navegador.' : 'Pulsa el botón de la carpeta (abajo a la izquierda) para reintentar. Tus cambios siguen guardados en el navegador.');
   }
   async fsSync() {
-    const dir = this._fsDir, s = this.state, rev = this._rev || 0, secs = fsSections(s), cache = this._fsCache || (this._fsCache = {});
+    const dir = this._fsDir, s = this.state, rev = this._rev || 0, secs = fsSections(s), cache = this._fsCache || (this._fsCache = {}), imgs = new Set();
     const meta = { app: 'NoteApp', formato: 1, rev, config: s.config || {}, vista: { mode: s.mode, clean: s.clean, calView: s.calView || {}, lsel: s.lsel || {} } };
     for (const [key, folder] of FS_SECS) {
       const sec = secs[key], notes = (sec && sec.notes) || [];
@@ -145,13 +145,15 @@ NoteApp.partes.push(Base => class extends Base {
       const d = await dir.getDirectoryHandle(folder, { create: true }), want = {};
       for (const n of notes) {
         const fn = fsFileName(n), txt = JSON.stringify({ app: 'NoteApp', formato: 1, seccion: key, nota: n }, null, 2);
-        want[fn] = 1;
+        want[fn] = 1; imgNamesIn(txt, imgs);
         if (cache[folder + '/' + fn] !== txt) { await fsWrite(d, fn, txt); cache[folder + '/' + fn] = txt; }
       }
       const old = [];
       for await (const [name, h] of d.entries()) if (h.kind === 'file' && FS_FILE_RX.test(name) && !want[name]) old.push(name);
       for (const name of old) { await d.removeEntry(name); delete cache[folder + '/' + name]; }
     }
+    // Imágenes pegadas (js/motor/imagenes.js): se copian a <carpeta>/Imágenes las que aún no estén. Nunca se borran.
+    await imgSyncDir(dir, imgs, this._fsImgs || (this._fsImgs = new Set()));
     const mtxt = JSON.stringify(meta, null, 2);
     if (cache[FS_META] !== mtxt) { await fsWrite(dir, FS_META, mtxt); cache[FS_META] = mtxt; }
     if (dir === this._fsDir) fsSetSavedRev(rev);

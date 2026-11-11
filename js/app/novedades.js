@@ -20,9 +20,23 @@
 //      llega la 6.13.4.1 con todos sus puntos.
 //   3. Si YA está publicada, añade un bloque AL PRINCIPIO con el número nuevo, la fecha y los cambios (titulo + texto),
 //      escritos para cualquier persona, sin tecnicismos. Sube también VERSION en sw.js.
-//   4. Solo se guardan 5 versiones (la actual y 4 más): borra la más antigua. Si se olvida, se recorta sola (NOV_GUARDAR).
+//   4. Cada punto lleva su tipo en «tipos»: 'visual', 'estructural' y/o 'correccion' (los mismos de las cifras del
+//      número de versión). Si es de varios tipos a la vez, se ponen todos: tipos: ['visual', 'estructural'].
+//      En Ajustes › Actualizaciones las novedades se agrupan por tipo; las de varios tipos salen una sola vez, juntas.
+//   5. Solo se guardan 5 versiones (la actual y 4 más): borra la más antigua. Si se olvida, se recorta sola (NOV_GUARDAR).
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
+  {
+    version: '3.5.1.0',
+    fecha: '11 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Pega imágenes en tus notas', texto: 'Copia una imagen (una captura de pantalla, una foto, una imagen de una web…) y pégala con Ctrl+V mientras escribes: aparece en su propia línea. Funciona en el texto de las hojas, en las entidades de texto y en las formas del Diagrama.', tipos: ['visual'] },
+      { titulo: 'Tus imágenes, bien guardadas', texto: 'Las imágenes se guardan aparte para que las notas no pesen. Si tienes una carpeta conectada, también se guardan en ella, dentro de una carpeta «Imágenes», así las ves desde otro ordenador que abra esa misma carpeta.', tipos: ['estructural'] },
+      { titulo: 'Cambia el tamaño y recorta tus imágenes', texto: 'En la vista para editar, cada imagen se ve debajo de su línea. Haz clic en ella y salen unos puntos: los de las esquinas la hacen más grande o más pequeña sin deformarla, y los de los lados la recortan. Con doble clic vuelve a su tamaño original, sin recorte.', tipos: ['visual'] },
+      { titulo: 'Ordena tus notas', texto: 'Igual que con las hojas, al elegir una nota salen dos flechas pequeñas a los lados de su nombre, arriba. Púlsalas para moverla a la izquierda o a la derecha y dejar tus notas en el orden que quieras.', tipos: ['visual'] },
+      { titulo: 'Novedades por colores', texto: 'En Ajustes › Actualizaciones, cada novedad lleva a su izquierda una raya de color según su tipo: verde para las mejoras visuales (lo que ves), azul para las estructurales (cambios por dentro) y naranja para las correcciones (arreglos). A la derecha tienes la leyenda de los colores. Si una novedad es de varios tipos a la vez, sale una sola vez, con una raya por cada tipo.', tipos: ['visual'] }
+    ]
+  },
   {
     version: '3.0.0.0',
     fecha: '9 de noviembre de 2026',
