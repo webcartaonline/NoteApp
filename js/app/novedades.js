@@ -27,6 +27,16 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '4.0.0.0',
+    fecha: '15 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Sincronización: cambia, copia o muda tu espacio de trabajo', texto: 'El menú Sincronización de Ajustes ya funciona. En «Espacios de trabajo» puedes cambiar a otra carpeta (como con el botón de la carpeta), copiar todo a otra carpeta para tener dos espacios con el mismo contenido sin empezar de cero, o mudarlo: es como cortar y pegar, se lleva todo a la carpeta nueva y se borran de la anterior los archivos de NoteApp.', tipos: ['visual', 'estructural'] },
+      { titulo: 'Exportar e importar en un solo archivo', texto: 'En Ajustes › Sincronización › Exportar eliges qué guardar: una nota, una agenda, un diagrama, todas las de una ventana o todo. Sale un único archivo, con sus imágenes dentro, para tener una copia o enviarlo de una vez por mensajería. Al lado está Importar: si lo que traes se llama igual que algo tuyo, NoteApp te pregunta si guardas las dos (la importada con un número al final, como «Viajes (2)») o si sustituye a la tuya.', tipos: ['visual', 'estructural'] },
+      { titulo: 'Historial de espacios de trabajo', texto: 'En Ajustes › Sincronización › Historial aparecen las carpetas que has ido abriendo. A cada una le puedes poner un título y apuntar su ruta para reconocerla, y con «Abrir» cambias a ella al momento.', tipos: ['visual'] },
+      { titulo: 'Lista de entidades', texto: 'En Notas, a la izquierda del buscador del texto, hay un botón nuevo que abre una lista con las entidades: su nombre, su descripción, su valor y un botón para copiar su ruta o solo su nombre. Con los botones Agenda, Notas y Diagramas eliges dónde buscar (puedes activar varios) y, sin ninguno, ves las de la nota abierta. En su buscador, escribe un nombre o empieza con una barra (/) para elegir primero el título y después la hoja.', tipos: ['visual'] }
+    ]
+  },
+  {
     version: '3.6.2.0',
     fecha: '15 de noviembre de 2026',
     cambios: [
@@ -58,16 +68,6 @@ const NA_NOVEDADES = [
       { titulo: 'Página de Ajustes', texto: 'El botón del engranaje, abajo a la izquierda, abre los Ajustes. De momento tienen dos apartados, Ayuda y Actualizaciones; los demás llegarán poco a poco.' },
       { titulo: 'Ayuda siempre a mano', texto: 'En Ajustes › Ayuda tienes guías con ejemplos de todo: el formato del texto, las entidades, la Agenda, el Diagrama, las herramientas y cómo se guarda todo. Puedes copiar cada ejemplo y pegarlo en una nota para probarlo.' },
       { titulo: 'Tu versión y su historial', texto: 'En Ajustes › Actualizaciones ves qué versión usas, puedes comprobar si ha salido una más nueva y repasar las novedades de las últimas versiones.' }
-    ]
-  },
-  {
-    version: '2.0',
-    fecha: '9 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Calculadora rápida', texto: 'Nuevo botón con forma de calculadora en la barra de la izquierda. Elige qué quieres saber (un porcentaje, cuántos clientes necesitas, cuánto te falta para una meta, el IVA, despejar la x…), rellena los datos y verás el resultado, la fórmula y cada paso de la cuenta explicado.' },
-      { titulo: 'Historial de cálculos', texto: 'Guarda un cálculo con el botón «Guardar en el historial» o con la tecla Intro. Después puedes volver a abrirlo con sus números, por ejemplo para cambiar solo un dato.' },
-      { titulo: 'Texto de color', texto: 'Escribe un texto entre guiones bajos, por ejemplo _importante_, y se verá en verde.' },
-      { titulo: 'Elige cómo copiar', texto: 'El botón de copiar de un recuadro copiable te deja elegir: copiarlo en Markdown o tal cual está escrito.' }
     ]
   }
 ];

@@ -159,6 +159,11 @@
   height: 15px;
   transition: background-color .15s;
 }
+/* Botón de la lista de entidades (a la izquierda del buscador): abre el panel del componente lista-entidades */
+.panel-texto-icono-lista {
+  mask: url(../../assets/lista-entidades.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/lista-entidades.svg) center / contain no-repeat;
+}
 .panel-texto-icono-ancho {
   mask: url(../../assets/ancho-completo.svg) center / contain no-repeat;
   -webkit-mask: url(../../assets/ancho-completo.svg) center / contain no-repeat;

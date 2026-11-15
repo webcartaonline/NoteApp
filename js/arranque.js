@@ -32,6 +32,8 @@
     'ajustes',
     'ajustes-ayuda',
     'ajustes-actualizaciones',
+    'ajustes-sinc',
+    'lista-entidades',
     'diagrama'
   ];
   const ruta = n => 'componentes/' + n + '/' + n + '.html';

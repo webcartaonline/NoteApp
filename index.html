@@ -44,6 +44,8 @@
 <link rel="stylesheet" href="componentes/ajustes/ajustes.css">
 <link rel="stylesheet" href="componentes/ajustes-ayuda/ajustes-ayuda.css">
 <link rel="stylesheet" href="componentes/ajustes-actualizaciones/ajustes-actualizaciones.css">
+<link rel="stylesheet" href="componentes/ajustes-sinc/ajustes-sinc.css">
+<link rel="stylesheet" href="componentes/lista-entidades/lista-entidades.css">
 <link rel="stylesheet" href="componentes/diagrama/diagrama.css">
 <script>if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));</script>
 <!-- Arranque: descarga los componentes (carpeta componentes/) y luego el motor (support.js) -->
@@ -64,6 +66,7 @@
     <sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ true }}">
     <sc-if value="{{ notDiagrama }}" hint-placeholder-val="{{ true }}">
     <div class="app-caja-2">
+      <sc-if value="{{ leOn }}" hint-placeholder-val="{{ false }}"><dc-import name="lista-entidades" dc-props="{{ ui }}"></dc-import></sc-if>
       <sc-if value="{{ isNotas }}" hint-placeholder-val="{{ true }}"><dc-import name="panel-texto" dc-props="{{ ui }}"></dc-import></sc-if>
       <sc-if value="{{ showEnts }}" hint-placeholder-val="{{ true }}"><dc-import name="entidades" dc-props="{{ ui }}"></dc-import></sc-if>
     </div>
@@ -92,6 +95,7 @@ const Component = NoteApp.crearComponente(DCLogic);
 <script src="js/motor/formas.js"></script>
 <script src="js/motor/guardado.js"></script>
 <script src="js/motor/imagenes.js"></script>
+<script src="js/motor/espacios.js"></script>
 <script src="js/motor/calculos.js"></script>
 <script src="js/app/estado-inicial.js"></script>
 <script src="js/app/base.js"></script>
@@ -109,6 +113,8 @@ const Component = NoteApp.crearComponente(DCLogic);
 <script src="js/app/ajustes.js"></script>
 <script src="js/app/ajustes-ayuda.js"></script>
 <script src="js/app/ajustes-actualizaciones.js"></script>
+<script src="js/app/ajustes-sinc.js"></script>
+<script src="js/app/lista-entidades.js"></script>
 <script src="js/app/lineas.js"></script>
 <script src="js/app/imagen-editor.js"></script>
 <script src="js/app/diagrama.js"></script>

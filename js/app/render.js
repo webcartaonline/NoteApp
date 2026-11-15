@@ -110,7 +110,7 @@ NoteApp.partes.push(Base => class extends Base {
         if (last) this.focusLine(last.id, last.text.length);
       },
       resizeDown: e => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); this._rs = { x: e.clientX, w: this.panelRef.current.getBoundingClientRect().width }; this.setState({ dragging: true }); document.body.style.cursor = 'col-resize'; },
-      resizeMove: e => { if (!this._rs) return; const p = this.panelRef.current.parentElement.closest(':not(.sc-host)').getBoundingClientRect().width; const w = Math.round(Math.max(200, Math.min(p - 440, this._rs.w + e.clientX - this._rs.x))); const cur = this.curSheet(this.state); if (cur && w !== cur.width) this.setWidth(w); },
+      resizeMove: e => { if (!this._rs) return; const p = this.panelRef.current.parentElement.closest(':not(.sc-host)').getBoundingClientRect().width; const le = this.state.elist && this.state.elist.on ? LE_ANCHO : 0; const w = Math.round(Math.max(200, Math.min(p - 440 - le, this._rs.w + e.clientX - this._rs.x))); const cur = this.curSheet(this.state); if (cur && w !== cur.width) this.setWidth(w); },
       resizeUp: () => { if (!this._rs) return; this._rs = null; this.setState({ dragging: false }); document.body.style.cursor = ''; },
       resizeReset: () => this.setWidth(W0),
       fsPick: () => this.fsPick(),
@@ -139,7 +139,8 @@ NoteApp.partes.push(Base => class extends Base {
     Object.assign(v, this.novVals(s)); // ventana de novedades tras una actualización (js/app/novedades.js)
     Object.assign(v, this.calcVals(s)); // calculadora rápida con historial (js/app/calculadora.js)
     if (dg && sheet) Object.assign(v, this.dgVals(s, sheet)); // lienzo del diagrama
-    Object.assign(v, this.ajVals(s)); // página de Ajustes: Ayuda y Actualizaciones (js/app/ajustes.js)
+    Object.assign(v, this.ajVals(s)); // página de Ajustes: Ayuda, Sincronización y Actualizaciones (js/app/ajustes.js)
+    Object.assign(v, this.leVals(s, W)); // lista de entidades, a la izquierda del texto (js/app/lista-entidades.js)
     v.ui = v; // los componentes reciben todos estos valores con dc-props="{{ ui }}"
     return v;
   }

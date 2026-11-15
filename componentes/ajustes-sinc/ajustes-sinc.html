@@ -1,0 +1,152 @@
+<!-- Componente "ajustes-sinc" de NoteApp. Contenido del menú Sincronización de la página de Ajustes:
+     · Espacios de trabajo: el espacio abierto y los botones Cambiar, Copiar y Mudar.
+     · Exportar: dos columnas, exportar a un solo archivo (izquierda) e importar un archivo (derecha).
+     · Historial: los espacios de trabajo abiertos antes, con su título y su ruta, para cambiar rápido.
+     Los estilos fijos están en ajustes-sinc.css; los valores {{ }} vienen de sincVals() (js/app/ajustes-sinc.js). -->
+<x-dc>
+  <sc-if value="{{ sincEsEspacios }}" hint-placeholder-val="{{ true }}">
+    <div class="ajustes-sinc">
+      <div class="ajustes-sinc-cabeza">
+        <span class="ajustes-sinc-titulo">Espacios de trabajo</span>
+        <span class="ajustes-sinc-intro">Un espacio de trabajo es una carpeta de tu ordenador con sus propias notas, agenda y diagramas. Aquí puedes cambiar a otro, copiarlo o mudarlo de sitio.</span>
+      </div>
+      <div class="ajustes-sinc-actual">
+        <span class="ajustes-sinc-actual-icono"><span class="ajustes-sinc-icono ajustes-sinc-icono-carpeta"></span></span>
+        <div class="ajustes-sinc-actual-textos">
+          <span class="ajustes-sinc-etiqueta">Espacio de trabajo abierto</span>
+          <span class="ajustes-sinc-actual-nombre">{{ sincActNombre }}</span>
+          <span class="ajustes-sinc-actual-detalle">{{ sincActDetalle }}</span>
+          <span class="ajustes-sinc-actual-estado"><span class="ajustes-sinc-punto {{ sincActCls }}"></span><span>{{ sincActEstado }} · {{ sincActCuenta }}</span></span>
+        </div>
+      </div>
+      <sc-if value="{{ sincHayMsg }}" hint-placeholder-val="{{ false }}">
+        <div role="status" class="ajustes-sinc-estado {{ sincMsgCls }}"><span class="ajustes-sinc-estado-punto"></span><span>{{ sincMsgTxt }}</span></div>
+      </sc-if>
+      <div class="ajustes-sinc-acciones">
+        <div class="ajustes-sinc-accion">
+          <span class="ajustes-sinc-accion-icono"><span class="ajustes-sinc-icono ajustes-sinc-icono-cambiar"></span></span>
+          <span class="ajustes-sinc-accion-nombre">Cambiar</span>
+          <span class="ajustes-sinc-accion-texto">Abre otra carpeta, es decir, otro espacio de trabajo. Lo que tienes abierto se queda guardado en su carpeta; no se copia nada.</span>
+          <button onClick="{{ sincCambiar }}" disabled="{{ sincOcupado }}" class="ajustes-sinc-boton">Cambiar de espacio</button>
+        </div>
+        <div class="ajustes-sinc-accion">
+          <span class="ajustes-sinc-accion-icono"><span class="ajustes-sinc-icono ajustes-sinc-icono-copiar"></span></span>
+          <span class="ajustes-sinc-accion-nombre">Copiar</span>
+          <span class="ajustes-sinc-accion-texto">Hace una copia de todo en otra carpeta. Así tienes dos espacios de trabajo con el mismo contenido sin empezar de cero.</span>
+          <button onClick="{{ sincCopiar }}" disabled="{{ sincOcupado }}" class="ajustes-sinc-boton">Copiar a otra carpeta</button>
+        </div>
+        <div class="ajustes-sinc-accion">
+          <span class="ajustes-sinc-accion-icono"><span class="ajustes-sinc-icono ajustes-sinc-icono-mudar"></span></span>
+          <span class="ajustes-sinc-accion-nombre">Mudar</span>
+          <span class="ajustes-sinc-accion-texto">Como cortar y pegar: lleva el espacio de trabajo a otra carpeta y borra de la anterior los archivos de NoteApp, para liberar ese sitio.</span>
+          <button onClick="{{ sincMudar }}" disabled="{{ sincOcupado }}" class="ajustes-sinc-boton">Mudar a otra carpeta</button>
+        </div>
+      </div>
+      <sc-if value="{{ sincNoFs }}" hint-placeholder-val="{{ false }}">
+        <span class="ajustes-sinc-pie ajustes-sinc-pie-aviso">Este navegador no deja trabajar con carpetas, así que aquí no hay espacios de trabajo: tus notas se guardan en el navegador. Funciona en Chrome o Edge de ordenador. Para llevarte tus notas a otro sitio, usa la sección Exportar.</span>
+      </sc-if>
+      <span class="ajustes-sinc-pie">Al copiar o mudar, elige una carpeta vacía (puedes crearla en la misma ventana de elegir carpeta). Antes de mudar se comprueba que la copia está completa, y de la carpeta anterior solo se borran los archivos de NoteApp.</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ sincEsExportar }}" hint-placeholder-val="{{ false }}">
+    <div class="ajustes-sinc ajustes-sinc-ancha">
+      <div class="ajustes-sinc-cabeza">
+        <span class="ajustes-sinc-titulo">Exportar e importar</span>
+        <span class="ajustes-sinc-intro">Guarda lo que quieras en un solo archivo, para tener una copia o para pasárselo a alguien, y vuelve a meterlo en NoteApp cuando haga falta. Funciona en cualquier dispositivo.</span>
+      </div>
+      <sc-if value="{{ sincHayMsg }}" hint-placeholder-val="{{ false }}">
+        <div role="status" class="ajustes-sinc-estado {{ sincMsgCls }}"><span class="ajustes-sinc-estado-punto"></span><span>{{ sincMsgTxt }}</span></div>
+      </sc-if>
+      <div class="ajustes-sinc-columnas">
+        <section class="ajustes-sinc-columna">
+          <div class="ajustes-sinc-columna-cabeza">
+            <span class="ajustes-sinc-accion-icono"><span class="ajustes-sinc-icono ajustes-sinc-icono-exportar"></span></span>
+            <span class="ajustes-sinc-columna-titulo">Exportar</span>
+          </div>
+          <span class="ajustes-sinc-etiqueta">1 · Qué quieres exportar</span>
+          <div class="ajustes-sinc-chips">
+            <sc-for list="{{ sincExpWins }}" as="w" hint-placeholder-count="4">
+              <button onClick="{{ w.pick }}" aria-pressed="{{ w.on }}" class="ajustes-sinc-chip {{ w.cls }}">{{ w.txt }}<span class="ajustes-sinc-chip-num">{{ w.n }}</span></button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ sincExpTodo }}" hint-placeholder-val="{{ true }}">
+            <span class="ajustes-sinc-nota">{{ sincExpTodoTxt }}</span>
+          </sc-if>
+          <sc-if value="{{ sincExpLista }}" hint-placeholder-val="{{ false }}">
+            <span class="ajustes-sinc-etiqueta">2 · Todas o solo una</span>
+            <div data-scroll="" class="ajustes-sinc-opciones">
+              <sc-for list="{{ sincExpItems }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.pick }}" aria-pressed="{{ o.on }}" class="ajustes-sinc-opcion {{ o.cls }}">
+                  <span class="ajustes-sinc-opcion-marca"></span>
+                  <span class="ajustes-sinc-opcion-nombre">{{ o.txt }}</span>
+                  <span class="ajustes-sinc-opcion-sub">{{ o.sub }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div class="ajustes-sinc-archivo">
+            <span class="ajustes-sinc-etiqueta">Se creará un solo archivo</span>
+            <span class="ajustes-sinc-archivo-nombre">{{ sincExpArchivo }}</span>
+          </div>
+          <button onClick="{{ sincExportar }}" disabled="{{ sincOcupado }}" class="ajustes-sinc-boton ajustes-sinc-boton-verde">Exportar</button>
+        </section>
+        <section class="ajustes-sinc-columna">
+          <div class="ajustes-sinc-columna-cabeza">
+            <span class="ajustes-sinc-accion-icono"><span class="ajustes-sinc-icono ajustes-sinc-icono-importar"></span></span>
+            <span class="ajustes-sinc-columna-titulo">Importar</span>
+          </div>
+          <span class="ajustes-sinc-nota">Elige un archivo exportado con NoteApp. Lo que trae se añade a lo que ya tienes, cada cosa en su ventana (Notas, Agenda o Diagrama).</span>
+          <span class="ajustes-sinc-nota">Si algo se llama igual que una nota, agenda o diagrama tuyo, NoteApp te pregunta qué hacer: guardar las dos (la importada con un número al final, como «Viajes (2)») o sustituir la tuya.</span>
+          <button onClick="{{ sincImportar }}" disabled="{{ sincOcupado }}" class="ajustes-sinc-boton">Elegir archivo…</button>
+        </section>
+      </div>
+      <span class="ajustes-sinc-pie">El archivo lleva dentro las imágenes pegadas. Si una nota menciona entidades de otra nota que no va en el archivo, esas menciones saldrán sin valor (ND) hasta que la otra nota también esté.</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ sincEsHistorial }}" hint-placeholder-val="{{ false }}">
+    <div class="ajustes-sinc">
+      <div class="ajustes-sinc-cabeza">
+        <span class="ajustes-sinc-titulo">Historial de espacios de trabajo</span>
+        <span class="ajustes-sinc-intro">Las carpetas que has abierto en este navegador. Ponle a cada una un título y apunta su ruta para reconocerla, y pulsa «Abrir» para cambiar a ella al momento.</span>
+      </div>
+      <sc-if value="{{ sincHayMsg }}" hint-placeholder-val="{{ false }}">
+        <div role="status" class="ajustes-sinc-estado {{ sincMsgCls }}"><span class="ajustes-sinc-estado-punto"></span><span>{{ sincMsgTxt }}</span></div>
+      </sc-if>
+      <sc-if value="{{ sincHistVacio }}" hint-placeholder-val="{{ false }}">
+        <div class="ajustes-sinc-vacio">
+          <span class="ajustes-sinc-accion-icono"><span class="ajustes-sinc-icono ajustes-sinc-icono-carpeta"></span></span>
+          <span class="ajustes-sinc-vacio-texto">Todavía no hay ningún espacio de trabajo en el historial. Aparecerán aquí según vayas abriendo carpetas con «Cambiar» o con el botón de la carpeta.</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sincHistHay }}" hint-placeholder-val="{{ true }}">
+        <div class="ajustes-sinc-hist">
+          <sc-for list="{{ sincHist }}" as="h" hint-placeholder-count="2">
+            <div class="ajustes-sinc-hist-fila {{ h.cls }}">
+              <div class="ajustes-sinc-hist-campos">
+                <div class="ajustes-sinc-hist-linea">
+                  <input value="{{ h.titulo }}" onChange="{{ h.onTitulo }}" maxLength="40" spellCheck="false" placeholder="Título" aria-label="Título del espacio de trabajo" class="ajustes-sinc-campo ajustes-sinc-campo-titulo">
+                  <sc-if value="{{ h.actual }}" hint-placeholder-val="{{ false }}"><span class="ajustes-sinc-chip-actual">Abierto ahora</span></sc-if>
+                  <sc-if value="{{ h.falta }}" hint-placeholder-val="{{ false }}"><span class="ajustes-sinc-chip-falta">No encontrada</span></sc-if>
+                </div>
+                <input value="{{ h.ruta }}" onChange="{{ h.onRuta }}" maxLength="260" spellCheck="false" placeholder="Ruta: escríbela o pégala aquí (por ejemplo, C:\Usuarios\Camilo\OneDrive\Clases)" aria-label="Ruta de la carpeta" class="ajustes-sinc-campo ajustes-sinc-campo-ruta">
+                <span class="ajustes-sinc-hist-sub">Carpeta «{{ h.carpeta }}» · {{ h.cuando }}</span>
+              </div>
+              <div class="ajustes-sinc-hist-botones">
+                <sc-if value="{{ h.otro }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ h.abrir }}" class="ajustes-sinc-boton ajustes-sinc-boton-verde">Abrir</button>
+                  <button onClick="{{ h.quitar }}" title="Quitar del historial (la carpeta y sus notas no se borran)" class="ajustes-sinc-boton ajustes-sinc-boton-suave">Quitar</button>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ sincNoFs }}" hint-placeholder-val="{{ false }}">
+        <span class="ajustes-sinc-pie ajustes-sinc-pie-aviso">Este navegador no deja trabajar con carpetas, así que no hay historial. Funciona en Chrome o Edge de ordenador.</span>
+      </sc-if>
+      <span class="ajustes-sinc-pie">El navegador no deja que NoteApp vea la ruta completa de una carpeta, solo su nombre: por eso la ruta la escribes tú, una vez. Al abrir un espacio, puede que el navegador te pida permiso para su carpeta. «Quitar» solo lo borra de esta lista: la carpeta y sus notas siguen en su sitio.</span>
+    </div>
+  </sc-if>
+</x-dc>

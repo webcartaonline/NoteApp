@@ -1,0 +1,69 @@
+<!-- Componente "lista-entidades" de NoteApp. Panel con la lista de entidades, a la izquierda del texto MKD (solo en
+     Notas). Se abre con el botón de la lista (a la izquierda del buscador del texto, componente panel-texto).
+     Arriba: título, cuántas hay y cerrar. Después los tres filtros (Agenda, Notas, Diagramas), el buscador
+     (texto = por nombre; / = navegar por títulos y hojas) y la lista: cada hoja con sus entidades (nombre,
+     descripción, valor y botón de copiar la ruta o el nombre).
+     Los estilos fijos están en lista-entidades.css; los valores {{ }} vienen de leVals() (js/app/lista-entidades.js). -->
+<x-dc>
+  <aside aria-label="Lista de entidades" onMouseDown="{{ leStop }}" class="lista-entidades-panel">
+    <div class="lista-entidades-barra">
+      <span class="lista-entidades-titulo">Entidades</span>
+      <span class="lista-entidades-cuenta">{{ leCuenta }}</span>
+      <button onClick="{{ leToggle }}" aria-label="Cerrar la lista de entidades" title="Cerrar" class="lista-entidades-cerrar"><span class="lista-entidades-x lista-entidades-x-1"></span><span class="lista-entidades-x lista-entidades-x-2"></span></button>
+    </div>
+    <div class="lista-entidades-filtros">
+      <sc-for list="{{ leFiltros }}" as="f" hint-placeholder-count="3">
+        <button onClick="{{ f.pick }}" aria-pressed="{{ f.on }}" title="{{ f.title }}" class="lista-entidades-filtro {{ f.cls }}">{{ f.txt }}</button>
+      </sc-for>
+    </div>
+    <div class="lista-entidades-buscar">
+      <span class="lista-entidades-buscar-icono"></span>
+      <input data-lebuscar="1" value="{{ leQ }}" onChange="{{ leOnQ }}" onKeyDown="{{ leOnKey }}" spellCheck="false" autoComplete="off" placeholder="Nombre… o / para elegir título" aria-label="Buscar entidades por nombre, o escribe una barra para elegir título y hoja" class="lista-entidades-buscar-campo">
+      <sc-if value="{{ leHayQ }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ leBorrarQ }}" aria-label="Borrar la búsqueda" title="Borrar (Esc)" class="lista-entidades-borrar"><span class="lista-entidades-x lista-entidades-x-1"></span><span class="lista-entidades-x lista-entidades-x-2"></span></button>
+      </sc-if>
+    </div>
+    <sc-if value="{{ leOpciones }}" hint-placeholder-val="{{ false }}">
+      <div class="lista-entidades-opciones">
+        <span class="lista-entidades-opciones-titulo">{{ leOpTitulo }}</span>
+        <div data-scroll="" class="lista-entidades-opciones-lista">
+          <sc-for list="{{ leOpLista }}" as="o" hint-placeholder-count="3">
+            <button onMouseDown="{{ o.noFocus }}" onClick="{{ o.pick }}" class="lista-entidades-opcion"><span class="lista-entidades-opcion-nombre">{{ o.txt }}</span><span class="lista-entidades-opcion-sub">{{ o.sub }}</span></button>
+          </sc-for>
+          <sc-if value="{{ leOpVacio }}" hint-placeholder-val="{{ false }}"><span class="lista-entidades-opcion-vacio">{{ leOpVacioTxt }}</span></sc-if>
+        </div>
+      </div>
+    </sc-if>
+    <span class="lista-entidades-ambito">{{ leAmbito }}</span>
+    <div data-scroll="" class="lista-entidades-lista">
+      <sc-for list="{{ leFilas }}" as="r" hint-placeholder-count="4">
+        <sc-if value="{{ r.head }}" hint-placeholder-val="{{ false }}">
+          <div class="lista-entidades-hoja {{ r.cls }}"><span class="lista-entidades-hoja-ventana">{{ r.ventana }}</span><span class="lista-entidades-hoja-donde" title="{{ r.donde }}">{{ r.donde }}</span></div>
+        </sc-if>
+        <sc-if value="{{ r.item }}" hint-placeholder-val="{{ true }}">
+          <div data-lemenu="1" class="lista-entidades-tarjeta">
+            <div class="lista-entidades-fila">
+              <div class="lista-entidades-datos">
+                <span class="lista-entidades-nombre" title="{{ r.name }}"><span class="lista-entidades-tipo" style="mask:{{ r.ic }};-webkit-mask:{{ r.ic }};"></span><span class="lista-entidades-nombre-txt">{{ r.name }}</span></span>
+                <sc-if value="{{ r.hasDesc }}" hint-placeholder-val="{{ true }}"><span class="lista-entidades-desc" title="{{ r.desc }}">{{ r.desc }}</span></sc-if>
+                <span class="lista-entidades-valor" title="{{ r.val }}">{{ r.val }}</span>
+              </div>
+              <button onClick="{{ r.toggleMenu }}" aria-label="Copiar la ruta o el nombre" aria-expanded="{{ r.menu }}" title="{{ r.copyTitle }}" class="lista-entidades-copiar"><span class="lista-entidades-copiar-icono" style="background:{{ r.copyColor }};"></span></button>
+            </div>
+            <sc-if value="{{ r.menu }}" hint-placeholder-val="{{ false }}">
+              <div role="menu" class="lista-entidades-menu">
+                <sc-if value="{{ r.hasRuta }}" hint-placeholder-val="{{ true }}">
+                  <button role="menuitem" onClick="{{ r.copiarRuta }}" title="{{ r.ruta }}" class="lista-entidades-menu-opcion"><span class="lista-entidades-menu-nombre">Copiar la ruta</span><span class="lista-entidades-menu-sub">{{ r.ruta }}</span></button>
+                </sc-if>
+                <button role="menuitem" onClick="{{ r.copiarNombre }}" title="{{ r.soloNombre }}" class="lista-entidades-menu-opcion"><span class="lista-entidades-menu-nombre">Copiar solo el nombre</span><span class="lista-entidades-menu-sub">{{ r.soloNombre }}</span></button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </sc-for>
+      <sc-if value="{{ leVacio }}" hint-placeholder-val="{{ false }}"><span class="lista-entidades-aviso">{{ leVacioTxt }}</span></sc-if>
+      <sc-if value="{{ leAvisoDg }}" hint-placeholder-val="{{ false }}"><span class="lista-entidades-aviso lista-entidades-aviso-caja">Los diagramas todavía no tienen entidades con nombre y valor (sus formas no se pueden mencionar). Cuando las tengan, saldrán aquí.</span></sc-if>
+      <sc-if value="{{ leMas }}" hint-placeholder-val="{{ false }}"><span class="lista-entidades-aviso lista-entidades-aviso-caja">Hay más entidades de las que caben aquí. Escribe en el buscador o elige un título con / para afinar.</span></sc-if>
+    </div>
+  </aside>
+</x-dc>

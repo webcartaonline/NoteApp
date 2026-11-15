@@ -1,7 +1,7 @@
 <!-- Componente "ajustes" de NoteApp. Página de Ajustes: ocupa toda la pantalla, encima de la app.
      Arriba a la izquierda, el nombre del menú elegido; arriba a la derecha, sus secciones y el botón de cerrar.
      A la izquierda, los menús (cada uno con su icono, título y descripción); a la derecha, el panel gris con el
-     contenido de la sección elegida (componentes ajustes-ayuda y ajustes-actualizaciones).
+     contenido de la sección elegida (componentes ajustes-ayuda, ajustes-sinc y ajustes-actualizaciones).
      En el móvil se ve una parte cada vez: primero los menús y, al elegir uno, su contenido (con una flecha para volver).
      Se cierra con la X o con Esc. Los estilos fijos están en ajustes.css; los valores {{ }} vienen de renderVals()
      (js/app/render.js) y la lógica de js/app/ajustes.js. -->
@@ -37,6 +37,7 @@
       <!-- Panel con el contenido de la sección elegida -->
       <div ref="{{ ajScrollRef }}" data-scroll="" class="ajustes-panel">
         <sc-if value="{{ ajEsAyuda }}" hint-placeholder-val="{{ true }}"><dc-import name="ajustes-ayuda" dc-props="{{ ui }}"></dc-import></sc-if>
+        <sc-if value="{{ ajEsSinc }}" hint-placeholder-val="{{ false }}"><dc-import name="ajustes-sinc" dc-props="{{ ui }}"></dc-import></sc-if>
         <sc-if value="{{ ajEsAct }}" hint-placeholder-val="{{ false }}"><dc-import name="ajustes-actualizaciones" dc-props="{{ ui }}"></dc-import></sc-if>
         <sc-if value="{{ ajPronto }}" hint-placeholder-val="{{ false }}">
           <div class="ajustes-pronto">

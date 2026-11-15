@@ -2,8 +2,8 @@
 // izquierda, el contenido en el panel gris y, arriba a la derecha, las secciones del menú elegido.
 // Se abre con el botón del engranaje de la barra lateral y se cierra con la X o con Esc.
 //
-// Menús hechos: Ayuda (js/app/ajustes-ayuda.js) y Actualizaciones (js/app/ajustes-actualizaciones.js).
-// Sincronización, Seguridad y Personalización se ven en la lista, pero de momento muestran «Próximamente».
+// Menús hechos: Ayuda (js/app/ajustes-ayuda.js), Sincronización (js/app/ajustes-sinc.js) y Actualizaciones
+// (js/app/ajustes-actualizaciones.js). Seguridad y Personalización se ven en la lista, pero de momento muestran «Próximamente».
 //
 // CÓMO TERMINAR UN MENÚ (más adelante):
 //   1. Pon listo: true en su entrada de AJ_MENUS y sus secciones en ajSecciones() (lista de [id, nombre]).
@@ -18,9 +18,8 @@
 const AJ_MENUS = [
   { id: 'ayuda', nombre: 'Ayuda', icono: 'ayuda', listo: true,
     desc: 'Guías de uso sobre el campo de texto MKD y las entidades' },
-  { id: 'sinc', nombre: 'Sincronización', icono: 'sincronizacion',
-    desc: 'Importa o exporta el contenido y gestiona la conexión con la carpeta local',
-    pronto: 'Aquí podrás importar y exportar todo tu contenido y gestionar la carpeta donde se guarda. Mientras tanto, la carpeta se elige con su botón, abajo a la izquierda.' },
+  { id: 'sinc', nombre: 'Sincronización', icono: 'sincronizacion', listo: true,
+    desc: 'Importa o exporta el contenido y gestiona la conexión con la carpeta local' },
   { id: 'seguridad', nombre: 'Seguridad', icono: 'seguridad',
     desc: 'Establece una contraseña para acceder a la app, nota u hoja concreta',
     pronto: 'Aquí podrás poner una contraseña para entrar en NoteApp o para abrir una nota u hoja concreta.' },
@@ -41,6 +40,7 @@ NoteApp.partes.push(Base => class extends Base {
   ajSecciones(menu) {
     if (menu === 'ayuda') return AYUDA.map(x => [x.id, x.nombre]);
     if (menu === 'act') return AJ_ACT_SECS;
+    if (menu === 'sinc') return AJ_SINC_SECS; // js/app/ajustes-sinc.js
     return [];
   }
   // Sección visible del menú (la última elegida, o la primera)
@@ -62,11 +62,13 @@ NoteApp.partes.push(Base => class extends Base {
     this.setState({ ajustes: null });
   }
   ajMenu(id) {
-    this.setState(s => s.ajustes ? { ajustes: { ...s.ajustes, menu: id, vista: 'panel' } } : null, () => this.ajArriba());
+    this.setState(s => s.ajustes ? { ajustes: { ...s.ajustes, menu: id, vista: 'panel' }, sinc: this.ajSincLimpio(s) } : null, () => this.ajArriba());
   }
   ajSec(id) {
-    this.setState(s => s.ajustes ? { ajustes: { ...s.ajustes, sec: { ...s.ajustes.sec, [s.ajustes.menu]: id } } } : null, () => this.ajArriba());
+    this.setState(s => s.ajustes ? { ajustes: { ...s.ajustes, sec: { ...s.ajustes.sec, [s.ajustes.menu]: id } }, sinc: this.ajSincLimpio(s) } : null, () => this.ajArriba());
   }
+  // Al cambiar de menú o de sección se quita el mensaje de la última acción de Sincronización (si no está trabajando)
+  ajSincLimpio(s) { return s.sinc && s.sinc.msg && !s.sinc.busy ? { ...s.sinc, msg: null } : s.sinc; }
   // Vuelve arriba del panel (al cambiar de menú o de sección) y deja a la vista la sección elegida
   // (en pantallas estrechas las secciones se desplazan de lado)
   ajArriba() {
@@ -96,11 +98,13 @@ NoteApp.partes.push(Base => class extends Base {
     v.ajScrollRef = this.ajScrollRef;
     v.ajEsAyuda = menu.id === 'ayuda';
     v.ajEsAct = menu.id === 'act';
+    v.ajEsSinc = menu.id === 'sinc';
     v.ajPronto = !menu.listo;
     v.ajProntoTxt = menu.pronto || '';
     v.ajProntoIc = ajMask(menu.icono);
     if (v.ajEsAyuda) Object.assign(v, this.ayudaVals(s, sec));
     if (v.ajEsAct) Object.assign(v, this.actVals(s, sec));
+    if (v.ajEsSinc) Object.assign(v, this.sincVals(s, sec));
     return v;
   }
 });

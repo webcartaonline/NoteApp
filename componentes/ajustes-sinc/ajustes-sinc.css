@@ -1,0 +1,539 @@
+/* Componente "ajustes-sinc": menú Sincronización de Ajustes (espacios de trabajo, exportar / importar e historial),
+   dentro del panel gris (#262626). Mismo estilo que ajustes-actualizaciones: tarjetas #1e1e1e y botones #2f2f2f. */
+
+.ajustes-sinc {
+  max-width: 900px;
+  padding: 30px 34px 30px;
+  display: flex;
+  flex-direction: column;
+}
+.ajustes-sinc-ancha {
+  max-width: 1040px;
+}
+
+.ajustes-sinc-cabeza {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 22px;
+}
+.ajustes-sinc-titulo {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+.ajustes-sinc-intro {
+  max-width: 700px;
+  font-size: 15.5px;
+  line-height: 23px;
+  color: #b0b0b0;
+  text-wrap: pretty;
+}
+
+.ajustes-sinc-etiqueta {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #7a7a7a;
+}
+
+/* Iconos (máscara CSS, como el resto de la app) */
+.ajustes-sinc-icono {
+  width: 18px;
+  height: 18px;
+  background: #3fa63f;
+}
+.ajustes-sinc-icono-carpeta { mask: url(../../assets/carpeta.svg) center / contain no-repeat; -webkit-mask: url(../../assets/carpeta.svg) center / contain no-repeat; }
+.ajustes-sinc-icono-cambiar { mask: url(../../assets/sincronizacion.svg) center / contain no-repeat; -webkit-mask: url(../../assets/sincronizacion.svg) center / contain no-repeat; }
+.ajustes-sinc-icono-copiar  { width: 16px; height: 16px; mask: url(../../assets/clon.svg) center / contain no-repeat; -webkit-mask: url(../../assets/clon.svg) center / contain no-repeat; }
+.ajustes-sinc-icono-mudar   { mask: url(../../assets/mudar.svg) center / contain no-repeat; -webkit-mask: url(../../assets/mudar.svg) center / contain no-repeat; }
+.ajustes-sinc-icono-exportar { mask: url(../../assets/exportar.svg) center / contain no-repeat; -webkit-mask: url(../../assets/exportar.svg) center / contain no-repeat; }
+.ajustes-sinc-icono-importar { transform: rotate(180deg); mask: url(../../assets/exportar.svg) center / contain no-repeat; -webkit-mask: url(../../assets/exportar.svg) center / contain no-repeat; }
+
+/* ===== Espacio de trabajo abierto ===== */
+.ajustes-sinc-actual {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 14px;
+  background: #1e1e1e;
+}
+.ajustes-sinc-actual-icono,
+.ajustes-sinc-accion-icono {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(0,128,0,.16);
+}
+.ajustes-sinc-actual-textos {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.ajustes-sinc-actual-nombre {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  overflow-wrap: anywhere;
+}
+.ajustes-sinc-actual-detalle {
+  font-size: 14px;
+  line-height: 20px;
+  color: #a6a6a6;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+.ajustes-sinc-actual-estado {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 13.5px;
+  line-height: 19px;
+  color: #cfcfcf;
+}
+.ajustes-sinc-punto {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: #5a5a5a;
+}
+.ajustes-sinc-punto-ok { background: #00a000; }
+.ajustes-sinc-punto-aviso { background: #d08a00; }
+
+/* ===== Mensaje con el resultado de la última acción ===== */
+.ajustes-sinc-estado {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: #1e1e1e;
+  font-size: 14px;
+  line-height: 20px;
+  color: #cfcfcf;
+  text-wrap: pretty;
+}
+.ajustes-sinc-ancha .ajustes-sinc-estado {
+  margin: 0 0 14px;
+}
+.ajustes-sinc-estado-punto {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: #00a000;
+}
+.ajustes-sinc-estado-aviso .ajustes-sinc-estado-punto { background: #d08a00; }
+.ajustes-sinc-estado-error .ajustes-sinc-estado-punto { background: #c25b5b; }
+@keyframes ajustesSincLatido { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
+.ajustes-sinc-estado-trabajando .ajustes-sinc-estado-punto {
+  background: #8a8a8a;
+  animation: ajustesSincLatido 1s ease-in-out infinite;
+}
+
+/* ===== Cambiar, copiar y mudar ===== */
+.ajustes-sinc-acciones {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+.ajustes-sinc-accion {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #2f2f2f;
+}
+.ajustes-sinc-accion .ajustes-sinc-accion-icono {
+  background: rgba(0,128,0,.2);
+}
+.ajustes-sinc-accion-nombre {
+  margin-top: 2px;
+  font-size: 17px;
+  font-weight: 600;
+}
+.ajustes-sinc-accion-texto {
+  flex: 1;
+  font-size: 13.5px;
+  line-height: 19px;
+  color: #a6a6a6;
+  text-wrap: pretty;
+}
+
+.ajustes-sinc-boton {
+  flex: none;
+  height: 38px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 10px;
+  background: #3a3a3a;
+  color: #fff;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+  transition: background-color .15s, opacity .15s;
+}
+.ajustes-sinc-boton:hover {
+  background: #454545 !important;
+}
+.ajustes-sinc-boton:focus-visible {
+  box-shadow: 0 0 0 2px #1e1e1e, 0 0 0 4px #6a6a6a;
+}
+.ajustes-sinc-boton:disabled {
+  opacity: .55;
+  cursor: default;
+}
+.ajustes-sinc-accion .ajustes-sinc-boton {
+  margin-top: 6px;
+}
+.ajustes-sinc-boton-verde {
+  background: #2f6f2f;
+}
+.ajustes-sinc-boton-verde:hover {
+  background: #367d36 !important;
+}
+.ajustes-sinc-boton-suave {
+  background: transparent;
+  color: #a6a6a6;
+}
+.ajustes-sinc-boton-suave:hover {
+  background: #333 !important;
+  color: #fff !important;
+}
+
+.ajustes-sinc-pie {
+  margin-top: 18px;
+  font-size: 13.5px;
+  line-height: 20px;
+  color: #8a8a8a;
+  text-wrap: pretty;
+}
+.ajustes-sinc-pie-aviso {
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: rgba(208,138,0,.12);
+  color: #d9b36a;
+}
+
+/* ===== Exportar / Importar: dos columnas ===== */
+.ajustes-sinc-columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+}
+.ajustes-sinc-columna {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+  padding: 18px;
+  border-radius: 14px;
+  background: #1e1e1e;
+}
+.ajustes-sinc-columna-cabeza {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+.ajustes-sinc-columna-titulo {
+  font-size: 20px;
+  font-weight: 700;
+}
+.ajustes-sinc-nota {
+  font-size: 14px;
+  line-height: 20px;
+  color: #a6a6a6;
+  text-wrap: pretty;
+}
+
+.ajustes-sinc-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.ajustes-sinc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 9px 0 13px;
+  border: 0;
+  border-radius: 999px;
+  background: #2f2f2f;
+  color: #cfcfcf;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: background-color .15s, color .15s;
+}
+.ajustes-sinc-chip:hover {
+  background: #3a3a3a !important;
+  color: #fff !important;
+}
+.ajustes-sinc-chip:focus-visible {
+  box-shadow: 0 0 0 2px #1e1e1e, 0 0 0 4px #6a6a6a;
+}
+.ajustes-sinc-chip-num {
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.28);
+  font-size: 11.5px;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.ajustes-sinc-chip-on,
+.ajustes-sinc-chip-on:hover {
+  background: #008000 !important;
+  color: #fff !important;
+}
+
+/* Lista para elegir todas o una sola nota / agenda / diagrama */
+.ajustes-sinc-opciones {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 264px;
+  overflow-y: auto;
+  padding: 4px;
+  border-radius: 10px;
+  background: #262626;
+}
+.ajustes-sinc-opcion {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #e6e6e6;
+  font: inherit;
+  font-size: 14.5px;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+}
+.ajustes-sinc-opcion:hover {
+  background: #303030 !important;
+}
+.ajustes-sinc-opcion:focus-visible {
+  box-shadow: inset 0 0 0 2px #6a6a6a;
+}
+.ajustes-sinc-opcion-marca {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px #5a5a5a;
+}
+.ajustes-sinc-opcion-on .ajustes-sinc-opcion-marca {
+  box-shadow: inset 0 0 0 4px #00a000;
+  background: #fff;
+}
+.ajustes-sinc-opcion-on {
+  background: #303030;
+}
+.ajustes-sinc-opcion-nombre {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ajustes-sinc-opcion-sub {
+  flex: none;
+  font-size: 12.5px;
+  color: #7a7a7a;
+}
+
+.ajustes-sinc-archivo {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #262626;
+}
+.ajustes-sinc-archivo-nombre {
+  font-size: 14.5px;
+  color: #e6e6e6;
+  overflow-wrap: anywhere;
+}
+
+/* ===== Historial ===== */
+.ajustes-sinc-hist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ajustes-sinc-hist-fila {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 14px 14px 16px;
+  border-radius: 12px;
+  background: #2f2f2f;
+}
+.ajustes-sinc-hist-actual {
+  background: #1e1e1e;
+  box-shadow: inset 0 0 0 1px rgba(0,128,0,.55);
+}
+.ajustes-sinc-hist-campos {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ajustes-sinc-hist-linea {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ajustes-sinc-campo {
+  min-width: 0;
+  margin: 0;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 7px;
+  outline: none;
+  background: rgba(0,0,0,.22);
+  color: #fff;
+  font: inherit;
+  caret-color: #1fe85c;
+  user-select: text;
+  -webkit-user-select: text;
+  transition: box-shadow .15s;
+}
+.ajustes-sinc-campo:focus {
+  box-shadow: inset 0 0 0 1.5px #008000;
+}
+.ajustes-sinc-campo::placeholder {
+  color: #6a6a6a;
+}
+.ajustes-sinc-campo-titulo {
+  flex: 1;
+  height: 34px;
+  font-size: 17px;
+  font-weight: 600;
+}
+.ajustes-sinc-campo-ruta {
+  height: 30px;
+  font-size: 13.5px;
+  color: #cfcfcf;
+}
+.ajustes-sinc-hist-sub {
+  padding-left: 2px;
+  font-size: 12.5px;
+  color: #8a8a8a;
+  overflow-wrap: anywhere;
+}
+.ajustes-sinc-chip-actual,
+.ajustes-sinc-chip-falta {
+  flex: none;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(0,128,0,.18);
+  color: #3fa63f;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ajustes-sinc-chip-falta {
+  background: rgba(194,91,91,.16);
+  color: #d07a7a;
+}
+.ajustes-sinc-hist-botones {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 84px;
+}
+
+.ajustes-sinc-vacio {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 14px;
+  background: #1e1e1e;
+}
+.ajustes-sinc-vacio-texto {
+  font-size: 14.5px;
+  line-height: 21px;
+  color: #a6a6a6;
+  text-wrap: pretty;
+}
+
+/* ===== Pantallas estrechas ===== */
+@media (max-width: 1099px) {
+  .ajustes-sinc-acciones {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ajustes-sinc-accion {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 14px;
+    row-gap: 2px;
+  }
+  .ajustes-sinc-accion .ajustes-sinc-accion-icono { grid-row: 1 / 3; }
+  .ajustes-sinc-accion-nombre { margin: 0; }
+  .ajustes-sinc-accion-texto { grid-column: 2; }
+  .ajustes-sinc-accion .ajustes-sinc-boton { grid-column: 3; grid-row: 1 / 3; margin: 0; }
+}
+@media (max-width: 899px) {
+  .ajustes-sinc-columnas {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 699px) {
+  .ajustes-sinc {
+    padding: 22px 16px 24px;
+  }
+  .ajustes-sinc-titulo {
+    font-size: 22px;
+  }
+  .ajustes-sinc-accion {
+    display: flex;
+    align-items: flex-start;
+  }
+  .ajustes-sinc-accion .ajustes-sinc-boton { margin-top: 6px; }
+  .ajustes-sinc-hist-fila {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ajustes-sinc-hist-botones {
+    flex-direction: row;
+  }
+}

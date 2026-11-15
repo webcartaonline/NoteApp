@@ -287,6 +287,14 @@ const AYUDA = [
         '- **Intro**: la siguiente. **Mayús + Intro**: la anterior.',
         '- **Esc**: cerrar la búsqueda.'
       ] },
+      { t: 'Lista de entidades', ic: 'lista-entidades', p: [
+        'El botón de la lista, a la izquierda del buscador, abre un panel al lado del texto con las entidades. Sirve para consultar un nombre, un valor o una ruta sin ir a buscarlos.',
+        '- Cada entidad enseña su **nombre**, su **descripción** y su **valor**. Su botón de copiar te deja elegir entre la **ruta entera** (lista para pegarla en cualquier hoja) o **solo el nombre** (para la misma hoja).',
+        '- Los botones **Agenda**, **Notas** y **Diagramas** eligen dónde buscar. Puedes activar varios a la vez. Sin ninguno, ves solo las entidades de la nota abierta.',
+        '- En el buscador de la lista, escribe parte del nombre para encontrar una entidad.',
+        '- Si empiezas con una barra `/`, salen los **títulos** para elegir uno. Con otra barra detrás del título salen sus **hojas**. Al elegir una hoja ves solo sus entidades.'
+      ], ficha: [['precio', 'Busca las entidades que tengan «precio» en el nombre'], ['/', 'Enseña los títulos para elegir uno'], ['/Viajes/', 'Enseña las hojas de «Viajes» y todas sus entidades'], ['/Viajes/Lisboa/', 'Enseña solo las entidades de la hoja «Lisboa»']],
+        nota: ['**Truco:** pulsa **Intro** para elegir el primer título o la primera hoja de la lista, y **Esc** para borrar lo escrito.'] },
       { t: 'Copiar la hoja entera', ic: 'clon', p: [
         'El botón de copiar, encima del texto, copia toda la hoja de dos formas:',
         '- **Copiar Markdown**: en formato estándar y con las menciones convertidas en su valor. Ideal para pegarlo en otras aplicaciones.',
@@ -326,6 +334,24 @@ const AYUDA = [
         'Cada carpeta es un **espacio de trabajo** con sus propias notas, agenda y diagramas, como cajones separados (por ejemplo, una carpeta para tus cosas y otra para las clases).',
         'Al abrir otra carpeta no se copia nada: si está vacía, empiezas de cero; si ya tiene datos, se cargan los suyos. La primera vez que conectas una carpeta vacía, te pregunta si quieres guardar ahí lo que tienes abierto.'
       ] },
+      { t: 'Cambiar, copiar o mudar un espacio', ic: 'sincronizacion', p: [
+        'En **Ajustes › Sincronización › Espacios de trabajo** ves qué espacio tienes abierto y tres botones:',
+        '- **Cambiar**: abre otra carpeta. Hace lo mismo que el botón de la carpeta.',
+        '- **Copiar**: hace una copia de todo en otra carpeta. Tú sigues en la de siempre y la copia queda en el Historial. Útil para empezar un espacio parecido sin partir de cero.',
+        '- **Mudar**: como cortar y pegar. Lleva todo a otra carpeta y, cuando comprueba que la copia está completa, borra de la anterior los archivos de NoteApp.'
+      ], nota: ['Para copiar o mudar, elige una carpeta vacía. Al mudar, los archivos que no son de NoteApp no se tocan nunca.'] },
+      { t: 'Historial de espacios', ic: 'reloj', p: [
+        'En **Ajustes › Sincronización › Historial** están las carpetas que has abierto en este navegador. Pulsa **Abrir** para cambiar a una al momento.',
+        'A cada una le puedes poner un **título** y apuntar su **ruta**, para saber cuál es cuál. La ruta la escribes tú, porque el navegador solo le enseña a NoteApp el nombre de la carpeta.',
+        '**Quitar** solo la borra de la lista: la carpeta y sus notas siguen en su sitio.'
+      ] },
+      { t: 'Exportar e importar', ic: 'exportar', p: [
+        'En **Ajustes › Sincronización › Exportar** guardas lo que elijas en **un solo archivo**: una nota, una agenda, un diagrama, todas las de una ventana o todo. El archivo lleva dentro las imágenes, así que puedes enviarlo de una vez o guardarlo como copia.',
+        'Con **Importar** vuelves a meter un archivo de esos en NoteApp. Lo que trae se añade a lo que ya tienes.',
+        'Si algo se llama igual que una nota tuya, te pregunta qué hacer:',
+        '- **Guardar las dos**: la importada se añade con un número al final, por ejemplo «Viajes (2)».',
+        '- **Sustituir la mía**: la importada ocupa el sitio de la tuya.'
+      ], nota: ['Funciona también en el móvil y en cualquier navegador, aunque no se puedan usar carpetas.'] },
       { t: 'Instalar NoteApp', p: [
         'Puedes instalar NoteApp como una aplicación: en el ordenador, con el icono de instalar de la barra de direcciones; en el móvil, con «Añadir a la pantalla de inicio».',
         'Después de abrirla una vez con internet, funciona también sin conexión.'

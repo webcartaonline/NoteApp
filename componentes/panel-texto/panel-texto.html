@@ -1,11 +1,15 @@
-<!-- Componente "panel-texto" de NoteApp. Panel de texto de la hoja (solo en Notas): barra superior (buscar,
-     ocultar entidades, copiar (menú: Markdown o literal) y exportar a Markdown), las líneas y el asa para cambiar el ancho.
+<!-- Componente "panel-texto" de NoteApp. Panel de texto de la hoja (solo en Notas): barra superior (lista de entidades,
+     buscar, ocultar entidades, copiar (menú: Markdown o literal) y exportar a Markdown), las líneas y el asa para cambiar el ancho.
+     El botón de la lista de entidades abre el panel del componente lista-entidades, a la izquierda de este.
      Si la hoja tiene las entidades ocultas (botón de ancho completo), ocupa todo el ancho y no muestra el asa.
      Los estilos fijos están en panel-texto.css; los que cambian ({{ }}) siguen aquí.
      Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
 <x-dc>
   <section ref="{{ panelRef }}" onMouseDown="{{ panelDown }}" class="panel-texto-seccion" style="flex:{{ panelFlex }};cursor:{{ panelCursor }};">
     <div onMouseDown="{{ stopBar }}" class="panel-texto-barra">
+      <button onClick="{{ leToggle }}" aria-label="Lista de entidades" aria-pressed="{{ leOn }}" title="{{ leTitle }}" class="panel-texto-boton">
+        <span class="panel-texto-boton-icono panel-texto-icono-lista" style="background:{{ leColor }};"></span>
+      </button>
       <div class="panel-texto-buscar">
         <span class="panel-texto-buscar-icono"></span>
         <input value="{{ searchQuery }}" onChange="{{ onSearchChange }}" onKeyDown="{{ onSearchKey }}" spellCheck="false" placeholder="Buscar en el texto…" aria-label="Buscar en el texto de la hoja" class="panel-texto-buscar-campo">

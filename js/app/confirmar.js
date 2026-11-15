@@ -4,6 +4,10 @@
 //   las notas del navegador: { kind: 'folder', name, gone, count } (ver fsPick y fsAnswer en js/app/carpeta.js)
 // - al pulsar el botón de copiar de algo copiable ('x', '' o celda copiable), para elegir cómo copiarlo:
 //   { kind: 'copy', md, lit, key, what } (md = en Markdown, lit = tal cual está escrito; ver askCopy)
+// - antes de mudar el espacio de trabajo a otra carpeta: { kind: 'move', name, from } (wsCopiar y wsMudarOk, en
+//   js/app/ajustes-sinc.js; la carpeta pendiente está en this._mv)
+// - al importar algo que se llama igual que una nota, agenda o diagrama que ya existe: { kind: 'import', i, total, name, w }
+//   (impPreguntar e impResponder, en js/app/ajustes-sinc.js; lo pendiente está en this._imp)
 NoteApp.partes.push(Base => class extends Base {
   // Abre la ventana para la hoja activa o la nota activa
   askDelete(kind) {
@@ -14,7 +18,12 @@ NoteApp.partes.push(Base => class extends Base {
       return { menu: false, focusId: null, confirm: { kind, noteId: n.id, sheetId: kind === 'sheet' ? n.activeSheet : null } };
     }, () => { const b = document.querySelector('[data-confirmar="cancelar"]'); if (b) b.focus(); });
   }
-  closeConfirm() { this._fsAsk = null; this.setState({ confirm: null }); }
+  closeConfirm() {
+    const c = this.state.confirm; this._fsAsk = null; this._mv = null;
+    // Cancelar una de las preguntas de la importación la cancela entera: no se añade nada.
+    if (c && c.kind === 'import') { this._imp = null; this.sincMsg('aviso', 'Importación cancelada: no se ha añadido ni cambiado nada.'); }
+    this.setState({ confirm: null });
+  }
   // Menú de copiar de lo copiable: { md, lit, key, what }. Al elegir, copia y el botón de copiar se pone verde.
   askCopy(c) {
     const a = document.activeElement; if (a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT')) a.blur();
@@ -42,10 +51,29 @@ NoteApp.partes.push(Base => class extends Base {
   }
   // Valores para la plantilla (se añaden en renderVals)
   confirmVals(s) {
-    const c = s.confirm, v = { confirmOpen: !!c, confirmFolder: !!c && c.kind === 'folder', confirmCopy: !!c && c.kind === 'copy', confirmDel: !!c && c.kind !== 'folder' && c.kind !== 'copy' };
+    const otras = ['folder', 'copy', 'move', 'import'];
+    const c = s.confirm, v = { confirmOpen: !!c, confirmFolder: !!c && c.kind === 'folder', confirmCopy: !!c && c.kind === 'copy', confirmMove: !!c && c.kind === 'move', confirmImport: !!c && c.kind === 'import', confirmDel: !!c && !otras.includes(c.kind) };
     if (!c) return v;
     v.confirmCancel = () => this.closeConfirm();
     v.confirmBack = e => { if (e.target === e.currentTarget) this.closeConfirm(); };
+    if (c.kind === 'move') {
+      v.confirmTitle = 'Mudar el espacio de trabajo';
+      v.confirmName = c.name;
+      v.confirmDetail = 'Carpeta nueva · antes en «' + c.from + '»';
+      v.confirmWarn = 'Se copiará todo a «' + c.name + '» y, cuando la copia esté comprobada, se borrarán de «' + c.from + '» los archivos de NoteApp (notas, agenda, diagramas e imágenes). Si en esa carpeta hay otros archivos, no se tocan; si queda vacía, se borra.';
+      v.confirmMoveOk = () => this.wsMudarOk();
+      return v;
+    }
+    if (c.kind === 'import') {
+      const que = { notas: 'una nota', agenda: 'una agenda', diagrama: 'un diagrama' }[c.w] || 'una nota';
+      v.confirmTitle = 'Ya tienes ' + que + ' con ese nombre';
+      v.confirmName = (c.name || '').trim() || 'Sin nombre';
+      v.confirmDetail = (c.total > 1 ? 'Coincidencia ' + (c.i + 1) + ' de ' + c.total + ' · ' : '') + WIN_TITLE[c.w];
+      v.confirmWarn = 'Guardar las dos: la tuya se queda como está y la importada se añade con un número al final del nombre, por ejemplo «' + impNombre(c.name, new Set()) + '». Sustituir la mía: la importada ocupa el sitio de la tuya, que se pierde.';
+      v.confirmBoth = () => this.impResponder('ambas');
+      v.confirmReplace = () => this.impResponder('sustituir');
+      return v;
+    }
     if (c.kind === 'copy') {
       const first = (c.lit.split('\n').find(l => l.trim()) || '').trim();
       v.confirmTitle = 'Copiar';

@@ -9,14 +9,21 @@ NoteApp.partes.push(Base => class extends Base {
     this.setState(st => ({ toasts: (st.toasts || []).concat({ id, title, body, when: '' }).slice(-4) }));
     setTimeout(() => this.setState(st => ({ toasts: (st.toasts || []).filter(t => t.id !== id) })), 7000);
   }
-  async fsPick() {
+  // otra = true: se quiere abrir OTRA carpeta sí o sí (botón «Cambiar» de Ajustes › Sincronización). Sin ello, si a la
+  // carpeta conectada le falta el permiso, el botón de la carpeta primero intenta recuperarlo.
+  async fsPick(otra) {
     if (!FS_OK) { this.fsToast('Guardado en carpeta no disponible', 'Este navegador no lo permite. Usa Chrome o Edge en un ordenador. Tus notas siguen guardadas en el navegador.'); return; }
     if (this._fsPicking) return;
-    if (this._fsDir && (this.state.fs === 'perm' || this.state.fs === 'err')) {
+    if (!otra && this._fsDir && (this.state.fs === 'perm' || this.state.fs === 'err')) {
       let p = 'denied'; try { p = await this._fsDir.requestPermission({ mode: 'readwrite' }); } catch (_) {}
       if (p === 'granted') { this.fsStart(this._fsDir, false); return; }
     }
     let dir; try { dir = await window.showDirectoryPicker({ id: 'noteapp', mode: 'readwrite' }); } catch (_) { return; }
+    await this.fsGo(dir);
+  }
+  // Abre el espacio de trabajo de una carpeta ya elegida (con el selector o desde el Historial de Ajustes › Sincronización).
+  async fsGo(dir) {
+    if (this._fsPicking) return;
     this._fsPicking = true;
     try {
       const prev = this.state.fsName, leave = await this.fsLeave(dir);
@@ -80,6 +87,7 @@ NoteApp.partes.push(Base => class extends Base {
       await fsSetHandle(dir);
       this._fsGone = '';
       this.setState({ fs: 'on', fsName: dir.name }, () => this.fsQueue());
+      this.histRecord(dir); // Historial de espacios de trabajo (js/app/ajustes-sinc.js)
       if (prev) this.fsToast(load ? 'Espacio de trabajo abierto' : 'Espacio de trabajo nuevo', (load ? 'Se han cargado las notas de «' + dir.name + '».' : '«' + dir.name + '» empieza vacío; todo lo que crees se guardará ahí.') + ' Las notas de «' + prev + '» siguen en su carpeta: para volver, pulsa el botón de la carpeta y elígela.');
       else if (empty && !load) this.fsToast('Espacio de trabajo nuevo', '«' + dir.name + '» empieza vacío; todo lo que crees se guardará ahí.');
       else if (chosen) this.fsToast('Carpeta conectada', load ? 'Se han cargado las notas guardadas en «' + dir.name + '». A partir de ahora todo se guarda ahí automáticamente.' : 'A partir de ahora todo se guarda automáticamente en «' + dir.name + '».');

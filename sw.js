@@ -1,7 +1,7 @@
 // Service worker de NoteApp: permite instalar la app y abrirla sin conexión.
 // Siempre intenta cargar la versión más reciente; la copia guardada solo se usa sin conexión.
 // Si añades o quitas archivos de la app, actualiza la lista APP y sube el número de VERSION.
-const VERSION = 'noteapp-v27';
+const VERSION = 'noteapp-v28';
 const APP = [
   '/',
   '/index.html',
@@ -19,6 +19,7 @@ const APP = [
   '/js/motor/formas.js',
   '/js/motor/guardado.js',
   '/js/motor/imagenes.js',
+  '/js/motor/espacios.js',
   '/js/motor/calculos.js',
   '/js/app/estado-inicial.js',
   '/js/app/base.js',
@@ -36,6 +37,8 @@ const APP = [
   '/js/app/ajustes.js',
   '/js/app/ajustes-ayuda.js',
   '/js/app/ajustes-actualizaciones.js',
+  '/js/app/ajustes-sinc.js',
+  '/js/app/lista-entidades.js',
   '/js/app/lineas.js',
   '/js/app/imagen-editor.js',
   '/js/app/cursor.js',
@@ -93,11 +96,17 @@ const APP = [
   '/componentes/ajustes-ayuda/ajustes-ayuda.css',
   '/componentes/ajustes-actualizaciones/ajustes-actualizaciones.html',
   '/componentes/ajustes-actualizaciones/ajustes-actualizaciones.css',
+  '/componentes/ajustes-sinc/ajustes-sinc.html',
+  '/componentes/ajustes-sinc/ajustes-sinc.css',
+  '/componentes/lista-entidades/lista-entidades.html',
+  '/componentes/lista-entidades/lista-entidades.css',
   '/componentes/diagrama/diagrama.html',
   '/componentes/diagrama/diagrama.css',
   '/assets/agregar-activo.svg',
   '/assets/ancho-completo.svg',
   '/assets/buscar.svg',
+  '/assets/lista-entidades.svg',
+  '/assets/mudar.svg',
   '/assets/exportar.svg',
   '/assets/diagrama.svg',
   '/assets/forma-proceso.svg',
