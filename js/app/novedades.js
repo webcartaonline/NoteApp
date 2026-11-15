@@ -27,6 +27,13 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '3.5.2.0',
+    fecha: '12 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Las rutas dicen en qué ventana buscar', texto: 'Una ruta sin nada delante busca ahora solo en la ventana en la que la escribes: desde Notas, en Notas; desde la Agenda, en la Agenda; desde el Diagrama, en el Diagrama. Para usar una entidad de otra ventana, empieza la ruta con su nombre (Notas, Agenda o Diagrama). Por ejemplo, desde una nota: un igual seguido de /Agenda/Proyecto final/Reuniones/Fecha_1. Así no hay confusión aunque una nota y una agenda se llamen igual. No tienes que cambiar nada: las rutas que ya tenías escritas se ponen al día solas.', tipos: ['estructural'] }
+    ]
+  },
+  {
     version: '3.5.1.0',
     fecha: '11 de noviembre de 2026',
     cambios: [
@@ -62,19 +69,6 @@ const NA_NOVEDADES = [
     cambios: [
       { titulo: 'El cursor, en su sitio', texto: 'Al escribir dentro de una forma del diagrama, la barra que marca dónde escribes salía en otro lugar (por ejemplo, a la izquierda de la palabra en vez de al final). Ahora aparece justo detrás de la última letra que escribes.' },
       { titulo: 'Un cursor que se ve mejor', texto: 'La barra de escritura es más gruesa y de un verde más claro, en las notas, en los textos y en el diagrama, para que no la pierdas de vista.' }
-    ]
-  },
-  {
-    version: '1.0',
-    fecha: '3 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Cada carpeta, su propio espacio', texto: 'Si conectas otra carpeta, se abre con sus propias notas, agenda y diagramas, como cajones separados. Nada se mezcla ni se copia de una a otra.' },
-      { titulo: 'Te preguntamos antes de guardar', texto: 'La primera vez que conectas una carpeta vacía, puedes elegir si guardar ahí lo que tienes abierto o empezar de cero.' },
-      { titulo: 'Copiar un trozo dentro de una frase', texto: "Escribe algo entre comillas simples en medio de una línea, por ejemplo Clave: 'abc123', y saldrá en un recuadro con su botón de copiar." },
-      { titulo: 'Combinar formatos en una línea', texto: 'Ahora puedes hacer, por ejemplo, un título numerado (1. ## Título) o una anotación dentro de un punto de lista (- > nota).' },
-      { titulo: 'Más formato en lo copiable', texto: 'Los recuadros copiables admiten títulos, listas y anotaciones. Al copiar, se copia tal como se ve.' },
-      { titulo: 'Dos formas de copiar la hoja', texto: 'El botón de copiar, encima del texto, copia la hoja en Markdown o tal cual, con todos sus símbolos.' },
-      { titulo: 'Esta ventana', texto: 'Cada vez que NoteApp se actualice, al abrirla verás aquí lo que ha cambiado.' }
     ]
   }
 ];

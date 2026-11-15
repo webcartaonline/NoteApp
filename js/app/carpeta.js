@@ -98,14 +98,15 @@ NoteApp.partes.push(Base => class extends Base {
   fsApply(data, fresh) {
     const m = data.meta || {}, v = m.vista || {};
     _uid = Math.max(_uid, naMaxId([data.notas, data.agenda, data.diagrama]));
-    const up = !(m.config && m.config.mkdV2), mig = list => refMigDeep(up ? mkdMigNotes(list) : list);
+    const up = !(m.config && m.config.mkdV2), mig = list => refMigDeep(up ? mkdMigNotes(list) : list), rmig = !(m.config && m.config.rutasV3);
     const act = (list, sec) => { const id = sec && sec.activa; return list.some(n => n.id === id) ? id : list.length ? list[0].id : null; };
     // Cada ventana con sus notas de la carpeta. Si la carpeta no tiene una sección (p. ej. Diagramas en una
     // carpeta de antes): en la misma carpeta se mantiene la que ya había en la app; en otro espacio de trabajo, vacía.
-    const now = winsOf(this.state), all = {};
+    const now = winsOf(this.state); let all = {};
     WINS.forEach(k => { const list = data[k]; all[k] = Array.isArray(list) ? { notes: mig(list), activeNote: act(list, m[k]) } : fresh ? WIN_EMPTY() : now[k]; });
+    if (rmig) all = rutasMig(all, !!(m.config && m.config.rutasV2)); // rutas a otra ventana sin su palabra delante (renombrar.js)
     const mode = WINS.includes(v.mode) ? v.mode : 'notas';
-    const config = fresh ? { ...(m.config || {}), ...(this.state.config || {}), mkdV2: true } : up ? { ...(m.config || {}), mkdV2: true } : (m.config || {});
+    const config = { ...(fresh ? { ...(m.config || {}), ...(this.state.config || {}) } : (m.config || {})), mkdV2: true, rutasV3: true }; delete config.rutasV2;
     this._rev = +m.rev || 0; this._naHold = true; fsSetSavedRev(this._rev);
     this.setState({ ...winPatch(all, mode), clean: typeof v.clean === 'boolean' ? v.clean : this.state.clean, calView: v.calView || {}, lsel: v.lsel || {}, config, ...this.fsReset() });
   }
@@ -113,7 +114,7 @@ NoteApp.partes.push(Base => class extends Base {
   fsBlank() {
     const all = {}; WINS.forEach(k => { all[k] = WIN_EMPTY(); });
     this._rev = Date.now(); this._naHold = true;
-    this.setState({ ...winPatch(all, this.state.mode), calView: {}, lsel: {}, config: { ...(this.state.config || {}), mkdV2: true }, ...this.fsReset() });
+    this.setState({ ...winPatch(all, this.state.mode), calView: {}, lsel: {}, config: { ...(this.state.config || {}), mkdV2: true, rutasV3: true }, ...this.fsReset() });
   }
   fsQueue() {
     if (!this._fsDir || this.state.fs !== 'on') return;

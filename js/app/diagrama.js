@@ -157,7 +157,7 @@ NoteApp.partes.push(Base => class extends Base {
       if (!nn || !hn || /[\/=\n]/.test(nn + hn)) return; // la ruta no se podría escribir
       const names = (h.entities || []).filter(e => !NOVAL(e.type) && e.name).map(e => e.name).concat(sheetFlags(h).map(f => f.name));
       names.forEach(name => {
-        const path = '=/' + nn + '/' + hn + '/' + name;
+        const path = '=/' + PATH_WINS[k] + '/' + nn + '/' + hn + '/' + name; // desde el Diagrama, siempre con la ventana delante (Notas/ o Agenda/)
         if (nq && !norm(WIN_TITLE[k] + ' ' + nn + ' ' + hn + ' ' + name).includes(nq)) return;
         out.push({ path, win: WIN_TITLE[k], where: nn + ' › ' + hn, name });
       });

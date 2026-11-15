@@ -118,7 +118,8 @@ const UNIT_MS = { d: 864e5, h: 36e5, m: 6e4, s: 1e3 }, UNIT_SFX = { d: ' d', h: 
 function countUnit(a, u) { const order = ['d', 'h', 'm', 's']; let i = Math.max(0, order.indexOf(u)); while (i < 3 && Math.floor(a / UNIT_MS[order[i]]) === 0) i++; return order[i]; }
 const normN = s => String(s || '').trim().replace(/\s+/g, ' ').toLowerCase();
 function makeWorld(s) {
-  // =Nombre busca solo en la hoja donde se escribe; =/Nota/Hoja/Entidad busca en cualquier nota (primero en la ventana de quien la escribe).
+  // =Nombre busca solo en la hoja donde se escribe. Una ruta sin palabra delante (=/Nota/Hoja/Entidad) busca solo en la
+  // ventana de la hoja donde se escribe; con =/Notas/…, =/Agenda/… o =/Diagrama/… busca solo en esa (pathInfo, menciones.js).
   const entries = [], sheetW = new Map();
   // Primero las entidades del panel y después las casillas-entidad del texto: si se repite un nombre, gana la del panel.
   winLists(s).forEach(([w, list]) => list.forEach(n => n.sheets.forEach(x => { // w = ventana (notas, agenda, diagrama)
@@ -136,9 +137,9 @@ function makeWorld(s) {
     memo.set(id, v); return v;
   };
   const findPath = (key, w) => {
-    const k = w + key; if (pmemo.has(k)) return pmemo.get(k);
-    const p = key.slice(2).split('/').map(normN); let en = null;
-    if (p.length === 3) { const hits = entries.filter(x => x.note === p[0] && x.sheet === p[1] && x.e.name.toLowerCase() === p[2]); en = hits.find(x => x.w === w) || hits[0] || null; }
+    const pi = pathInfo(key), win = pi && (pi.w || w), k = win + key; if (pmemo.has(k)) return pmemo.get(k);
+    let en = null;
+    if (pi) { const p = pi.p.map(normN); en = entries.find(x => x.w === win && x.note === p[0] && x.sheet === p[1] && x.e.name.toLowerCase() === p[2]) || null; }
     pmemo.set(k, en); return en;
   };
   const at = sid => {

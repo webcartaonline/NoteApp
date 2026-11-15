@@ -26,9 +26,10 @@ function naLoad(base) {
     NA_REV = +d.rev || 0;
     const out = { ...base }; NA_KEEP.forEach(k => { if (d[k] !== undefined && d[k] !== null) out[k] = d[k]; });
     if (!out.notes.some(n => n.id === out.activeNote)) out.activeNote = out.notes.length ? out.notes[0].id : null;
-    const all = winsOf(out), mig = !(d.config && d.config.mkdV2);
+    let all = winsOf(out); const mig = !(d.config && d.config.mkdV2), rmig = !(d.config && d.config.rutasV3);
     WINS.forEach(k => { all[k] = { ...all[k], notes: refMigDeep(mig ? mkdMigNotes(all[k].notes) : all[k].notes) }; });
-    if (mig) out.config = { ...(d.config || {}), mkdV2: true };
+    if (rmig) all = rutasMig(all, !!(d.config && d.config.rutasV2)); // rutas a otra ventana sin su palabra delante (renombrar.js)
+    if (mig || rmig) { out.config = { ...(d.config || {}), mkdV2: true, rutasV3: true }; delete out.config.rutasV2; }
     delete out.other;
     return { ...out, ...winPatch(all, out.mode) };
   } catch (_) { return base; }

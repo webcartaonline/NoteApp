@@ -131,7 +131,7 @@ const AYUDA = [
         nota: ["Un apóstrofo, como en don't o en l'aigua, nunca crea un copiable."] },
       { t: 'Menciones', ic: 'funcion', p: [
         'Escribe un igual pegado al nombre de una entidad y verás su valor, que se actualiza solo cuando cambia. Por ejemplo, `=Precio`.',
-        'Para una entidad de otra hoja o de otra nota, escribe su ruta: `=/Nota/Hoja/Entidad`. Así puedes usar también datos de la Agenda en Notas, y al revés.',
+        'Para una entidad de otra hoja o de otra nota, escribe su ruta: `=/Nota/Hoja/Entidad`. Busca en la misma ventana en la que escribes; para otra ventana, empieza con su nombre: `=/Agenda/Nota/Hoja/Entidad`.',
         'Delante del igual no puede haber nada pegado: en `2+2=4` o en una dirección web no se crea ninguna mención.'
       ], ej: ['Precio: =Precio €', 'Total: **=Subtotal €**', 'Desde otra hoja: =/Mi nota/Compra/Subtotal €'],
         nota: ['Mientras escribes el nombre tras el igual, cada espacio se convierte en guion bajo. Pulsa Esc, o dos espacios seguidos, para terminar el nombre.'] },
@@ -191,8 +191,11 @@ const AYUDA = [
       ] },
       { t: 'Entidades de otras hojas', ic: 'funcion', p: [
         'Una mención normal solo busca en la misma hoja. Para una entidad de otra hoja o de otra nota, escribe su **ruta**: un igual y, después, la nota, la hoja y la entidad, cada una con una barra delante.',
-        'La nota y la hoja se escriben con su nombre tal cual, con espacios si los tienen. Las rutas funcionan en el texto y en las fórmulas, y sirven también para usar datos de la Agenda.'
-      ], ej: ['Total de la compra: =/Mi nota/Compra/Subtotal €'] }
+        'La nota y la hoja se escriben con su nombre tal cual, con espacios si los tienen. Las rutas funcionan en el texto y en las fórmulas.',
+        'Sin nada delante, la ruta busca en la **misma ventana** en la que escribes: desde Notas, en Notas; desde la Agenda, en la Agenda; desde el Diagrama, en el Diagrama.',
+        'Para buscar en otra ventana, empieza la ruta con su nombre: **Notas**, **Agenda** o **Diagrama**. Por ejemplo, desde una nota: `=/Agenda/Proyecto final/Reuniones/Fecha_1`.'
+      ], ej: ['Total de la compra: =/Mi nota/Compra/Subtotal €', 'Lo mismo, diciendo la ventana: =/Notas/Mi nota/Compra/Subtotal €'],
+        nota: ['Así nunca hay dudas: aunque una nota y una agenda se llamen igual, la palabra de delante dice cuál es.'] }
     ]
   },
   {
@@ -227,7 +230,7 @@ const AYUDA = [
         'Igual que en Notas: un título que ordena el panel en partes, o un espacio en blanco si lo dejas sin título.'
       ] },
       { t: 'Fechas en Notas y Diagrama', ic: 'funcion', p: [
-        'Las entidades de la Agenda se pueden citar desde Notas o Diagrama con su ruta, por ejemplo `=/Viajes/Lisboa/Faltan_Vuelo`. Así una nota puede decir cuántos días faltan para algo.'
+        'Las entidades de la Agenda se pueden citar desde Notas o Diagrama con su ruta, que empieza con la palabra Agenda: por ejemplo, `=/Agenda/Viajes/Lisboa/Faltan_Vuelo`. Así una nota puede decir cuántos días faltan para algo. Dentro de la propia Agenda no hace falta la palabra.'
       ] }
     ]
   },
@@ -270,8 +273,8 @@ const AYUDA = [
         ['Esc', 'Salir o quitar la selección']
       ] },
       { t: 'Datos de Notas y Agenda', ic: 'funcion', p: [
-        'Las formas pueden mostrar valores de Notas y Agenda, que se actualizan solos. Selecciona una forma y pulsa el botón **=** para buscar la entidad: se escribe su ruta.'
-      ], ej: ['**Gasto previsto**', '=/Mi nota/Compra/Subtotal €'] }
+        'Las formas pueden mostrar valores de Notas y Agenda, que se actualizan solos. Selecciona una forma y pulsa el botón **=** para buscar la entidad: se escribe su ruta, que empieza con el nombre de su ventana (Notas o Agenda).'
+      ], ej: ['**Gasto previsto**', '=/Notas/Mi nota/Compra/Subtotal €'] }
     ]
   },
   {

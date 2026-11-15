@@ -11,7 +11,7 @@ function refIndex(s) {
     sheetFlags(x).forEach(f => add('f:' + x.id + ':' + f.name, f.name)); // casillas-entidad del texto
   })));
   return (ref, sid, w) => {
-    if (isPath(ref)) { const p = ref.slice(2).split('/').map(normN); if (p.length !== 3) return null; const hits = entries.filter(x => x.note === p[0] && x.sheet === p[1] && x.name.toLowerCase() === p[2]); return hits.find(x => x.w === w) || hits[0] || null; }
+    if (isPath(ref)) { const pi = pathInfo(ref); if (!pi) return null; const p = pi.p.map(normN), win = pi.w || w; return entries.find(x => x.w === win && x.note === p[0] && x.sheet === p[1] && x.name.toLowerCase() === p[2]) || null; }
     const m = bySheet.get(sid); return (m && m.get(ref)) || null;
   };
 }
@@ -66,9 +66,34 @@ function renameFix(before, kind, id, v) {
   const R = refIndex(before), badSeg = /[\/=\n]/.test(v);
   return (ref, sid, w) => {
     const en = R(ref, sid, w); if (!en) return null;
-    if (kind === 'ent') { if (en.id !== id) return null; if (!isPath(ref)) return v; const p = ref.slice(2).split('/'); p[2] = v; return '=/' + p.join('/'); }
+    if (kind === 'ent') { if (en.id !== id) return null; if (!isPath(ref)) return v; const pi = pathInfo(ref), p = pi.p.slice(); p[2] = v; return pathJoin(pi, p); }
     if (!isPath(ref) || badSeg) return null;
     const k = kind === 'note' ? 0 : 1; if ((kind === 'note' ? en.nid : en.sid) !== id) return null;
-    const p = ref.slice(2).split('/'); p[k] = v; return '=/' + p.join('/');
+    const pi = pathInfo(ref), p = pi.p.slice(); p[k] = v; return pathJoin(pi, p); // conserva Notas/, Agenda/ o Diagrama/ delante
   };
+}
+
+// ===== Rutas de antes de las rutas con ventana (12/11/2026) =====
+// Antes, =/Nota/Hoja/Entidad buscaba en Notas y en la Agenda (primero en la ventana de quien la escribía). Ahora, sin
+// palabra delante, solo busca en la ventana de quien la escribe. Para que nada deje de funcionar, las rutas guardadas que
+// apuntaban a otra ventana reciben su palabra: desde una nota a la Agenda, =/Agenda/…; desde la Agenda a Notas, =/Notas/….
+// Se hace una sola vez por datos (config.rutasV3, en naLoad y fsApply). v2 = los datos ya pasaron por la versión de prueba
+// del mismo día (config.rutasV2: sin palabra = siempre Notas). all = { notas: { notes, activeNote }, agenda, diagrama };
+// devuelve lo mismo, cambiado.
+function rutasMig(all, v2) {
+  const entries = [];
+  WINS.forEach(w => ((all[w] && all[w].notes) || []).forEach(n => (n.sheets || []).forEach(x => {
+    const add = name => entries.push({ w, name: String(name).toLowerCase(), note: normN(n.name), sheet: normN(x.name) });
+    (x.entities || []).forEach(e => { if (!NOVAL(e.type) && e.name) add(e.name); });
+    sheetFlags(x).forEach(f => add(f.name));
+  })));
+  if (!entries.length) return all;
+  const fix = (ref, sid, w) => {
+    const pi = isPath(ref) && pathInfo(ref); if (!pi || pi.pre) return null; // solo las rutas sin palabra delante
+    const p = pi.p.map(normN), hits = entries.filter(x => x.note === p[0] && x.sheet === p[1] && x.name === p[2]);
+    const en = v2 ? hits.find(x => x.w === 'notas') : hits.find(x => x.w === w) || hits[0]; // la regla de antes
+    return en && en.w !== w ? '=/' + PATH_WINS[en.w] + '/' + ref.slice(2) : null;
+  };
+  const get = k => all[k] || WIN_EMPTY(), s = { mode: 'notas', notes: get('notas').notes || [], activeNote: get('notas').activeNote, wins: { agenda: get('agenda'), diagrama: get('diagrama') } };
+  return winsOf(renameIn(s, fix));
 }

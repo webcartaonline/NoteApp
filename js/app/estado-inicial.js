@@ -141,7 +141,7 @@ function naEstadoInicial() {
     'Un título entre líneas que ordena el panel en secciones. El botón de la T grande, a la izquierda del menú, destaca el título más grande y en verde. Si dejas el título vacío, el separador se convierte en un espacio en blanco. No produce ningún valor.',
     "## Rutas: entidades de otras hojas y notas",
     "Para citar una entidad de otra hoja o de otra nota, escribe un igual seguido de su ruta: \\=/Nota/Hoja/Entidad. Cada barra va pegada al nombre que la sigue. La nota y la hoja se escriben con su nombre original, con espacios si los tienen; la entidad no lleva espacios, así que la ruta termina en el primer espacio tras su nombre. El precio de esta guía vale =/Conoce NoteApp/Guía de entidades/Precio.",
-    "Funciona igual con la Agenda: el vuelo sale el **=/Viajes/Lisboa/Vuelo_Lisboa**. Si en Notas y en Agenda hay notas con el mismo nombre, se usa la de la ventana en la que escribes la ruta."
+    "Sin nada delante, la ruta busca en la misma ventana en la que escribes (aquí, en Notas). Para otra ventana, empieza la ruta con su nombre (Notas, Agenda o Diagrama): el vuelo sale el **=/Agenda/Viajes/Lisboa/Vuelo_Lisboa**."
   ], guiaEnt), mkSheet('Demostración', [
     '# Viaje a Lisboa',
     'Llevamos gastados =Gastos euros entre **=Personas personas**, así que cada uno pone *=Por_Persona* euros.',
@@ -155,7 +155,7 @@ function naEstadoInicial() {
     '## Resumen para el grupo',
     '> El hotel supone el =Peso_Hotel % del gasto total.',
     '> Si añadimos la cena, la propina sería de =Propina euros.',
-    'Faltan =/Viajes/Lisboa/Faltan_Vuelo días para el vuelo: **=/Viajes/Lisboa/Aviso_Maleta**',
+    'Faltan =/Agenda/Viajes/Lisboa/Faltan_Vuelo días para el vuelo: **=/Agenda/Viajes/Lisboa/Aviso_Maleta**',
     "''",
     'Total del viaje: =Gastos euros',
     'Seguro: =Seguro euros',
@@ -173,14 +173,14 @@ function naEstadoInicial() {
     { id: uid('e'), type: 'text', lines: mkLines(['## Antes de salir', '- Pasaporte y DNI', '- Cargador y adaptador', 'Faltan **=Faltan_Vuelo días**: =Aviso_Maleta']) },
     newEnt('toggle', 'Maleta_Hecha', { desc: 'Maleta preparada', on: false }),
     newEnt('logic', 'Aviso_Maleta', { desc: 'Recordatorio', a: 'Maleta_Hecha', cmp: '=', b: 'True', out: 'Todo listo', alts: [{ id: uid('b'), a: 'Faltan_Vuelo', cmp: '<=', b: '2', out: '¡Haz la maleta!' }], els: 'Hay tiempo' }),
-    newEnt('logic', 'Presupuesto', { desc: 'Estado del presupuesto', a: '=/Conoce NoteApp/Demostración/En_Presupuesto', cmp: '=', b: 'True', out: 'Dentro del presupuesto', els: 'Revisar gastos' })
+    newEnt('logic', 'Presupuesto', { desc: 'Estado del presupuesto', a: '=/Notas/Conoce NoteApp/Demostración/En_Presupuesto', cmp: '=', b: 'True', out: 'Dentro del presupuesto', els: 'Revisar gastos' })
   ]), pag = mkSheet('Pagos', [''], [
     newEnt('date', 'Pago_Hotel', { desc: 'Límite para pagar el hotel', date: inDays(4), time: '23:59' }),
     newEnt('count', 'Plazo_Hotel', { desc: 'Tiempo para pagar el hotel', target: 'Pago_Hotel', unit: 'txt' }),
     newEnt('notif', 'Aviso_Pago', { desc: 'Pagar el hotel', target: 'Pago_Hotel', d: '', h: '12' })
   ]);
   const anotes = [{ id: uid('n'), name: 'Viajes', sheets: [lis, pag], activeSheet: lis.id }];
-  return naLoad({ wins: { agenda: { notes: anotes, activeNote: anotes[0].id }, diagrama: naEjemplo('diagrama') }, calView: {}, now: Date.now(), lsel: {}, copied: null, search: null, exported: null, entMenu: null, field: null, colMenu: null, menu: false, mode: 'notas', notes, activeNote: notes[0].id, editing: null, draft: '', dragging: false, clean: true, focusId: null, config: { mkdV2: true }, fs: 'off', fsName: '' });
+  return naLoad({ wins: { agenda: { notes: anotes, activeNote: anotes[0].id }, diagrama: naEjemplo('diagrama') }, calView: {}, now: Date.now(), lsel: {}, copied: null, search: null, exported: null, entMenu: null, field: null, colMenu: null, menu: false, mode: 'notas', notes, activeNote: notes[0].id, editing: null, draft: '', dragging: false, clean: true, focusId: null, config: { mkdV2: true, rutasV3: true }, fs: 'off', fsName: '' });
 }
 
 // Ejemplo de la ventana Diagrama (también se crea si los datos guardados son de antes de esta ventana).
@@ -198,18 +198,18 @@ function naEjemplo(win) {
   const g6 = N('proceso', 40, 680, 260, 90, 'Se conecta con la forma donde la sueltes');
   const g7 = N('nota', 720, 40, 340, 310, ['### Editar', '- **Vista sucia**: editar · **vista limpia**: solo mirar', '- **Doble clic**: escribir en una forma (formato MKD)', '- **Arrastrar**: mover · **Mayús + clic**: elegir varias', '- **Supr**: borrar · **Ctrl+D**: duplicar', '- **Ctrl+Z / Ctrl+Y**: deshacer / rehacer']);
   const g8 = N('nota', 720, 390, 340, 190, ['### Moverse por el lienzo', '- Arrastra el fondo para desplazarte', '- **Ctrl + rueda**: zoom', '- **Ajustar** (abajo a la derecha): verlo todo'], 'azul');
-  const g9 = N('nota', 720, 620, 340, 230, ['### Menciones', 'Las formas pueden mostrar entidades de Notas y Agenda: cada persona paga **=/Conoce NoteApp/Demostración/Por_Persona** €.', 'Selecciona una forma y pulsa **=** para buscarlas.'], 'verde');
+  const g9 = N('nota', 720, 620, 340, 230, ['### Menciones', 'Las formas pueden mostrar entidades de Notas y Agenda: cada persona paga **=/Notas/Conoce NoteApp/Demostración/Por_Persona** €.', 'Selecciona una forma y pulsa **=** para buscarlas.'], 'verde');
   const guia = mkDiagSheet('Guía', [g1, g2, g3, g4, g5, g6, g7, g8, g9], [E(g1, g2), E(g2, g3), E(g3, g4), E(g4, g5, 'Sí'), E(g4, g6, 'No')]);
   // Hoja 2: ejemplo con menciones a la nota «Conoce NoteApp» y a la agenda «Viajes»
   const z = N('zona', 20, 20, 700, 770, '#### Viaje a Lisboa');
   const v1 = N('inicio', 60, 80, 220, 56, 'Preparar el viaje');
-  const v2 = N('proceso', 40, 190, 260, 90, 'Gasto por persona: **=/Conoce NoteApp/Demostración/Por_Persona €**');
-  const v3 = N('decision', 30, 340, 280, 150, ['¿Cabe en el presupuesto?', '=/Conoce NoteApp/Demostración/En_Presupuesto']);
+  const v2 = N('proceso', 40, 190, 260, 90, 'Gasto por persona: **=/Notas/Conoce NoteApp/Demostración/Por_Persona €**');
+  const v3 = N('decision', 30, 340, 280, 150, ['¿Cabe en el presupuesto?', '=/Notas/Conoce NoteApp/Demostración/En_Presupuesto']);
   const v4 = N('proceso', 400, 375, 260, 80, 'Revisar los gastos', 'rojo');
   const v5 = N('proceso', 40, 560, 260, 80, 'Reservar vuelo y hotel', 'verde');
   const v6 = N('inicio', 60, 700, 220, 56, 'Listo para viajar');
-  const v7 = N('dato', 770, 560, 300, 80, 'Faltan **=/Viajes/Lisboa/Faltan_Vuelo** días para el vuelo');
-  const v8 = N('nota', 770, 330, 300, 130, ['La agenda dice:', '**=/Viajes/Lisboa/Presupuesto**']);
+  const v7 = N('dato', 770, 560, 300, 80, 'Faltan **=/Agenda/Viajes/Lisboa/Faltan_Vuelo** días para el vuelo');
+  const v8 = N('nota', 770, 330, 300, 130, ['La agenda dice:', '**=/Agenda/Viajes/Lisboa/Presupuesto**']);
   const ej = mkDiagSheet('Ejemplo: viaje', [z, v1, v2, v3, v4, v5, v6, v7, v8], [E(v1, v2), E(v2, v3), E(v3, v4, 'No'), E(v4, v2, 'Ajustar', { dash: true }), E(v3, v5, 'Sí'), E(v5, v6), E(v5, v7, 'Cuenta atrás', { dash: true, head: 'none' })]);
   guia.view = { x: 30, y: 20, z: 0.8 }; ej.view = { x: 30, y: 20, z: 0.8 };
   const notes = [{ id: uid('n'), name: 'Conoce Diagrama', sheets: [guia, ej], activeSheet: guia.id }];
