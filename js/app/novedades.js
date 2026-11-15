@@ -27,6 +27,14 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '4.1.1.0',
+    fecha: '15 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Diagramas entidad-relación', texto: 'En Diagrama hay una forma nueva, la Tabla, para planear bases de datos. Cada tabla tiene su nombre, una descripción y sus campos, y cada campo puede llevar su clave (PK, FK, PK FK o UQ) y los valores que admite. Haz doble clic en una tabla para editarla: Intro añade un campo y el botón de la izquierda de cada campo cambia su clave. El color elige la cabecera, y hay un color nuevo, el blanco.', tipos: ['visual', 'estructural'] },
+      { titulo: 'Relaciones con 1 y N', texto: 'Al unir dos tablas, la línea sale en ángulo recto y con un 1 en un extremo y una N en el otro, para ver de un vistazo que, por ejemplo, un restaurante tiene muchas mesas. Si varias líneas salen del mismo lado de una tabla, se reparten solas para no montarse. Al seleccionar una línea puedes cambiar el 1 y la N, darles la vuelta o ponerla recta. También vale para las demás formas.', tipos: ['visual'] }
+    ]
+  },
+  {
     version: '4.0.0.0',
     fecha: '15 de noviembre de 2026',
     cambios: [
@@ -59,15 +67,6 @@ const NA_NOVEDADES = [
       { titulo: 'Cambia el tamaño y recorta tus imágenes', texto: 'En la vista para editar, cada imagen se ve debajo de su línea. Haz clic en ella y salen unos puntos: los de las esquinas la hacen más grande o más pequeña sin deformarla, y los de los lados la recortan. Con doble clic vuelve a su tamaño original, sin recorte.', tipos: ['visual'] },
       { titulo: 'Ordena tus notas', texto: 'Igual que con las hojas, al elegir una nota salen dos flechas pequeñas a los lados de su nombre, arriba. Púlsalas para moverla a la izquierda o a la derecha y dejar tus notas en el orden que quieras.', tipos: ['visual'] },
       { titulo: 'Novedades por colores', texto: 'En Ajustes › Actualizaciones, cada novedad lleva a su izquierda una raya de color según su tipo: verde para las mejoras visuales (lo que ves), azul para las estructurales (cambios por dentro) y naranja para las correcciones (arreglos). A la derecha tienes la leyenda de los colores. Si una novedad es de varios tipos a la vez, sale una sola vez, con una raya por cada tipo.', tipos: ['visual'] }
-    ]
-  },
-  {
-    version: '3.0.0.0',
-    fecha: '9 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Página de Ajustes', texto: 'El botón del engranaje, abajo a la izquierda, abre los Ajustes. De momento tienen dos apartados, Ayuda y Actualizaciones; los demás llegarán poco a poco.' },
-      { titulo: 'Ayuda siempre a mano', texto: 'En Ajustes › Ayuda tienes guías con ejemplos de todo: el formato del texto, las entidades, la Agenda, el Diagrama, las herramientas y cómo se guarda todo. Puedes copiar cada ejemplo y pegarlo en una nota para probarlo.' },
-      { titulo: 'Tu versión y su historial', texto: 'En Ajustes › Actualizaciones ves qué versión usas, puedes comprobar si ha salido una más nueva y repasar las novedades de las últimas versiones.' }
     ]
   }
 ];

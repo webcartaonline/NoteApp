@@ -246,7 +246,8 @@ const AYUDA = [
         '- **Dato**: algo que entra o sale, como un documento o un número.',
         '- **Nota**: un comentario al margen.',
         '- **Texto libre**: texto sin borde.',
-        '- **Zona**: un recuadro que agrupa formas; al moverla, se mueven las de dentro.'
+        '- **Zona**: un recuadro que agrupa formas; al moverla, se mueven las de dentro.',
+        '- **Tabla**: una tabla con sus campos, para los diagramas entidad-relación (mira más abajo).'
       ] },
       { t: 'Conectar formas', ic: 'diagrama', p: [
         'Selecciona una forma y arrastra desde uno de sus **puntos verdes** hasta otra forma. Si lo sueltas en un hueco, se crea una forma nueva ya conectada.',
@@ -257,6 +258,17 @@ const AYUDA = [
         'Con una forma seleccionada aparece su barra: colores, cambiar de forma, editar el texto, buscar menciones (botón **=**), duplicar y borrar.',
         'El **cuadrado verde** de la esquina cambia su tamaño. Si el texto no cabe, la forma crece sola.'
       ] },
+      { t: 'Diagramas entidad-relación', ic: 'forma-tabla', p: [
+        'Sirven para planear una base de datos: qué tablas hay, qué campos tiene cada una y cómo se relacionan. El botón **Tabla** de la barra lateral añade una.',
+        '**Doble clic** en una tabla para editarla. Arriba van su nombre y, si quieres, para qué sirve. Debajo, sus campos:',
+        '- El botón de la izquierda de cada campo cambia su **clave** con cada clic: sin clave, PK, FK, PK FK o UQ.',
+        '- En **valores** puedes apuntar los que admite ese campo, por ejemplo mañana · tarde. Salen en pequeño debajo del nombre.',
+        '- **Intro** añade un campo debajo. Las flechas pequeñas lo suben o lo bajan y la papelera lo quita.',
+        '- **Esc**, o un clic fuera, termina de editar.',
+        'Para **relacionar** dos tablas, arrastra desde un punto verde de una hasta la otra. La línea sale en ángulo, con un **1** en la tabla de la que sales y una **N** en la otra. Empieza por la tabla del 1: por ejemplo, de restaurante a mesa, porque un restaurante tiene muchas mesas.',
+        'Al seleccionar la línea puedes cambiar el 1 y la N de cada extremo (**Origen** y **Destino**), darles la vuelta con **Invertir** o ponerla recta.'
+      ], ficha: [['PK', 'Clave primaria: identifica cada fila'], ['FK', 'Clave foránea: apunta a otra tabla'], ['PK FK', 'Clave primaria que además apunta a otra tabla'], ['UQ', 'Único: no se puede repetir'], ['1 — N', 'Uno a muchos: un restaurante tiene muchas mesas']],
+        nota: ['**Truco:** el color de la barra cambia la cabecera de la tabla; úsalo para agrupar (por ejemplo, azul para la carta y verde para las reservas). El cuadrado verde cambia el ancho; el alto se ajusta solo a sus campos.'] },
       { t: 'Moverse por el lienzo', p: [
         '- Arrastra el fondo, o usa la rueda del ratón, para desplazarte.',
         '- **Ctrl + rueda** acerca o aleja.',
@@ -269,7 +281,7 @@ const AYUDA = [
         ['Ctrl + Z / Ctrl + Y', 'Deshacer / rehacer'],
         ['Ctrl + D', 'Duplicar'],
         ['Ctrl + A', 'Elegir todo'],
-        ['Intro o F2', 'Escribir en la forma'],
+        ['Intro o F2', 'Escribir en la forma o editar la tabla'],
         ['Flechas', 'Mover (con Mayús, más deprisa)'],
         ['Esc', 'Salir o quitar la selección']
       ] },

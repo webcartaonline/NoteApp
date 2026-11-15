@@ -5,6 +5,8 @@
 // Estado temporal (no se guarda): dsel { nodes, edge } selección · dedit forma cuyo texto se edita ·
 // dlabel/ddraft etiqueta de conexión que se edita · dlink línea mientras se conecta · dlinkTo forma de destino ·
 // dbox recuadro de selección · ddrag qué se arrastra · dmen { id, q } buscador de menciones.
+// Diagramas entidad-relación: la forma «tabla» (título, descripción y campos con su clave; se edita en la propia tabla,
+// con dedit) y las conexiones en ángulo con «1» y «N» en los extremos (route, c1 y c2). Ver «Tablas» en formas.js.
 NoteApp.partes.push(Base => class extends Base {
   componentDidMount() {
     if (super.componentDidMount) super.componentDidMount();
@@ -43,9 +45,9 @@ NoteApp.partes.push(Base => class extends Base {
     return { x: (e.clientX - r.left - v.x) / v.z, y: (e.clientY - r.top - v.y) / v.z };
   }
   // Cambia la hoja del diagrama: fn(hoja) => hoja nueva. snap: guarda antes una copia para poder deshacer.
-  dgSet(fn, snap, extra) {
+  dgSet(fn, snap, extra, cb) {
     if (snap) this.dgSnap();
-    this.setState(s => { if (!this.dgSheet(s)) return null; return { ...(extra || {}), notes: this.mapSheet(s, fn) }; });
+    this.setState(s => { if (!this.dgSheet(s)) return null; return { ...(extra || {}), notes: this.mapSheet(s, fn) }; }, cb);
   }
   dgSetNodes(fn, snap, extra) { this.dgSet(x => ({ ...x, entities: (x.entities || []).map(e => e.type === 'node' ? fn(e) : e) }), snap, extra); }
   dgSetView(v) { this.setState(s => this.dgSheet(s) ? { notes: this.mapSheet(s, x => ({ ...x, view: { x: Math.round(v.x * 10) / 10, y: Math.round(v.y * 10) / 10, z: Math.round(dgClampZ(v.z) * 1000) / 1000 } })) } : null); }
@@ -76,7 +78,7 @@ NoteApp.partes.push(Base => class extends Base {
     const hit = (x0, y0) => used.some(n => n.shape !== 'zona' && x0 < n.x + n.w + 10 && x0 + d.w + 10 > n.x && y0 < n.y + n.h + 10 && y0 + d.h + 10 > n.y);
     let k = 0;
     if (shape !== 'zona') while (k < 80 && hit(px, py)) { py += 20; k++; }
-    const n = dgNode(shape, px, py, '');
+    const n = shape === 'tabla' ? dgTabla(px, py) : dgNode(shape, px, py, '');
     this.dgSnap();
     // Las zonas van detrás de todo: se ponen al principio de la lista
     this.setState(st => ({ clean: false, dmen: null, dlabel: null, notes: this.mapSheet(st, y => ({ ...y, entities: shape === 'zona' ? [n].concat(y.entities || []) : (y.entities || []).concat(n) })) }), () => this.dgEdit(n.id, true));
@@ -102,21 +104,25 @@ NoteApp.partes.push(Base => class extends Base {
   dgShape(shape) {
     const sel = this.state.dsel; if (!sel || !(sel.nodes || []).length || !DG_SHAPES[shape]) return;
     const ids = new Set(sel.nodes);
-    this.dgSetNodes(n => ids.has(n.id) && n.shape !== 'zona' ? { ...n, shape } : n, true);
+    this.dgSetNodes(n => ids.has(n.id) && n.shape !== 'zona' && n.shape !== 'tabla' ? { ...n, shape } : n, true);
   }
 
   // ----- Editar el texto de una forma -----
-  dgEdit(id, noSnap) {
+  dgEdit(id, noSnap, foco) {
     const s = this.state, x = this.dgSheet(s); if (!x || s.clean) return;
     const n = this.dgNodes(x).find(m => m.id === id); if (!n) return;
     if (!noSnap) this.dgSnap();
+    if (n.shape === 'tabla') { // las tablas se editan con sus propios campos (foco = id de la fila, o nada = el título)
+      this.setState({ dedit: id, dsel: { nodes: [id], edge: null }, dmen: null, dlabel: null, focusId: null }, () => this.dgTablaFoco(id, foco));
+      return;
+    }
     let lines = n.lines && n.lines.length ? n.lines : null;
     const ready = () => { const ls = (this.dgNodes(this.dgSheet()).find(m => m.id === id) || {}).lines || []; const last = ls[ls.length - 1]; if (last) this.focusLine(last.id, last.text.length); };
     if (!lines) { lines = mkLines(['']); this.setState(st => ({ dedit: id, dsel: { nodes: [id], edge: null }, dmen: null, dlabel: null, notes: this.mapSheet(st, y => ({ ...y, entities: (y.entities || []).map(e => e.id === id ? { ...e, lines } : e) })) }), ready); }
     else this.setState({ dedit: id, dsel: { nodes: [id], edge: null }, dmen: null, dlabel: null }, ready);
   }
   dgEndEdit() {
-    const a = document.activeElement; if (a && a.tagName === 'TEXTAREA') a.blur();
+    const a = document.activeElement; if (a && (a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && a.closest('[data-node]')))) a.blur();
     this._msel = null;
     this.setState({ dedit: null, focusId: null });
   }
@@ -127,9 +133,41 @@ NoteApp.partes.push(Base => class extends Base {
     if (!from || !to || from === to) return null;
     const x = this.dgSheet(); if (!x) return null;
     if ((x.edges || []).some(k => k.from === from && k.to === to)) return null;
-    const k = dgEdge(from, to);
+    const k = dgEdge(from, to, this.dgEdgeExtra(x, from, to));
     this.dgSet(y => ({ ...y, edges: (y.edges || []).concat(k) }), true, { dsel: { nodes: [], edge: k.id } });
     return k;
+  }
+  // Una conexión que toca una tabla nace como relación: en ángulo, sin flecha y de «1» (origen) a «N» (destino).
+  dgEdgeExtra(x, from, to) {
+    const ns = this.dgNodes(x), esTabla = id => { const n = ns.find(m => m.id === id); return !!n && n.shape === 'tabla'; };
+    return esTabla(from) || esTabla(to) ? { route: 'codo', head: 'none', c1: '1', c2: 'N' } : null;
+  }
+
+  // ----- Tablas (entidad-relación): título, descripción y campos -----
+  // cb: se llama cuando la tabla ya está dibujada con el cambio (para poner el cursor en su sitio sin perder teclas)
+  dgTablaSet(id, fn, cb) {
+    this.dgSet(x => ({ ...x, entities: (x.entities || []).map(e => { if (e.id !== id || e.shape !== 'tabla') return e; const n = fn(e); return { ...n, h: dgTablaH(n) }; }) }), false, null, cb);
+  }
+  // Pone el cursor en el campo de una fila (rid) o, sin fila, en el título de la tabla
+  dgTablaFoco(id, rid, nota) {
+    const nd = document.querySelector('[data-node="' + id + '"]'); if (!nd) return;
+    const el = rid ? nd.querySelector('[data-fila="' + rid + '"] ' + (nota ? '[data-campo-nota]' : '[data-campo]')) : nd.querySelector('[data-tabla-titulo]');
+    if (el) { el.focus(); try { el.setSelectionRange(el.value.length, el.value.length); } catch (_) {} }
+  }
+  dgRowSet(id, rid, key, val) { const max = key === 'note' ? 60 : 40; this.dgTablaSet(id, n => ({ ...n, rows: (n.rows || []).map(r => r.id === rid ? { ...r, [key]: String(val).slice(0, max) } : r) })); }
+  dgRowKey(id, rid) { this.dgTablaSet(id, n => ({ ...n, rows: (n.rows || []).map(r => r.id === rid ? { ...r, k: DG_KEYS[(DG_KEYS.indexOf(r.k) + 1) % DG_KEYS.length] } : r) })); }
+  // Campo nuevo debajo de la fila «tras» (o al final)
+  dgRowAdd(id, tras) {
+    const r = dgRow('');
+    this.dgTablaSet(id, n => { const rows = (n.rows || []).slice(), i = rows.findIndex(q => q.id === tras); rows.splice(i < 0 ? rows.length : i + 1, 0, r); return { ...n, rows }; }, () => this.dgTablaFoco(id, r.id));
+  }
+  dgRowDel(id, rid) {
+    const x = this.dgSheet(), n = x && this.dgNodes(x).find(m => m.id === id), rows = (n && n.rows) || [], i = rows.findIndex(r => r.id === rid); if (i < 0) return;
+    const vecina = rows[i - 1] || rows[i + 1];
+    this.dgTablaSet(id, m => ({ ...m, rows: (m.rows || []).filter(r => r.id !== rid) }), () => this.dgTablaFoco(id, vecina ? vecina.id : null));
+  }
+  dgRowMove(id, rid, dir) {
+    this.dgTablaSet(id, n => { const rows = (n.rows || []).slice(), i = rows.findIndex(r => r.id === rid), j = i + dir; if (i < 0 || j < 0 || j >= rows.length) return n; [rows[i], rows[j]] = [rows[j], rows[i]]; return { ...n, rows }; }, () => this.dgTablaFoco(id, rid));
   }
   dgLabelEdit(id) {
     const x = this.dgSheet(), k = x && (x.edges || []).find(e => e.id === id); if (!k || this.state.clean) return;
@@ -243,7 +281,7 @@ NoteApp.partes.push(Base => class extends Base {
       if (first) { this.dgSnap(); this.setState({ ddrag: 'resize' }); }
       const n0 = this.dgNodes(this.dgSheet()).find(m => m.id === g.id), mw = n0 && n0.shape === 'texto' ? 40 : 60, mh = n0 && n0.shape === 'texto' ? 24 : 36;
       const w = Math.max(mw, dgSnap(g.w + dxs / g.z)), h = Math.max(mh, dgSnap(g.h + dys / g.z));
-      this.dgSetNodes(n => n.id === g.id ? { ...n, w, h } : n);
+      this.dgSetNodes(n => n.id !== g.id ? n : n.shape === 'tabla' ? { ...n, w: Math.max(DG_TABLA.minW, w) } : { ...n, w, h }); // el alto de una tabla sale de sus campos
     } else if (g.kind === 'link') {
       const x = this.dgSheet(), p = this.dgPt(e, x), from = this.dgNodes(x).find(m => m.id === g.from); if (!from) return;
       const to = this.dgNodeAt(e.clientX, e.clientY, g.from), a = dgAnchor(from, p.x, p.y);
@@ -265,8 +303,9 @@ NoteApp.partes.push(Base => class extends Base {
       // Soltar en un hueco crea una forma nueva ya conectada
       if (x && Math.hypot(e.clientX - g.sx, e.clientY - g.sy) > 40 && e.type === 'pointerup') {
         const from = this.dgNodes(x).find(m => m.id === g.from); if (!from) return;
-        const shape = ['proceso', 'dato', 'nota'].includes(from.shape) ? from.shape : 'proceso', d = DG_SHAPES[shape], p = this.dgPt(e, x);
-        const n = dgNode(shape, dgSnap(p.x - d.w / 2), dgSnap(p.y - d.h / 2), ''), k = dgEdge(from.id, n.id);
+        const shape = ['proceso', 'dato', 'nota', 'tabla'].includes(from.shape) ? from.shape : 'proceso', d = DG_SHAPES[shape], p = this.dgPt(e, x);
+        const n = shape === 'tabla' ? dgTabla(dgSnap(p.x - d.w / 2), dgSnap(p.y - 28)) : dgNode(shape, dgSnap(p.x - d.w / 2), dgSnap(p.y - d.h / 2), '');
+        const k = dgEdge(from.id, n.id, shape === 'tabla' ? { route: 'codo', head: 'none', c1: '1', c2: 'N' } : null);
         this.dgSet(y => ({ ...y, entities: (y.entities || []).concat(n), edges: (y.edges || []).concat(k) }), true);
         setTimeout(() => this.dgEdit(n.id, true), 0);
       }
@@ -349,7 +388,7 @@ NoteApp.partes.push(Base => class extends Base {
     const els = document.querySelectorAll('[data-node]'); if (!els.length) return;
     const byId = new Map(this.dgNodes(x).map(n => [n.id, n])), fix = {};
     els.forEach(el => {
-      const n = byId.get(el.getAttribute('data-node')); if (!n || n.shape === 'zona') return;
+      const n = byId.get(el.getAttribute('data-node')); if (!n || n.shape === 'zona' || n.shape === 'tabla') return;
       const inner = el.querySelector('.diagrama-texto-in'); if (!inner) return;
       const p = dgPad(n), c = inner.offsetHeight;
       const need = n.shape === 'decision' ? c / 0.6 : c + p[0] + p[2];
@@ -365,12 +404,51 @@ NoteApp.partes.push(Base => class extends Base {
     const sel = s.dsel || {}, selN = new Set((sel.nodes || []).filter(id => byId.has(id))), edit = dirty ? s.dedit : null, drag = s.ddrag;
     const CENTER = { proceso: 1, decision: 1, inicio: 1, dato: 1 };
     const one = selN.size === 1 && !edit ? byId.get([...selN][0]) : null;
+    // Tabla de un diagrama entidad-relación: cabecera de color y campos (en la vista sucia se edita en la propia tabla)
+    const mkTabla = n => {
+      const editing = edit === n.id, on = dirty && selN.has(n.id), col = DG_TABLA_COLORS[n.color] || DG_TABLA_COLORS.azul, rows = n.rows || [];
+      return {
+        id: n.id, x: n.x + 'px', y: n.y + 'px', w: (editing ? Math.max(n.w, DG_TABLA.editW) : n.w) + 'px', h: editing ? 'auto' : n.h + 'px',
+        esTabla: true, noTabla: false, editing, ver: !editing, zi: editing ? 5 : 'auto',
+        cab: col[0], cabTxt: col[1], cabSub: col[2],
+        titulo: n.title || '', sub: n.sub || '', tituloVer: n.title || 'tabla', hasSub: !!n.sub,
+        onTitulo: e => this.dgTablaSet(n.id, m => ({ ...m, title: e.target.value.slice(0, 40) })),
+        onSub: e => this.dgTablaSet(n.id, m => ({ ...m, sub: e.target.value.slice(0, 60) })),
+        cabKey: e => { if (e.key === 'Enter') { e.preventDefault(); if (e.target.hasAttribute('data-tabla-titulo')) { const i = e.target.parentElement.querySelector('[data-tabla-sub]'); if (i) i.focus(); } else if (rows.length) this.dgTablaFoco(n.id, rows[0].id); else this.dgRowAdd(n.id); } },
+        filas: rows.map((r, i) => ({
+          id: r.id, nombre: r.name, nombreVer: r.name || '\u00a0', nota: r.note || '', hasNota: !!r.note,
+          k1: r.k === 'PK' || r.k === 'PKFK' ? 'PK' : r.k === 'UQ' ? 'UQ' : '', k2: r.k === 'FK' || r.k === 'PKFK' ? 'FK' : '', sinClave: !r.k, kTitle: DG_KEY_NAME[r.k || ''] + ' (clic para cambiar)',
+          clave: () => this.dgRowKey(n.id, r.id),
+          onNombre: e => this.dgRowSet(n.id, r.id, 'name', e.target.value), onNota: e => this.dgRowSet(n.id, r.id, 'note', e.target.value),
+          // Intro: campo nuevo debajo · Retroceso en un campo vacío: lo borra · Alt + flechas: lo sube o lo baja
+          key: e => {
+            if (e.key === 'Enter') { e.preventDefault(); this.dgRowAdd(n.id, r.id); }
+            else if (e.key === 'Backspace' && !r.name && !r.note && !e.target.hasAttribute('data-campo-nota')) { e.preventDefault(); this.dgRowDel(n.id, r.id); }
+            else if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); this.dgRowMove(n.id, r.id, e.key === 'ArrowUp' ? -1 : 1); }
+            else if (!e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { const o = rows[i + (e.key === 'ArrowUp' ? -1 : 1)]; if (o) { e.preventDefault(); this.dgTablaFoco(n.id, o.id, e.target.hasAttribute('data-campo-nota')); } }
+          },
+          sube: () => this.dgRowMove(n.id, r.id, -1), baja: () => this.dgRowMove(n.id, r.id, 1), borra: () => this.dgRowDel(n.id, r.id),
+          noSube: i === 0, noBaja: i === rows.length - 1
+        })),
+        sinFilas: !rows.length, anadir: () => this.dgRowAdd(n.id),
+        sel: on ? '1' : '', hl: s.dlinkTo === n.id ? '1' : '',
+        cur: !dirty ? 'grab' : editing ? 'default' : 'move',
+        dots: dirty && !editing && !drag,
+        resize: dirty && !!one && one.id === n.id,
+        down: e => this.dgNodeDown(e, n),
+        dbl: e => { e.stopPropagation(); if (!dirty || editing) return; const f = e.target.closest && e.target.closest('[data-fila]'); this.dgEdit(n.id, false, f ? f.getAttribute('data-fila') : null); },
+        link: e => this.dgLinkDown(e, n),
+        resizeDown: e => this.dgResizeDown(e, n)
+      };
+    };
     const mk = n => {
+      if (n.shape === 'tabla') return mkTabla(n);
       const p = dgPath(n), col = DG_COLORS[n.color] || DG_COLORS.gris, isT = n.shape === 'texto', isZ = n.shape === 'zona', pad = dgPad(n);
       const editing = edit === n.id, on = dirty && selN.has(n.id), src = n.lines || [];
       const lines = editing ? this.mkdLines(src, n.id) : this.mkdLines(src, n.id, true).map(l => ({ ...l, onDown: undefined }));
       return {
         id: n.id, x: n.x + 'px', y: n.y + 'px', w: n.w + 'px', h: n.h + 'px', vb: '0 0 ' + n.w + ' ' + n.h,
+        esTabla: false, noTabla: true, zi: 'auto',
         d: p.d, d2: p.d2,
         fill: isT ? 'transparent' : isZ ? col[1] + '0f' : col[0],
         stroke: isT ? (dirty ? '#4a4a4a' : 'transparent') : col[1],
@@ -391,10 +469,15 @@ NoteApp.partes.push(Base => class extends Base {
       };
     };
     const zones = all.filter(n => n.shape === 'zona').map(mk), nodes = all.filter(n => n.shape !== 'zona').map(mk);
-    const edges = [], labels = [];
+    const edges = [], labels = [], cards = [], geo = dgRoutes(byId, x.edges || []);
     (x.edges || []).forEach(k => {
       const a = byId.get(k.from), b = byId.get(k.to); if (!a || !b) return;
-      const g = dgEdgeGeo(a, b, k), on = dirty && sel.edge === k.id, color = on ? '#00a000' : '#8a8a8a';
+      const g = geo.get(k.id), on = dirty && sel.edge === k.id, color = on ? '#00a000' : '#8a8a8a'; if (!g) return;
+      // «1» o «N» en cada extremo (relaciones de un diagrama entidad-relación)
+      [[k.c1, g.e1, k.head === 'both'], [k.c2, g.e2, k.head !== 'none']].forEach(([txt, e, punta], i) => {
+        if (!txt) return; const q = dgCardPos(punta ? { ...e, x: e.x + e.dx * 10, y: e.y + e.dy * 10 } : e);
+        cards.push({ id: k.id + ':' + i, x: q.x + 'px', y: q.y + 'px', text: txt, color: on ? '#3fd45f' : '#e6e6e6' });
+      });
       edges.push({ id: k.id, d: g.d, hit: g.hit, heads: g.heads, color, dash: k.dash ? '7 6' : 'none', cur: dirty ? 'pointer' : 'grab', down: e => this.dgEdgeDown(e, k), dbl: e => { e.stopPropagation(); this.dgLabelEdit(k.id); } });
       const editing = dirty && s.dlabel === k.id;
       if (k.label || editing) {
@@ -409,7 +492,7 @@ NoteApp.partes.push(Base => class extends Base {
       dgWorld: 'translate(' + view.x + 'px,' + view.y + 'px) scale(' + z + ')',
       dgGridSize: (20 * z) + 'px ' + (20 * z) + 'px',
       dgGridPos: view.x + 'px ' + view.y + 'px',
-      dgZones: zones, dgNodes: nodes, dgEdges: edges, dgLabels: labels,
+      dgZones: zones, dgNodes: nodes, dgEdges: edges, dgLabels: labels, dgCards: cards,
       dgLinkD: L ? 'M' + L.x1.toFixed(1) + ',' + L.y1.toFixed(1) + ' L' + L.x2.toFixed(1) + ',' + L.y2.toFixed(1) : '',
       dgEmpty: !all.length,
       dgHint: dirty ? 'Añade formas con los botones de la barra lateral' : 'Diagrama vacío. Pasa a la vista sucia para editarlo',
@@ -442,7 +525,10 @@ NoteApp.partes.push(Base => class extends Base {
       v.dgColors = DG_COLOR_ORDER.map(c => ({ c, bg: DG_COLORS[c][1], title: DG_COLOR_NAME[c], ring: ns.every(n => (n.color || 'gris') === c) ? '0 0 0 2px #1c1c1c, 0 0 0 4px #fff' : 'none', pick: () => this.dgColor(c) }));
       v.dgOne = !!one;
       v.dgShapes = one && one.shape !== 'zona' ? ['proceso', 'decision', 'inicio', 'dato', 'nota', 'texto'].map(k => ({ k, title: DG_SHAPES[k].label, cls: 'diagrama-forma-' + k, bg: one.shape === k ? '#008000' : '#8a8a8a', pick: () => this.dgShape(k) })) : [];
-      v.dgCanShape = !!one && one.shape !== 'zona';
+      v.dgCanShape = !!one && one.shape !== 'zona' && one.shape !== 'tabla';
+      v.dgEsTabla = !!one && one.shape === 'tabla';
+      v.dgConTexto = !!one && one.shape !== 'tabla';
+      v.dgAddFila = () => { if (one) { this.dgSnap(); this.setState({ dedit: one.id, dmen: null, dlabel: null }, () => this.dgRowAdd(one.id)); } };
       v.dgEditTxt = () => { if (one) this.dgEdit(one.id); };
       v.dgMenOpen = () => { if (one) this.setState(st => ({ dmen: st.dmen && st.dmen.id === one.id ? null : { id: one.id, q: '' } }), () => { const i = document.querySelector('[data-menciones] input'); if (i) i.focus(); }); };
       v.dgMenOn = !!(one && s.dmen && s.dmen.id === one.id);
@@ -462,6 +548,14 @@ NoteApp.partes.push(Base => class extends Base {
       v.dgEdgeHead = () => this.dgEdgeSet(ek.id, k => ({ ...k, head: k.head === 'end' ? 'both' : k.head === 'both' ? 'none' : 'end' }));
       v.dgEdgeHeadTxt = ek.head === 'both' ? '↔' : ek.head === 'none' ? '—' : '→';
       v.dgEdgeFlip = () => this.dgEdgeSet(ek.id, k => ({ ...k, from: k.to, to: k.from }));
+      // Entidad-relación: línea recta o en ángulo, y cuántos en cada extremo (nada → 1 → N)
+      const sig = c => DG_CARD[(DG_CARD.indexOf(c || '') + 1) % DG_CARD.length];
+      v.dgEdgeRoute = () => this.dgEdgeSet(ek.id, k => ({ ...k, route: k.route === 'codo' ? '' : 'codo' }));
+      v.dgEdgeRouteTxt = ek.route === 'codo' ? 'En ángulo' : 'Recta';
+      v.dgEdgeC1 = () => this.dgEdgeSet(ek.id, k => ({ ...k, c1: sig(k.c1) }));
+      v.dgEdgeC2 = () => this.dgEdgeSet(ek.id, k => ({ ...k, c2: sig(k.c2) }));
+      v.dgEdgeC1Txt = 'Origen: ' + (ek.c1 || '–');
+      v.dgEdgeC2Txt = 'Destino: ' + (ek.c2 || '–');
       v.dgEdgeDel = () => this.dgDelete();
     }
     // Buscador de menciones

@@ -1,4 +1,5 @@
-<!-- Componente "diagrama" de NoteApp. Lienzo de la ventana Diagrama: zonas, conexiones, formas, etiquetas,
+<!-- Componente "diagrama" de NoteApp. Lienzo de la ventana Diagrama: zonas, conexiones, formas (y tablas de los
+     diagramas entidad-relación, con el 1 y la N de sus relaciones), etiquetas,
      barras de la forma/conexión seleccionada, buscador de menciones y zoom.
      Los estilos fijos están en diagrama.css; los que cambian ({{ }}) siguen aquí.
      Los valores {{ }} vienen de dgVals() (js/app/diagrama.js), que se añade en renderVals().
@@ -31,11 +32,51 @@
         <path d="{{ dgLinkD }}" fill="none" stroke="#00a000" strokeWidth="2" strokeDasharray="6 5"></path>
       </svg >
       <sc-for list="{{ dgNodes }}" as="n" hint-placeholder-count="0">
-        <div data-node="{{ n.id }}" data-sel="{{ n.sel }}" data-hl="{{ n.hl }}" onPointerDown="{{ n.down }}" onDoubleClick="{{ n.dbl }}" class="diagrama-nodo" style="left:{{ n.x }};top:{{ n.y }};width:{{ n.w }};height:{{ n.h }};cursor:{{ n.cur }};">
+        <div data-node="{{ n.id }}" data-sel="{{ n.sel }}" data-hl="{{ n.hl }}" onPointerDown="{{ n.down }}" onDoubleClick="{{ n.dbl }}" class="diagrama-nodo" style="left:{{ n.x }};top:{{ n.y }};width:{{ n.w }};height:{{ n.h }};cursor:{{ n.cur }};z-index:{{ n.zi }};">
+          <sc-if value="{{ n.noTabla }}" hint-placeholder-val="{{ true }}">
           <svg class="diagrama-forma" viewBox="{{ n.vb }}" preserveAspectRatio="none"><path d="{{ n.d }}" fill="{{ n.fill }}" stroke="{{ n.stroke }}" strokeWidth="1.5" strokeDasharray="{{ n.dash }}" strokeLinejoin="round"></path><path d="{{ n.d2 }}" fill="none" stroke="{{ n.stroke }}" strokeWidth="1.5" strokeLinejoin="round"></path></svg >
           <div data-lines="{{ n.id }}" class="diagrama-texto" style="padding:{{ n.pad }};justify-content:{{ n.vjust }};text-align:{{ n.align }};">
             <div class="diagrama-texto-in"><dc-import name="lineas" dc-props="{{ ui }}" list="{{ n.lines }}"></dc-import></div>
           </div>
+          </sc-if>
+          <!-- Tabla de un diagrama entidad-relación: cabecera de color (nombre y descripción) y sus campos, cada uno con su clave -->
+          <sc-if value="{{ n.esTabla }}" hint-placeholder-val="{{ false }}">
+            <div class="diagrama-tabla">
+              <div class="diagrama-tabla-cabeza" style="background:{{ n.cab }};">
+                <sc-if value="{{ n.ver }}" hint-placeholder-val="{{ true }}">
+                  <span class="diagrama-tabla-nombre" style="color:{{ n.cabTxt }};">{{ n.tituloVer }}</span>
+                  <sc-if value="{{ n.hasSub }}" hint-placeholder-val="{{ true }}"><span class="diagrama-tabla-sub" style="color:{{ n.cabSub }};">{{ n.sub }}</span></sc-if>
+                </sc-if>
+                <sc-if value="{{ n.editing }}" hint-placeholder-val="{{ false }}">
+                  <input data-tabla-titulo="1" value="{{ n.titulo }}" onChange="{{ n.onTitulo }}" onKeyDown="{{ n.cabKey }}" maxLength="40" spellCheck="false" placeholder="nombre_de_la_tabla" aria-label="Nombre de la tabla" class="diagrama-tabla-campo diagrama-tabla-campo-nombre" style="color:{{ n.cabTxt }};">
+                  <input data-tabla-sub="1" value="{{ n.sub }}" onChange="{{ n.onSub }}" onKeyDown="{{ n.cabKey }}" maxLength="60" spellCheck="false" placeholder="Para qué sirve (opcional)" aria-label="Descripción de la tabla" class="diagrama-tabla-campo diagrama-tabla-campo-sub" style="color:{{ n.cabSub }};">
+                </sc-if>
+              </div>
+              <div class="diagrama-tabla-cuerpo">
+                <sc-for list="{{ n.filas }}" as="r" hint-placeholder-count="3">
+                  <sc-if value="{{ n.ver }}" hint-placeholder-val="{{ true }}">
+                    <div data-fila="{{ r.id }}" class="diagrama-tabla-fila">
+                      <span class="diagrama-tabla-clave"><span class="diagrama-tabla-k1">{{ r.k1 }}</span><span class="diagrama-tabla-k2">{{ r.k2 }}</span></span>
+                      <span class="diagrama-tabla-dato"><span class="diagrama-tabla-dato-nombre">{{ r.nombreVer }}</span><sc-if value="{{ r.hasNota }}" hint-placeholder-val="{{ false }}"><span class="diagrama-tabla-nota">{{ r.nota }}</span></sc-if></span>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ n.editing }}" hint-placeholder-val="{{ false }}">
+                    <div data-fila="{{ r.id }}" class="diagrama-tabla-fila diagrama-tabla-fila-editar">
+                      <button onClick="{{ r.clave }}" title="{{ r.kTitle }}" aria-label="Cambiar la clave del campo" class="diagrama-tabla-clave diagrama-tabla-clave-boton"><span class="diagrama-tabla-k1">{{ r.k1 }}</span><span class="diagrama-tabla-k2">{{ r.k2 }}</span><sc-if value="{{ r.sinClave }}" hint-placeholder-val="{{ false }}"><span class="diagrama-tabla-k0">clave</span></sc-if></button>
+                      <input data-campo="1" value="{{ r.nombre }}" onChange="{{ r.onNombre }}" onKeyDown="{{ r.key }}" maxLength="40" spellCheck="false" placeholder="nombre_del_campo" aria-label="Nombre del campo" class="diagrama-tabla-campo diagrama-tabla-campo-dato">
+                      <input data-campo-nota="1" value="{{ r.nota }}" onChange="{{ r.onNota }}" onKeyDown="{{ r.key }}" maxLength="60" spellCheck="false" placeholder="valores (opcional)" title="Valores permitidos, por ejemplo: mañana · tarde" aria-label="Valores permitidos" class="diagrama-tabla-campo diagrama-tabla-campo-nota">
+                      <button onClick="{{ r.sube }}" disabled="{{ r.noSube }}" title="Subir (Alt + flecha arriba)" aria-label="Subir el campo" class="diagrama-tabla-mini diagrama-tabla-mini-sube"></button>
+                      <button onClick="{{ r.baja }}" disabled="{{ r.noBaja }}" title="Bajar (Alt + flecha abajo)" aria-label="Bajar el campo" class="diagrama-tabla-mini diagrama-tabla-mini-baja"></button>
+                      <button onClick="{{ r.borra }}" title="Quitar el campo" aria-label="Quitar el campo" class="diagrama-tabla-mini diagrama-tabla-mini-borra"></button>
+                    </div>
+                  </sc-if>
+                </sc-for>
+                <sc-if value="{{ n.editing }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ n.anadir }}" title="Añadir un campo (Intro en un campo)" class="diagrama-tabla-anadir">+ Añadir campo</button>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
           <sc-if value="{{ n.dots }}" hint-placeholder-val="{{ false }}">
             <span onPointerDown="{{ n.link }}" title="Arrastra para conectar" class="diagrama-punto diagrama-punto-n"></span>
             <span onPointerDown="{{ n.link }}" title="Arrastra para conectar" class="diagrama-punto diagrama-punto-e"></span>
@@ -44,6 +85,10 @@
           </sc-if>
           <sc-if value="{{ n.resize }}" hint-placeholder-val="{{ false }}"><span onPointerDown="{{ n.resizeDown }}" title="Cambiar tamaño" class="diagrama-tamano"></span></sc-if>
         </div>
+      </sc-for>
+      <!-- «1» y «N» en los extremos de las relaciones -->
+      <sc-for list="{{ dgCards }}" as="c" hint-placeholder-count="0">
+        <span class="diagrama-cardinal" style="left:{{ c.x }};top:{{ c.y }};color:{{ c.color }};">{{ c.text }}</span>
       </sc-for>
       <sc-for list="{{ dgLabels }}" as="l" hint-placeholder-count="0">
         <div data-edge="{{ l.id }}" class="diagrama-etiqueta" style="left:{{ l.x }};top:{{ l.y }};border-color:{{ l.color }};">
@@ -66,9 +111,13 @@
           <sc-for list="{{ dgShapes }}" as="f" hint-placeholder-count="6"><button onClick="{{ f.pick }}" title="{{ f.title }}" aria-label="{{ f.title }}" class="diagrama-barra-forma {{ f.cls }}" style="background:{{ f.bg }};"></button></sc-for>
         </sc-if>
         <span class="diagrama-barra-separador"></span>
-        <sc-if value="{{ dgOne }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ dgConTexto }}" hint-placeholder-val="{{ true }}">
           <button onClick="{{ dgEditTxt }}" title="Editar texto (doble clic o Intro)" aria-label="Editar texto" class="diagrama-boton diagrama-boton-texto"></button>
           <button onClick="{{ dgMenOpen }}" title="Mencionar una entidad de Notas o Agenda" aria-label="Mencionar entidad" aria-pressed="{{ dgMenOn }}" class="diagrama-boton-mencion">=</button>
+        </sc-if>
+        <sc-if value="{{ dgEsTabla }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ dgEditTxt }}" title="Editar la tabla: nombre, descripción y campos (doble clic o Intro)" class="diagrama-boton-texto-2">Editar</button>
+          <button onClick="{{ dgAddFila }}" title="Añadir un campo al final" class="diagrama-boton-texto-2">+ Campo</button>
         </sc-if>
         <button onClick="{{ dgDup }}" title="Duplicar (Ctrl+D)" aria-label="Duplicar" class="diagrama-boton diagrama-boton-duplicar"></button>
         <button onClick="{{ dgDel }}" title="Borrar (Supr)" aria-label="Borrar" class="diagrama-boton diagrama-boton-borrar"></button>
@@ -80,7 +129,11 @@
         <button onClick="{{ dgEdgeLabel }}" title="Escribir una etiqueta (doble clic en la flecha)" class="diagrama-boton-texto-2">Etiqueta</button>
         <button onClick="{{ dgEdgeDash }}" title="Línea continua o discontinua" class="diagrama-boton-texto-2">{{ dgEdgeDashTxt }}</button>
         <button onClick="{{ dgEdgeHead }}" title="Puntas de flecha: al final, a los dos lados o sin flecha" class="diagrama-boton-texto-2 diagrama-boton-flecha">{{ dgEdgeHeadTxt }}</button>
-        <button onClick="{{ dgEdgeFlip }}" title="Cambiar el sentido" class="diagrama-boton-texto-2">Invertir</button>
+        <button onClick="{{ dgEdgeFlip }}" title="Cambiar el sentido (también intercambia el 1 y la N)" class="diagrama-boton-texto-2">Invertir</button>
+        <span class="diagrama-barra-separador"></span>
+        <button onClick="{{ dgEdgeRoute }}" title="Línea recta o en ángulo recto" class="diagrama-boton-texto-2">{{ dgEdgeRouteTxt }}</button>
+        <button onClick="{{ dgEdgeC1 }}" title="Cuántos en el origen: nada, 1 o N (muchos)" class="diagrama-boton-texto-2">{{ dgEdgeC1Txt }}</button>
+        <button onClick="{{ dgEdgeC2 }}" title="Cuántos en el destino: nada, 1 o N (muchos)" class="diagrama-boton-texto-2">{{ dgEdgeC2Txt }}</button>
         <span class="diagrama-barra-separador"></span>
         <button onClick="{{ dgEdgeDel }}" title="Borrar conexión (Supr)" aria-label="Borrar conexión" class="diagrama-boton diagrama-boton-borrar"></button>
       </div>

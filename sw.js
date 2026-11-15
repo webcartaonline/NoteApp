@@ -1,7 +1,7 @@
 // Service worker de NoteApp: permite instalar la app y abrirla sin conexión.
 // Siempre intenta cargar la versión más reciente; la copia guardada solo se usa sin conexión.
 // Si añades o quitas archivos de la app, actualiza la lista APP y sube el número de VERSION.
-const VERSION = 'noteapp-v28';
+const VERSION = 'noteapp-v29';
 const APP = [
   '/',
   '/index.html',
@@ -116,6 +116,7 @@ const APP = [
   '/assets/forma-nota.svg',
   '/assets/forma-texto.svg',
   '/assets/forma-zona.svg',
+  '/assets/forma-tabla.svg',
   '/assets/agregar-barra.svg',
   '/assets/ajustes.svg',
   '/assets/angulo-pequeno-derecho.svg',

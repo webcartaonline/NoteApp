@@ -133,7 +133,8 @@ NoteApp.partes.push(Base => class extends Base {
       addDato: () => this.dgAdd('dato'),
       addNotaDg: () => this.dgAdd('nota'),
       addTextoDg: () => this.dgAdd('texto'),
-      addZona: () => this.dgAdd('zona')
+      addZona: () => this.dgAdd('zona'),
+      addTablaDg: () => this.dgAdd('tabla') // tabla de un diagrama entidad-relación
     };
     Object.assign(v, this.confirmVals(s)); // ventana de confirmación al eliminar
     Object.assign(v, this.novVals(s)); // ventana de novedades tras una actualización (js/app/novedades.js)

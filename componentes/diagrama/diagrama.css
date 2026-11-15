@@ -511,3 +511,235 @@
   background: #3a3a3a !important;
   color: #fff !important;
 }
+
+/* ===== Tablas (diagramas entidad-relación) =====
+   Cabecera de color con el nombre y la descripción, y debajo los campos: clave (PK, FK, UQ) y nombre, con los valores
+   permitidos en pequeño. Las medidas (cabecera 56, fila 26, nota 16, márgenes 9 y 11) son las de DG_TABLA en formas.js:
+   si se cambian aquí, hay que cambiarlas allí, porque de ellas sale el alto de la tabla. */
+.diagrama-tabla {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #161616;
+  box-shadow: inset 0 0 0 1px #2e2e2e;
+  font-family: ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, 'Liberation Mono', monospace;
+}
+.diagrama-tabla-cabeza {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  height: 56px;
+  padding: 0 16px;
+}
+.diagrama-tabla-nombre {
+  font-size: 15.5px;
+  font-weight: 700;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.diagrama-tabla-sub {
+  font-family: 'Google Sans','Product Sans',Figtree,system-ui,sans-serif;
+  font-size: 12.5px;
+  line-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.diagrama-tabla-cuerpo {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 9px 12px 11px 16px;
+}
+.diagrama-tabla-fila {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  min-height: 26px;
+}
+.diagrama-tabla-clave {
+  flex: none;
+  display: flex;
+  gap: 5px;
+  width: 56px;
+  height: 26px;
+  align-items: center;
+  font-family: 'Google Sans','Product Sans',Figtree,system-ui,sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .03em;
+}
+.diagrama-tabla-k1 { color: #fff; }
+.diagrama-tabla-k2 { color: #9a9a9a; }
+.diagrama-tabla-dato {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.diagrama-tabla-dato-nombre {
+  height: 26px;
+  font-size: 14px;
+  line-height: 26px;
+  color: #e6e6e6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.diagrama-tabla-nota {
+  height: 16px;
+  margin-top: -3px;
+  padding-bottom: 3px;
+  font-family: 'Google Sans','Product Sans',Figtree,system-ui,sans-serif;
+  font-size: 11px;
+  line-height: 16px;
+  color: #9a9a9a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tabla mientras se edita (vista sucia, doble clic): todo son campos para escribir */
+.diagrama-tabla-campo {
+  min-width: 0;
+  margin: 0;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 5px;
+  outline: none;
+  background: rgba(0,0,0,.28);
+  color: #fff;
+  font: inherit;
+  caret-color: #1fe85c;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.diagrama-tabla-campo:focus {
+  box-shadow: inset 0 0 0 1.5px #00a000;
+}
+.diagrama-tabla-campo::placeholder {
+  color: #7a7a7a;
+}
+.diagrama-tabla:has(.diagrama-tabla-campo-nombre) .diagrama-tabla-cabeza {
+  height: auto;
+  gap: 4px;
+  padding: 8px 10px 9px;
+}
+.diagrama-tabla-campo-nombre {
+  height: 24px;
+  font-size: 15px;
+  font-weight: 700;
+  background: rgba(0,0,0,.16);
+}
+.diagrama-tabla-campo-sub {
+  height: 21px;
+  font-family: 'Google Sans','Product Sans',Figtree,system-ui,sans-serif;
+  font-size: 12.5px;
+  background: rgba(0,0,0,.16);
+}
+.diagrama-tabla-campo-nombre::placeholder,
+.diagrama-tabla-campo-sub::placeholder {
+  color: inherit;
+  opacity: .55;
+}
+.diagrama-tabla:has(.diagrama-tabla-campo-nombre) .diagrama-tabla-cuerpo {
+  padding: 9px 8px 9px 10px;
+  gap: 3px;
+}
+.diagrama-tabla-fila-editar {
+  align-items: center;
+  gap: 4px;
+}
+.diagrama-tabla-clave-boton {
+  justify-content: center;
+  width: 50px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: #2a2a2a;
+  cursor: pointer;
+}
+.diagrama-tabla-clave-boton:hover {
+  background: #383838 !important;
+}
+.diagrama-tabla-k0 {
+  font-weight: 500;
+  color: #6a6a6a;
+}
+.diagrama-tabla-campo-dato {
+  flex: 1.3;
+  height: 24px;
+  font-size: 13.5px;
+}
+.diagrama-tabla-campo-nota {
+  flex: 1;
+  height: 24px;
+  font-family: 'Google Sans','Product Sans',Figtree,system-ui,sans-serif;
+  font-size: 12px;
+  color: #cfcfcf;
+}
+.diagrama-tabla-mini {
+  flex: none;
+  position: relative;
+  width: 18px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+.diagrama-tabla-mini::after {
+  content: '';
+  position: absolute;
+  inset: 7px 4px;
+  background: #7a7a7a;
+}
+.diagrama-tabla-mini:hover::after {
+  background: #fff;
+}
+.diagrama-tabla-mini:disabled {
+  opacity: .25;
+  cursor: default;
+}
+.diagrama-tabla-mini-sube::after { transform: rotate(-90deg); mask: url(../../assets/angulo-pequeno-derecho.svg) center / contain no-repeat; -webkit-mask: url(../../assets/angulo-pequeno-derecho.svg) center / contain no-repeat; }
+.diagrama-tabla-mini-baja::after { transform: rotate(90deg); mask: url(../../assets/angulo-pequeno-derecho.svg) center / contain no-repeat; -webkit-mask: url(../../assets/angulo-pequeno-derecho.svg) center / contain no-repeat; }
+.diagrama-tabla-mini-borra::after { inset: 6px 3px; mask: url(../../assets/papelera.svg) center / contain no-repeat; -webkit-mask: url(../../assets/papelera.svg) center / contain no-repeat; }
+.diagrama-tabla-mini-borra:hover::after {
+  background: #d07a7a;
+}
+.diagrama-tabla-anadir {
+  flex: none;
+  height: 26px;
+  margin-top: 4px;
+  border: 0;
+  border-radius: 6px;
+  background: #242424;
+  color: #a6a6a6;
+  font: 500 12.5px 'Google Sans','Product Sans',Figtree,system-ui,sans-serif;
+  cursor: pointer;
+}
+.diagrama-tabla-anadir:hover {
+  background: #303030 !important;
+  color: #fff !important;
+}
+
+/* «1» y «N» en los extremos de una relación */
+.diagrama-cardinal {
+  position: absolute;
+  z-index: 1;
+  transform: translate(-50%,-50%);
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 14px;
+  pointer-events: none;
+}
