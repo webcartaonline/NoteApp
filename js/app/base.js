@@ -25,7 +25,7 @@ NoteApp.partes.push(Base => class extends Base {
     document.addEventListener('copy', this._copy);
     document.addEventListener('paste', this._paste);
     document.addEventListener('mousedown', this._down, true);
-    this._key = e => { if (this.state.novedades) { if (e.key === 'Escape') { e.preventDefault(); this.closeNovedades(); } return; } if (this.state.confirm) { if (e.key === 'Escape') { e.preventDefault(); this.closeConfirm(); } return; } if (this.state.calc) { if (e.key === 'Escape') { e.preventDefault(); this.calcEsc(); } return; } if (this.state.ajustes) { if (e.key === 'Escape') { e.preventDefault(); this.ajEsc(); } return; } if (this.selKey(e)) return; if (e.key === 'Escape' && (this.state.menu || this.state.entMenu || this.state.copyMenu)) this.setState({ menu: false, entMenu: null, copyMenu: false }); };
+    this._key = e => { if (this.state.novedades) { if (e.key === 'Escape') { e.preventDefault(); this.closeNovedades(); } return; } if (this.state.confirm) { if (e.key === 'Escape') { e.preventDefault(); this.closeConfirm(); } return; } if (this.state.calc) { if (e.key === 'Escape') { e.preventDefault(); this.calcEsc(); } return; } if (this.state.ajustes) { if (e.key === 'Escape') { e.preventDefault(); this.ajEsc(); } return; } if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && (e.code === 'KeyV' || e.key === 'v' || e.key === 'V')) { e.preventDefault(); if (!e.repeat) this.toggleView(); return; } if (this.selKey(e)) return; if (e.key === 'Escape' && (this.state.menu || this.state.entMenu || this.state.copyMenu)) this.setState({ menu: false, entMenu: null, copyMenu: false }); };
     document.addEventListener('keydown', this._key);
     IMG_ON = () => this.setState({ imgTick: Date.now() });
     this._rev = NA_REV;
@@ -36,6 +36,8 @@ NoteApp.partes.push(Base => class extends Base {
     if (FS_OK) fsGetHandle().then(async h => { if (!h) return; this._fsDir = h; let p = 'prompt'; try { p = await h.queryPermission({ mode: 'readwrite' }); } catch (_) {} if (p === 'granted') this.fsStart(h, false); else this.setState({ fs: 'perm', fsName: h.name }); });
     this._last = Date.now(); this._tick = setInterval(() => { const s = this.state; this.checkNotifs(s); if (s.mode === 'agenda' || winLists(s).some(([w, list]) => w !== s.mode && list.some(n => n.sheets.some(x => (x.entities || []).some(e => e.type === 'count'))))) this.setState({ now: Date.now() }); }, 1000);
   }
+  // Cambia entre la vista limpia y la sucia (interruptor de la barra de hojas y atajo Alt+V).
+  toggleView() { const a = document.activeElement; if (a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT')) a.blur(); this.setState(st => ({ clean: !st.clean, focusId: null, field: null, colMenu: null, entMenu: null, dsel: null, dedit: null, dlabel: null, dmen: null })); }
   componentWillUnmount() { if (this._naFlush) { this._naFlush(); window.removeEventListener('pagehide', this._naFlush); window.removeEventListener('beforeunload', this._naFlush); } clearInterval(this._tick); document.removeEventListener('mousedown', this._down, true); document.removeEventListener('keydown', this._key); document.removeEventListener('mousemove', this._move); document.removeEventListener('mouseup', this._up); document.removeEventListener('copy', this._copy); document.removeEventListener('paste', this._paste); }
   componentDidUpdate() {
     const naS = this.state, naP = this._naPrev;

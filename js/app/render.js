@@ -64,7 +64,7 @@ NoteApp.partes.push(Base => class extends Base {
       clean: s.clean,
       knobLeft: s.clean ? '16px' : '0px',
       knobColor: s.clean ? '#008000' : '#8a8a8a',
-      toggleView: () => { const a = document.activeElement; if (a && a.tagName === 'TEXTAREA') a.blur(); this.setState(st => ({ clean: !st.clean, focusId: null, field: null, colMenu: null, entMenu: null, dsel: null, dedit: null, dlabel: null, dmen: null })); },
+      toggleView: () => this.toggleView(),
       panelCursor: s.clean ? 'default' : 'text',
       panelRef: this.panelRef,
       panelWidth: (sheet ? sheet.width : W0) + 'px',

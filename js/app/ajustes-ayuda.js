@@ -33,7 +33,7 @@ const AYUDA = [
         '- El **punto gris** a la derecha de las hojas abre las opciones para eliminar la hoja o la nota. Antes te pide confirmación, porque no se puede deshacer.'
       ] },
       { t: 'Vista limpia y vista sucia', p: [
-        'El interruptor de la barra gris cambia la forma de ver la hoja:',
+        'El interruptor de la barra gris cambia la forma de ver la hoja. También puedes pulsar **Alt + V** en el teclado:',
         '- **Vista limpia**, para leer: ves el resultado, con los títulos, las negritas y los valores ya calculados. Las casillas se marcan con un clic.',
         '- **Vista sucia**, para editar: ves el texto tal cual lo escribes, con sus símbolos, y puedes cambiar los nombres, descripciones y fórmulas de las entidades.'
       ], ej: [
@@ -264,6 +264,7 @@ const AYUDA = [
         '- **Mayús + clic** elige varias formas y **Mayús + arrastrar** el fondo las elige con un recuadro.'
       ] },
       { t: 'Atajos de teclado', ficha: [
+        ['Alt + V', 'Cambiar entre vista limpia y sucia'],
         ['Supr', 'Borrar lo elegido'],
         ['Ctrl + Z / Ctrl + Y', 'Deshacer / rehacer'],
         ['Ctrl + D', 'Duplicar'],

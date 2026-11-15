@@ -27,6 +27,13 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '3.6.2.0',
+    fecha: '15 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Cambia de vista con el teclado', texto: 'Pulsa Alt+V para pasar de la vista limpia a la sucia y al revés, sin tener que ir al interruptor con el ratón. Funciona en Notas, en la Agenda y en el Diagrama, incluso mientras escribes.', tipos: ['visual'] }
+    ]
+  },
+  {
     version: '3.5.2.0',
     fecha: '12 de noviembre de 2026',
     cambios: [
@@ -61,14 +68,6 @@ const NA_NOVEDADES = [
       { titulo: 'Historial de cálculos', texto: 'Guarda un cálculo con el botón «Guardar en el historial» o con la tecla Intro. Después puedes volver a abrirlo con sus números, por ejemplo para cambiar solo un dato.' },
       { titulo: 'Texto de color', texto: 'Escribe un texto entre guiones bajos, por ejemplo _importante_, y se verá en verde.' },
       { titulo: 'Elige cómo copiar', texto: 'El botón de copiar de un recuadro copiable te deja elegir: copiarlo en Markdown o tal cual está escrito.' }
-    ]
-  },
-  {
-    version: '1.1',
-    fecha: '5 de noviembre de 2026',
-    cambios: [
-      { titulo: 'El cursor, en su sitio', texto: 'Al escribir dentro de una forma del diagrama, la barra que marca dónde escribes salía en otro lugar (por ejemplo, a la izquierda de la palabra en vez de al final). Ahora aparece justo detrás de la última letra que escribes.' },
-      { titulo: 'Un cursor que se ve mejor', texto: 'La barra de escritura es más gruesa y de un verde más claro, en las notas, en los textos y en el diagrama, para que no la pierdas de vista.' }
     ]
   }
 ];
