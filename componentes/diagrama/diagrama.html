@@ -57,7 +57,10 @@
                   <sc-if value="{{ n.ver }}" hint-placeholder-val="{{ true }}">
                     <div data-fila="{{ r.id }}" class="diagrama-tabla-fila">
                       <span class="diagrama-tabla-clave"><span class="diagrama-tabla-k1">{{ r.k1 }}</span><span class="diagrama-tabla-k2">{{ r.k2 }}</span></span>
-                      <span class="diagrama-tabla-dato"><span class="diagrama-tabla-dato-nombre">{{ r.nombreVer }}</span><sc-if value="{{ r.hasNota }}" hint-placeholder-val="{{ false }}"><span class="diagrama-tabla-nota">{{ r.nota }}</span></sc-if></span>
+                      <span class="diagrama-tabla-dato">
+                        <span class="diagrama-tabla-dato-nombre"><sc-for list="{{ r.nombreVer }}" as="g" hint-placeholder-count="1"><span class="{{ g.cls }}">{{ g.t }}</span></sc-for></span>
+                        <sc-if value="{{ r.hasNota }}" hint-placeholder-val="{{ false }}"><span class="diagrama-tabla-nota"><sc-for list="{{ r.notaVer }}" as="g" hint-placeholder-count="1"><span class="{{ g.cls }}">{{ g.t }}</span></sc-for></span></sc-if>
+                      </span>
                     </div>
                   </sc-if>
                   <sc-if value="{{ n.editing }}" hint-placeholder-val="{{ false }}">

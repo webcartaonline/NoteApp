@@ -577,8 +577,13 @@
   font-weight: 700;
   letter-spacing: .03em;
 }
-.diagrama-tabla-k1 { color: #fff; }
-.diagrama-tabla-k2 { color: #9a9a9a; }
+/* PK, FK y UQ se ven igual (mismo color y peso), solas o juntas como PK FK */
+.diagrama-tabla-k1,
+.diagrama-tabla-k2 { color: #b0b0b0; }
+/* Trozos entre *asteriscos* del nombre de un campo o de sus valores (dgMarks en formas.js) */
+.diagrama-tabla-marca {
+  color: #3fb950;
+}
 .diagrama-tabla-dato {
   flex: 1;
   min-width: 0;

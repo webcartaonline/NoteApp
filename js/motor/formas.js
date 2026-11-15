@@ -57,6 +57,22 @@ const DG_TABLA_COLORS = {
   morado:   ['#7446a6', '#ffffff', '#efe3fb'],
   blanco:   ['#ffffff', '#12305f', '#2f4f85']
 };
+// Resaltar con asteriscos: en el nombre de un campo y en sus valores, *texto* se ve en verde (sin los asteriscos)
+// mientras no se está editando la tabla. Sirve para marcar a ojo lo importante, por ejemplo el nombre de la tabla a la
+// que apunta una clave foránea: *role*_id. Para ver un asterisco tal cual se escribe \*. Devuelve los trozos del texto:
+// [{ t: trozo, on: true si va en verde }]
+const DG_MARK_RX = /\\\*|\*([^*\n]+)\*/g;
+function dgMarks(txt) {
+  const t = String(txt == null ? '' : txt), out = []; let last = 0, m;
+  DG_MARK_RX.lastIndex = 0;
+  while ((m = DG_MARK_RX.exec(t))) {
+    if (m.index > last) out.push({ t: t.slice(last, m.index), on: false });
+    out.push(m[1] != null ? { t: m[1], on: true } : { t: '*', on: false });
+    last = m.index + m[0].length;
+  }
+  if (last < t.length || !out.length) out.push({ t: t.slice(last), on: false });
+  return out;
+}
 const DG_KEYS = ['', 'PK', 'FK', 'PKFK', 'UQ'];
 const DG_KEY_NAME = { '': 'Sin clave', PK: 'Clave primaria: identifica cada fila', FK: 'Clave foránea: apunta a otra tabla', PKFK: 'Clave primaria que además apunta a otra tabla', UQ: 'Único: no se puede repetir' };
 const DG_CARD = ['', '1', 'N']; // cuántos en cada extremo de una relación

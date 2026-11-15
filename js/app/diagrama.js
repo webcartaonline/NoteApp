@@ -405,6 +405,8 @@ NoteApp.partes.push(Base => class extends Base {
     const CENTER = { proceso: 1, decision: 1, inicio: 1, dato: 1 };
     const one = selN.size === 1 && !edit ? byId.get([...selN][0]) : null;
     // Tabla de un diagrama entidad-relación: cabecera de color y campos (en la vista sucia se edita en la propia tabla)
+    // *texto* se ve en verde (sin los asteriscos) mientras no se edita la tabla; ver dgMarks en formas.js
+    const marcas = t => dgMarks(t).map((g, i) => ({ ...g, key: i, cls: g.on ? 'diagrama-tabla-marca' : '' }));
     const mkTabla = n => {
       const editing = edit === n.id, on = dirty && selN.has(n.id), col = DG_TABLA_COLORS[n.color] || DG_TABLA_COLORS.azul, rows = n.rows || [];
       return {
@@ -416,7 +418,7 @@ NoteApp.partes.push(Base => class extends Base {
         onSub: e => this.dgTablaSet(n.id, m => ({ ...m, sub: e.target.value.slice(0, 60) })),
         cabKey: e => { if (e.key === 'Enter') { e.preventDefault(); if (e.target.hasAttribute('data-tabla-titulo')) { const i = e.target.parentElement.querySelector('[data-tabla-sub]'); if (i) i.focus(); } else if (rows.length) this.dgTablaFoco(n.id, rows[0].id); else this.dgRowAdd(n.id); } },
         filas: rows.map((r, i) => ({
-          id: r.id, nombre: r.name, nombreVer: r.name || '\u00a0', nota: r.note || '', hasNota: !!r.note,
+          id: r.id, nombre: r.name, nombreVer: marcas(r.name || '\u00a0'), nota: r.note || '', notaVer: marcas(r.note), hasNota: !!r.note,
           k1: r.k === 'PK' || r.k === 'PKFK' ? 'PK' : r.k === 'UQ' ? 'UQ' : '', k2: r.k === 'FK' || r.k === 'PKFK' ? 'FK' : '', sinClave: !r.k, kTitle: DG_KEY_NAME[r.k || ''] + ' (clic para cambiar)',
           clave: () => this.dgRowKey(n.id, r.id),
           onNombre: e => this.dgRowSet(n.id, r.id, 'name', e.target.value), onNota: e => this.dgRowSet(n.id, r.id, 'note', e.target.value),

@@ -265,9 +265,10 @@ const AYUDA = [
         '- En **valores** puedes apuntar los que admite ese campo, por ejemplo mañana · tarde. Salen en pequeño debajo del nombre.',
         '- **Intro** añade un campo debajo. Las flechas pequeñas lo suben o lo bajan y la papelera lo quita.',
         '- **Esc**, o un clic fuera, termina de editar.',
+        'En el nombre de un campo y en sus valores puedes **resaltar** una parte poniéndola entre asteriscos: `*role*_id` se ve como role_id con «role» en verde. Los asteriscos solo se ven mientras editas. Va bien para señalar a qué tabla apunta una clave foránea.',
         'Para **relacionar** dos tablas, arrastra desde un punto verde de una hasta la otra. La línea sale en ángulo, con un **1** en la tabla de la que sales y una **N** en la otra. Empieza por la tabla del 1: por ejemplo, de restaurante a mesa, porque un restaurante tiene muchas mesas.',
         'Al seleccionar la línea puedes cambiar el 1 y la N de cada extremo (**Origen** y **Destino**), darles la vuelta con **Invertir** o ponerla recta.'
-      ], ficha: [['PK', 'Clave primaria: identifica cada fila'], ['FK', 'Clave foránea: apunta a otra tabla'], ['PK FK', 'Clave primaria que además apunta a otra tabla'], ['UQ', 'Único: no se puede repetir'], ['1 — N', 'Uno a muchos: un restaurante tiene muchas mesas']],
+      ], ficha: [['PK', 'Clave primaria: identifica cada fila'], ['FK', 'Clave foránea: apunta a otra tabla'], ['PK FK', 'Clave primaria que además apunta a otra tabla'], ['UQ', 'Único: no se puede repetir'], ['1 — N', 'Uno a muchos: un restaurante tiene muchas mesas'], ['`*role*_id`', 'Lo que va entre asteriscos se ve en verde']],
         nota: ['**Truco:** el color de la barra cambia la cabecera de la tabla; úsalo para agrupar (por ejemplo, azul para la carta y verde para las reservas). El cuadrado verde cambia el ancho; el alto se ajusta solo a sus campos.'] },
       { t: 'Moverse por el lienzo', p: [
         '- Arrastra el fondo, o usa la rueda del ratón, para desplazarte.',
