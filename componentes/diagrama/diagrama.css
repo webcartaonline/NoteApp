@@ -565,21 +565,22 @@
   align-items: flex-start;
   min-height: 26px;
 }
+/* La clave del campo (PK, FK, PK FK o UQ). Es UN solo texto pegado a la izquierda de su columna: así todas las
+   claves de la tabla empiezan exactamente en el mismo sitio, estén solas o juntas, y todas se ven igual. */
 .diagrama-tabla-clave {
   flex: none;
   display: flex;
-  gap: 5px;
+  align-items: center;
+  justify-content: flex-start;
   width: 56px;
   height: 26px;
-  align-items: center;
+  color: #b0b0b0;
   font-family: 'Google Sans','Product Sans',Figtree,system-ui,sans-serif;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .03em;
+  white-space: nowrap;
 }
-/* PK, FK y UQ se ven igual (mismo color y peso), solas o juntas como PK FK */
-.diagrama-tabla-k1,
-.diagrama-tabla-k2 { color: #b0b0b0; }
 /* Trozos entre *asteriscos* del nombre de un campo o de sus valores (dgMarks en formas.js) */
 .diagrama-tabla-marca {
   color: #3fb950;
@@ -664,10 +665,9 @@
   gap: 4px;
 }
 .diagrama-tabla-clave-boton {
-  justify-content: center;
-  width: 50px;
+  width: 54px;
   height: 24px;
-  padding: 0;
+  padding: 0 7px;
   border: 0;
   border-radius: 5px;
   background: #2a2a2a;
@@ -676,7 +676,8 @@
 .diagrama-tabla-clave-boton:hover {
   background: #383838 !important;
 }
-.diagrama-tabla-k0 {
+/* Campo sin clave todavía (solo mientras se edita): se ve apagado */
+.diagrama-tabla-clave-boton[data-vacia="true"] {
   font-weight: 500;
   color: #6a6a6a;
 }

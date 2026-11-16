@@ -74,6 +74,7 @@ function dgMarks(txt) {
   return out;
 }
 const DG_KEYS = ['', 'PK', 'FK', 'PKFK', 'UQ'];
+const DG_KEY_TXT = { '': '', PK: 'PK', FK: 'FK', PKFK: 'PK FK', UQ: 'UQ' }; // se dibuja como un solo texto, para que todas las claves empiecen en el mismo sitio
 const DG_KEY_NAME = { '': 'Sin clave', PK: 'Clave primaria: identifica cada fila', FK: 'Clave foránea: apunta a otra tabla', PKFK: 'Clave primaria que además apunta a otra tabla', UQ: 'Único: no se puede repetir' };
 const DG_CARD = ['', '1', 'N']; // cuántos en cada extremo de una relación
 const dgRow = (name, k, note) => ({ id: uid('r'), k: DG_KEYS.includes(k) ? k : '', name: name || '', note: note || '' });

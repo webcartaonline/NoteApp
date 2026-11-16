@@ -56,7 +56,7 @@
                 <sc-for list="{{ n.filas }}" as="r" hint-placeholder-count="3">
                   <sc-if value="{{ n.ver }}" hint-placeholder-val="{{ true }}">
                     <div data-fila="{{ r.id }}" class="diagrama-tabla-fila">
-                      <span class="diagrama-tabla-clave"><span class="diagrama-tabla-k1">{{ r.k1 }}</span><span class="diagrama-tabla-k2">{{ r.k2 }}</span></span>
+                      <span class="diagrama-tabla-clave">{{ r.kTxt }}</span>
                       <span class="diagrama-tabla-dato">
                         <span class="diagrama-tabla-dato-nombre"><sc-for list="{{ r.nombreVer }}" as="g" hint-placeholder-count="1"><span class="{{ g.cls }}">{{ g.t }}</span></sc-for></span>
                         <sc-if value="{{ r.hasNota }}" hint-placeholder-val="{{ false }}"><span class="diagrama-tabla-nota"><sc-for list="{{ r.notaVer }}" as="g" hint-placeholder-count="1"><span class="{{ g.cls }}">{{ g.t }}</span></sc-for></span></sc-if>
@@ -65,7 +65,7 @@
                   </sc-if>
                   <sc-if value="{{ n.editing }}" hint-placeholder-val="{{ false }}">
                     <div data-fila="{{ r.id }}" class="diagrama-tabla-fila diagrama-tabla-fila-editar">
-                      <button onClick="{{ r.clave }}" title="{{ r.kTitle }}" aria-label="Cambiar la clave del campo" class="diagrama-tabla-clave diagrama-tabla-clave-boton"><span class="diagrama-tabla-k1">{{ r.k1 }}</span><span class="diagrama-tabla-k2">{{ r.k2 }}</span><sc-if value="{{ r.sinClave }}" hint-placeholder-val="{{ false }}"><span class="diagrama-tabla-k0">clave</span></sc-if></button>
+                      <button onClick="{{ r.clave }}" title="{{ r.kTitle }}" aria-label="Cambiar la clave del campo" data-vacia="{{ r.sinClave }}" class="diagrama-tabla-clave diagrama-tabla-clave-boton">{{ r.kEdit }}</button>
                       <input data-campo="1" value="{{ r.nombre }}" onChange="{{ r.onNombre }}" onKeyDown="{{ r.key }}" maxLength="40" spellCheck="false" placeholder="nombre_del_campo" aria-label="Nombre del campo" class="diagrama-tabla-campo diagrama-tabla-campo-dato">
                       <input data-campo-nota="1" value="{{ r.nota }}" onChange="{{ r.onNota }}" onKeyDown="{{ r.key }}" maxLength="60" spellCheck="false" placeholder="valores (opcional)" title="Valores permitidos, por ejemplo: mañana · tarde" aria-label="Valores permitidos" class="diagrama-tabla-campo diagrama-tabla-campo-nota">
                       <button onClick="{{ r.sube }}" disabled="{{ r.noSube }}" title="Subir (Alt + flecha arriba)" aria-label="Subir el campo" class="diagrama-tabla-mini diagrama-tabla-mini-sube"></button>

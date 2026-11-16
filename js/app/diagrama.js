@@ -419,7 +419,7 @@ NoteApp.partes.push(Base => class extends Base {
         cabKey: e => { if (e.key === 'Enter') { e.preventDefault(); if (e.target.hasAttribute('data-tabla-titulo')) { const i = e.target.parentElement.querySelector('[data-tabla-sub]'); if (i) i.focus(); } else if (rows.length) this.dgTablaFoco(n.id, rows[0].id); else this.dgRowAdd(n.id); } },
         filas: rows.map((r, i) => ({
           id: r.id, nombre: r.name, nombreVer: marcas(r.name || '\u00a0'), nota: r.note || '', notaVer: marcas(r.note), hasNota: !!r.note,
-          k1: r.k === 'PK' || r.k === 'PKFK' ? 'PK' : r.k === 'UQ' ? 'UQ' : '', k2: r.k === 'FK' || r.k === 'PKFK' ? 'FK' : '', sinClave: !r.k, kTitle: DG_KEY_NAME[r.k || ''] + ' (clic para cambiar)',
+          kTxt: DG_KEY_TXT[r.k || ''], kEdit: DG_KEY_TXT[r.k || ''] || 'clave', sinClave: !r.k, kTitle: DG_KEY_NAME[r.k || ''] + ' (clic para cambiar)',
           clave: () => this.dgRowKey(n.id, r.id),
           onNombre: e => this.dgRowSet(n.id, r.id, 'name', e.target.value), onNota: e => this.dgRowSet(n.id, r.id, 'note', e.target.value),
           // Intro: campo nuevo debajo · Retroceso en un campo vacío: lo borra · Alt + flechas: lo sube o lo baja

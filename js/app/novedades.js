@@ -27,6 +27,13 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '4.2.1.2',
+    fecha: '16 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Las claves de las tablas, bien alineadas', texto: 'En las tablas de los diagramas entidad-relación, las claves de los campos (PK, FK, PK FK y UQ) empiezan ahora todas en el mismo sitio, pegadas a la izquierda de su columna, y se ven todas igual. Antes cada una caía en un sitio distinto según la clave que tuviera.', tipos: ['correccion'] }
+    ]
+  },
+  {
     version: '4.2.1.1',
     fecha: '15 de noviembre de 2026',
     cambios: [
@@ -57,17 +64,6 @@ const NA_NOVEDADES = [
     fecha: '12 de noviembre de 2026',
     cambios: [
       { titulo: 'Las rutas dicen en qué ventana buscar', texto: 'Una ruta sin nada delante busca ahora solo en la ventana en la que la escribes: desde Notas, en Notas; desde la Agenda, en la Agenda; desde el Diagrama, en el Diagrama. Para usar una entidad de otra ventana, empieza la ruta con su nombre (Notas, Agenda o Diagrama). Por ejemplo, desde una nota: un igual seguido de /Agenda/Proyecto final/Reuniones/Fecha_1. Así no hay confusión aunque una nota y una agenda se llamen igual. No tienes que cambiar nada: las rutas que ya tenías escritas se ponen al día solas.', tipos: ['estructural'] }
-    ]
-  },
-  {
-    version: '3.5.1.0',
-    fecha: '11 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Pega imágenes en tus notas', texto: 'Copia una imagen (una captura de pantalla, una foto, una imagen de una web…) y pégala con Ctrl+V mientras escribes: aparece en su propia línea. Funciona en el texto de las hojas, en las entidades de texto y en las formas del Diagrama.', tipos: ['visual'] },
-      { titulo: 'Tus imágenes, bien guardadas', texto: 'Las imágenes se guardan aparte para que las notas no pesen. Si tienes una carpeta conectada, también se guardan en ella, dentro de una carpeta «Imágenes», así las ves desde otro ordenador que abra esa misma carpeta.', tipos: ['estructural'] },
-      { titulo: 'Cambia el tamaño y recorta tus imágenes', texto: 'En la vista para editar, cada imagen se ve debajo de su línea. Haz clic en ella y salen unos puntos: los de las esquinas la hacen más grande o más pequeña sin deformarla, y los de los lados la recortan. Con doble clic vuelve a su tamaño original, sin recorte.', tipos: ['visual'] },
-      { titulo: 'Ordena tus notas', texto: 'Igual que con las hojas, al elegir una nota salen dos flechas pequeñas a los lados de su nombre, arriba. Púlsalas para moverla a la izquierda o a la derecha y dejar tus notas en el orden que quieras.', tipos: ['visual'] },
-      { titulo: 'Novedades por colores', texto: 'En Ajustes › Actualizaciones, cada novedad lleva a su izquierda una raya de color según su tipo: verde para las mejoras visuales (lo que ves), azul para las estructurales (cambios por dentro) y naranja para las correcciones (arreglos). A la derecha tienes la leyenda de los colores. Si una novedad es de varios tipos a la vez, sale una sola vez, con una raya por cada tipo.', tipos: ['visual'] }
     ]
   }
 ];
