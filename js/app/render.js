@@ -93,8 +93,9 @@ NoteApp.partes.push(Base => class extends Base {
       stopBar: e => e.stopPropagation(),
       searchQuery: (s.search && s.search.q) || '',
       hasSearch: !!(s.search && s.search.q),
+      searching: s.search && s.search.q && s.search.q.trim() ? '1' : '0', // oscurece lo que no coincide (panel-texto.css)
       searchCountTxt: (() => { const t = (this._matches || []).length; if (!s.search || !s.search.q) return ''; if (!t) return 'Sin resultados'; const k = ((s.search.active % t) + t) % t; return (k + 1) + ' / ' + t; })(),
-      onSearchChange: e => this.setState({ search: { q: e.target.value, active: 0 } }),
+      onSearchChange: e => this.setState({ search: { q: e.target.value, active: 0 } }, () => this.searchShow()),
       onSearchKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.searchStep(e.shiftKey ? -1 : 1); } else if (e.key === 'Escape') { e.preventDefault(); e.target.blur(); this.setState({ search: null }); } },
       searchPrev: () => this.searchStep(-1),
       searchNext: () => this.searchStep(1),

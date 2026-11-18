@@ -8,10 +8,12 @@ NoteApp.partes.push(Base => class extends Base {
       const cur = st.search ? st.search.active : 0;
       const next = ((cur % total) + total + dir) % total;
       return { search: { ...(st.search || { q: '' }), active: next } };
-    }, () => {
-      const t = (this._matches || []).length; if (!t) return;
-      const i = ((this.state.search.active % t) + t) % t, m = this._matches[i];
-      if (m) { const el = document.querySelector('[data-lid="' + m.lineId + '"]'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' }); }
-    });
+    }, () => this.searchShow());
+  }
+  // Lleva a la vista la coincidencia actual (al pulsar Intro / flechas y también al escribir en el buscador).
+  searchShow() {
+    const t = (this._matches || []).length; if (!t || !this.state.search) return;
+    const i = ((this.state.search.active % t) + t) % t, m = this._matches[i];
+    if (m) { const el = document.querySelector('[data-lid="' + m.lineId + '"]'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' }); }
   }
 });

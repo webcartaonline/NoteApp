@@ -254,3 +254,16 @@
 .panel-texto-asa:hover {
   background: #008000 !important;
 }
+
+/* Mientras se busca en el texto (data-buscando="1"), todo lo que no es una coincidencia se oscurece.
+   El texto se oscurece trozo a trozo en js/app/lineas.js (searchRuns, DIM_BUSCAR); aquí, lo demás:
+   imágenes, casillas, viñetas y números de lista, separadores, botones de copiar y fondos de bloques. */
+.panel-texto-lineas[data-buscando="1"] :is(.lineas-imagen, .lineas-casilla, .lineas-texto-2, .lineas-celda-marca, .lineas-caja, .lineas-celda-linea, .lineas-copiar-contenido, .lineas-chip-copiar, .lineas-celda-copiar) {
+  opacity: 0.35;
+}
+.panel-texto-lineas[data-buscando="1"] .lineas-enlace {
+  text-decoration-color: rgba(0, 128, 0, 0.35) !important;
+}
+.panel-texto-lineas[data-buscando="1"] .lineas-texto-4 {
+  background: rgba(29, 43, 29, 0.35);
+}

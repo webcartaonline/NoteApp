@@ -1,4 +1,6 @@
 // Líneas de texto: teclado y edición de cada línea (lineHandlers) y cómo se dibuja cada una (mkdLines).
+// Opacidad del texto que no coincide mientras se usa el buscador del panel de texto (se oscurece).
+const DIM_BUSCAR = '0.35';
 NoteApp.partes.push(Base => class extends Base {
   lineHandlers(ln, idx, lines, entId) {
     const s = this.state, setL = (l, f, c) => this.setLines(l, f, c, entId);
@@ -140,6 +142,43 @@ NoteApp.partes.push(Base => class extends Base {
     Object.assign(v, { hasCopy: true, disp: 'inline-flex', copyTitle: copied ? 'Copiado' : 'Copiar', copyColor: copied ? '#008000' : '#8a8a8a',
       onCopy: e => { e.preventDefault(); e.stopPropagation(); if (menu) this.askCopy({ ...menu(), key }); else this.copyText(get(), key); } });
   }
+  // Busca "query" en los trozos de una línea (concatenando su texto visible) y apunta en cada trozo qué partes hay
+  // que resaltar (_hl: texto, código o enlace; _hlL: nombre o valor de una mención; _hlE: el "=" de la mención).
+  // this._matches guarda el orden global de las coincidencias, para el contador y los botones de anterior/siguiente.
+  searchLine(segs, query, lineId) {
+    const s = this.state; let plain = ''; const spans = [];
+    const add = (sg, f, t) => { if (!t) return; spans.push({ sg, f, start: plain.length, end: plain.length + t.length }); plain += t; };
+    segs.forEach(sg => {
+      if (sg.isText || sg.isCode || sg.isLink) add(sg, '_hl', sg.text);
+      else if (sg.isEnt) { add(sg, '_hlE', sg.eq || ''); add(sg, '_hlL', String(sg.label == null ? '' : sg.label)); }
+    });
+    const low = plain.toLowerCase(); let pos = 0, i;
+    while ((i = low.indexOf(query, pos)) !== -1) {
+      const me = i + query.length, gi = this._matches.length, active = !!(s.search && s.search.active === gi);
+      this._matches.push({ lineId });
+      spans.forEach(sp => { const a = Math.max(sp.start, i), b = Math.min(sp.end, me); if (a < b) (sp.sg[sp.f] = sp.sg[sp.f] || []).push({ a: a - sp.start, b: b - sp.start, active }); });
+      pos = me > i ? me : i + 1;
+    }
+  }
+  // Parte el texto de un trozo en "runs" (lo resaltado y lo que no) para dibujarlos en lineas.html.
+  // bg = fondo verde de la coincidencia (más intenso la actual), col = color del texto, op = opacidad (se oscurece al buscar).
+  searchRuns(sg, on) {
+    const mk = (t, hl, off) => {
+      t = t == null ? '' : String(t);
+      const plain = (x, o) => ({ t: x, bg: 'transparent', col: 'inherit', op: on ? DIM_BUSCAR : '1', off: o });
+      if (!hl || !hl.length) return [plain(t, off)];
+      const rs = hl.slice().sort((x, y) => x.a - y.a), out = []; let p = 0;
+      rs.forEach(r => { if (r.a > p) out.push(plain(t.slice(p, r.a), off + p)); out.push({ t: t.slice(r.a, r.b), bg: r.active ? '#008000' : 'rgba(0,128,0,.45)', col: '#fff', op: '1', off: off + r.a }); p = r.b; });
+      if (p < t.length) out.push(plain(t.slice(p), off + p));
+      return out;
+    };
+    if (sg.isText || sg.isCode || sg.isLink) sg.runs = mk(sg.text, sg._hl, sg.off);
+    if (sg.isEnt) {
+      sg.lruns = mk(sg.label, sg._hlL, sg.off2);
+      const e = sg._hlE && sg._hlE.length ? sg._hlE[0] : null;
+      Object.assign(sg, { eqBg: e ? (e.active ? '#008000' : 'rgba(0,128,0,.45)') : 'transparent', eqOp: on && !e ? DIM_BUSCAR : '1' });
+    }
+  }
   mkdLines(src, entId, out) {
     const s = this.state, cleanV = s.clean || !!out;
     const blocks = cleanV ? blockInfo(src) : null;
@@ -265,38 +304,12 @@ NoteApp.partes.push(Base => class extends Base {
       }
       if (!ln.text && !focused && src.length === 1) segs = [{ t: 'text', text: 'Escribe aquí…', off: 0, color: DIM }];
       segs = segs.map(sg => segV(sg, focused, ln));
-      if (query) {
-        // Busca "query" en el texto visible de la línea (concatenando sus trozos) y marca, en cada
-        // trozo de texto normal, qué partes hay que resaltar. this._matches guarda el orden global
-        // de las coincidencias, para el contador y los botones de anterior/siguiente.
-        let plain = ''; const spans = [];
-        segs.forEach(sg => {
-          let eqLen = 0, t = null;
-          if (sg.isText || sg.isCode || sg.isLink) t = sg.text;
-          else if (sg.isEnt) { eqLen = (sg.eq || '').length; t = sg.label; }
-          if (t == null) return;
-          const full = (sg.isEnt ? (sg.eq || '') : '') + t;
-          spans.push({ sg, t, start: plain.length + eqLen, end: plain.length + eqLen + t.length });
-          plain += full;
-        });
-        const low = plain.toLowerCase();
-        let pos = 0, idx2;
-        while ((idx2 = low.indexOf(query, pos)) !== -1) {
-          const ms = idx2, me = idx2 + query.length, gi = this._matches.length;
-          const active = !!(s.search && s.search.active === gi);
-          this._matches.push({ lineId: ln.id });
-          spans.forEach(sp => { const a = Math.max(sp.start, ms), b = Math.min(sp.end, me); if (a < b) (sp.sg._hl = sp.sg._hl || []).push({ a: a - sp.start, b: b - sp.start, active }); });
-          pos = me > idx2 ? me : idx2 + 1;
-        }
-      }
-      segs.forEach(sg => {
-        if (!sg.isText) return; // solo se resalta el texto normal (no código, enlaces, menciones ni casillas)
-        if (!sg._hl || !sg._hl.length) { sg.runs = [{ t: sg.text, bg: 'transparent', off: sg.off }]; return; }
-        const hl = sg._hl.slice().sort((a, b) => a.a - b.a), runs = []; let p = 0;
-        hl.forEach(r => { if (r.a > p) runs.push({ t: sg.text.slice(p, r.a), bg: 'transparent', off: sg.off + p }); runs.push({ t: sg.text.slice(r.a, r.b), bg: r.active ? '#008000' : 'rgba(0,128,0,.45)', off: sg.off + r.a }); p = r.b; });
-        if (p < sg.text.length) runs.push({ t: sg.text.slice(p), bg: 'transparent', off: sg.off + p });
-        sg.runs = runs;
-      });
+      // Búsqueda: se busca en todo el texto visible de la línea (texto normal, código, enlaces, menciones y
+      // celdas de tabla) y se resalta en verde sea cual sea su formato. Mientras se busca, el resto del texto
+      // se oscurece (runs con op = DIM_BUSCAR; los demás elementos, en panel-texto.css con [data-buscando="1"]).
+      const cellSegs = v.isRow ? v.cells.reduce((a, c) => a.concat(c.segs), []) : [];
+      if (query) this.searchLine(segs.concat(cellSegs), query, ln.id);
+      segs.concat(cellSegs).forEach(sg => this.searchRuns(sg, !!query));
       const imgs = dbi && dbi[idx].kind !== 'code' && ln.text.includes('![') ? this.imgEditors(ln, entId) : [];
       return { id: ln.id, text: ln.text, focused, segs, fs, lh, mt, fw: head ? 700 : 400, hasImgs: imgs.length > 0, imgs, ...v, ...this.lineHandlers(ln, idx, src, entId), ...(out ? { onDown: null } : null) };
     });

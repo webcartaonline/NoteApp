@@ -27,6 +27,13 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '4.6.4.0',
+    fecha: '18 de noviembre de 2026',
+    cambios: [
+      { titulo: 'El buscador se ve mucho mejor', tipos: ['visual', 'correccion'], texto: 'Al buscar en el texto de una hoja, ahora se marcan en verde todas las coincidencias, tengan el formato que tengan: código, enlaces, menciones, celdas de tabla, títulos, listas… Antes algunas no se marcaban. Además, mientras buscas, el resto del texto se oscurece para que lo encontrado destaque, y la hoja salta sola a la primera coincidencia. Por ejemplo, si buscas «casa», cada «casa» queda en verde y todo lo demás pasa a un segundo plano.' }
+    ]
+  },
+  {
     version: '4.5.4.3',
     fecha: '18 de noviembre de 2026',
     cambios: [
@@ -54,15 +61,6 @@ const NA_NOVEDADES = [
     fecha: '16 de noviembre de 2026',
     cambios: [
       { titulo: 'Las claves de las tablas, bien alineadas', texto: 'En las tablas de los diagramas entidad-relación, las claves de los campos (PK, FK, PK FK y UQ) empiezan ahora todas en el mismo sitio, pegadas a la izquierda de su columna, y se ven todas igual. Antes cada una caía en un sitio distinto según la clave que tuviera.', tipos: ['correccion'] }
-    ]
-  },
-  {
-    version: '4.2.1.1',
-    fecha: '15 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Diagramas entidad-relación', texto: 'En Diagrama hay una forma nueva, la Tabla, para planear bases de datos. Cada tabla tiene su nombre, una descripción y sus campos, y cada campo puede llevar su clave (PK, FK, PK FK o UQ) y los valores que admite. Haz doble clic en una tabla para editarla: Intro añade un campo y el botón de la izquierda de cada campo cambia su clave. El color elige la cabecera, y hay un color nuevo, el blanco.', tipos: ['visual', 'estructural'] },
-      { titulo: 'Resalta en verde lo que quieras', texto: 'En el nombre de un campo de una tabla, y en sus valores, lo que pongas entre asteriscos se ve en verde, sin los asteriscos. Por ejemplo, escribe *role*_id y se verá role_id con «role» en verde, para ver de un vistazo a qué tabla apunta esa clave. Los asteriscos solo se ven mientras editas la tabla.', tipos: ['visual'] },
-      { titulo: 'Relaciones con 1 y N', texto: 'Al unir dos tablas, la línea sale en ángulo recto y con un 1 en un extremo y una N en el otro, para ver de un vistazo que, por ejemplo, un restaurante tiene muchas mesas. Si varias líneas salen del mismo lado de una tabla, se reparten solas para no montarse. Al seleccionar una línea puedes cambiar el 1 y la N, darles la vuelta o ponerla recta. También vale para las demás formas.', tipos: ['visual'] }
     ]
   }
 ];
