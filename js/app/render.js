@@ -105,10 +105,11 @@ NoteApp.partes.push(Base => class extends Base {
         if (e.target.dataset && e.target.dataset.handle) return;
         if (e.target.closest && e.target.closest('[data-line]')) return;
         if (e.nativeEvent.offsetX >= e.target.clientWidth) return;
+        // Clic en un hueco (debajo del texto, entre dos líneas o en los márgenes): no se hace nada.
+        // Antes llevaba el cursor al final de la hoja y estorbaba al seleccionar texto (Camilo, 18/11/2026).
+        // preventDefault: no quita el foco de la línea que se esté editando ni empieza una selección suelta.
         e.preventDefault();
-        const last = src[src.length - 1];
-        if (last) this.focusLine(last.id, last.text.length);
-        else if (sheet) { const ln = mkLines([''])[0]; this.setLines([ln], ln.id, 0); } // hoja sin líneas (p. ej. un diagrama antiguo)
+        if (!src.length && sheet) { const ln = mkLines([''])[0]; this.setLines([ln], ln.id, 0); } // hoja sin líneas (p. ej. un diagrama antiguo)
       },
       resizeDown: e => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); this._rs = { x: e.clientX, w: this.panelRef.current.getBoundingClientRect().width }; this.setState({ dragging: true }); document.body.style.cursor = 'col-resize'; },
       // En Diagrama el panel flota sobre el lienzo: el máximo sale del ancho del lienzo y deja 120 px a la vista.

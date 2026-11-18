@@ -27,6 +27,13 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '4.5.4.3',
+    fecha: '18 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Seleccionar texto ya no te lleva al final', tipos: ['correccion'], texto: 'Antes, al hacer clic en un hueco del texto de una hoja (debajo de la última línea, entre dos líneas o en los márgenes), el cursor saltaba al final de todo, y eso estorbaba al seleccionar. Ahora un clic en un hueco no hace nada: el cursor se queda donde estaba. Para escribir, haz clic en una línea.' }
+    ]
+  },
+  {
     version: '4.5.4.0',
     fecha: '18 de noviembre de 2026',
     cambios: [
@@ -56,16 +63,6 @@ const NA_NOVEDADES = [
       { titulo: 'Diagramas entidad-relación', texto: 'En Diagrama hay una forma nueva, la Tabla, para planear bases de datos. Cada tabla tiene su nombre, una descripción y sus campos, y cada campo puede llevar su clave (PK, FK, PK FK o UQ) y los valores que admite. Haz doble clic en una tabla para editarla: Intro añade un campo y el botón de la izquierda de cada campo cambia su clave. El color elige la cabecera, y hay un color nuevo, el blanco.', tipos: ['visual', 'estructural'] },
       { titulo: 'Resalta en verde lo que quieras', texto: 'En el nombre de un campo de una tabla, y en sus valores, lo que pongas entre asteriscos se ve en verde, sin los asteriscos. Por ejemplo, escribe *role*_id y se verá role_id con «role» en verde, para ver de un vistazo a qué tabla apunta esa clave. Los asteriscos solo se ven mientras editas la tabla.', tipos: ['visual'] },
       { titulo: 'Relaciones con 1 y N', texto: 'Al unir dos tablas, la línea sale en ángulo recto y con un 1 en un extremo y una N en el otro, para ver de un vistazo que, por ejemplo, un restaurante tiene muchas mesas. Si varias líneas salen del mismo lado de una tabla, se reparten solas para no montarse. Al seleccionar una línea puedes cambiar el 1 y la N, darles la vuelta o ponerla recta. También vale para las demás formas.', tipos: ['visual'] }
-    ]
-  },
-  {
-    version: '4.0.0.0',
-    fecha: '15 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Sincronización: cambia, copia o muda tu espacio de trabajo', texto: 'El menú Sincronización de Ajustes ya funciona. En «Espacios de trabajo» puedes cambiar a otra carpeta (como con el botón de la carpeta), copiar todo a otra carpeta para tener dos espacios con el mismo contenido sin empezar de cero, o mudarlo: es como cortar y pegar, se lleva todo a la carpeta nueva y se borran de la anterior los archivos de NoteApp.', tipos: ['visual', 'estructural'] },
-      { titulo: 'Exportar e importar en un solo archivo', texto: 'En Ajustes › Sincronización › Exportar eliges qué guardar: una nota, una agenda, un diagrama, todas las de una ventana o todo. Sale un único archivo, con sus imágenes dentro, para tener una copia o enviarlo de una vez por mensajería. Al lado está Importar: si lo que traes se llama igual que algo tuyo, NoteApp te pregunta si guardas las dos (la importada con un número al final, como «Viajes (2)») o si sustituye a la tuya.', tipos: ['visual', 'estructural'] },
-      { titulo: 'Historial de espacios de trabajo', texto: 'En Ajustes › Sincronización › Historial aparecen las carpetas que has ido abriendo. A cada una le puedes poner un título y apuntar su ruta para reconocerla, y con «Abrir» cambias a ella al momento.', tipos: ['visual'] },
-      { titulo: 'Lista de entidades', texto: 'En Notas, a la izquierda del buscador del texto, hay un botón nuevo que abre una lista con las entidades: su nombre, su descripción, su valor y un botón para copiar su ruta o solo su nombre. Con los botones Agenda, Notas y Diagramas eliges dónde buscar (puedes activar varios) y, sin ninguno, ves las de la nota abierta. En su buscador, escribe un nombre o empieza con una barra (/) para elegir primero el título y después la hoja.', tipos: ['visual'] }
     ]
   }
 ];
