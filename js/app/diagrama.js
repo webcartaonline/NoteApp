@@ -187,6 +187,8 @@ NoteApp.partes.push(Base => class extends Base {
   }
   // Sin límite de largo (los saltos de línea de lo pegado se cambian por espacios: cada campo es una sola línea que se parte sola)
   dgRowSet(id, rid, key, val) { const v = String(val).replace(/\r?\n/g, ' '); this.dgTablaSet(id, n => ({ ...n, rows: (n.rows || []).map(r => r.id === rid ? { ...r, [key]: v } : r) })); }
+  // Elige una opción rápida (–, 1 o N) para un extremo de una conexión y cierra su menú (botones y atajos 1 / N)
+  dgCardPick(edge, end, c) { this.dgEdgeSet(edge, k => ({ ...k, [end]: c })); this.setState({ dcard: null }); }
   // Cierra el menú del texto de un extremo de una conexión (quitando los espacios de sobra de lo escrito)
   dgCardClose() {
     const d = this.state.dcard; if (!d) return;
@@ -408,6 +410,9 @@ NoteApp.partes.push(Base => class extends Base {
       if (sel) this.setState({ dsel: null });
       return;
     }
+    // Menú del texto de un extremo abierto: la tecla 1 elige «1» y la N elige «N». Mientras se escribe en «Otro» (typing),
+    // no hay atajos: esas teclas escriben.
+    if (s.dcard && !typing && !mod && !e.altKey && (k === '1' || k === 'n' || k === 'N')) { e.preventDefault(); this.dgCardPick(s.dcard.edge, s.dcard.end, k === '1' ? '1' : 'N'); return; }
     if (typing || s.clean || !this.dgSheet(s)) return;
     if (mod && !e.altKey && (k === 'z' || k === 'Z')) { e.preventDefault(); this.dgUndo(e.shiftKey); return; }
     if (mod && !e.altKey && (k === 'y' || k === 'Y')) { e.preventDefault(); this.dgUndo(true); return; }
@@ -614,19 +619,23 @@ NoteApp.partes.push(Base => class extends Base {
       v.dgEdgeRoute = () => this.dgEdgeSet(ek.id, k => ({ ...k, route: k.route === 'codo' ? '' : 'codo' }));
       v.dgEdgeRouteTxt = ek.route === 'codo' ? 'En ángulo' : 'Recta';
       // Texto de cada extremo (18/11/2026): el botón abre un menú con «–» (nada), «1», «N» y un campo «Otro» para escribir
-      // cualquier texto (0..1, muchos…). state.dcard = { edge, end: 'c1' | 'c2' } mientras está abierto.
+      // cualquier texto (0..1, muchos…). state.dcard = { edge, end: 'c1' | 'c2', txt } mientras está abierto; txt = lo escrito
+      // en «Otro» desde que se abrió (null si no se ha escrito nada): así, escribir «1» en «Otro» se queda en el campo y no
+      // se confunde con la opción rápida «1». Atajos: con el menú abierto y fuera de «Otro», las teclas 1 y N (dgKey).
       const dc = s.dcard && s.dcard.edge === ek.id ? s.dcard.end : null;
       v.dgEnds = [['c1', 'Origen'], ['c2', 'Destino']].map(([end, nombre]) => {
-        const val = ek[end] || '', abierto = dc === end, otro = val && !DG_CARD.includes(val) ? val : '';
+        const val = ek[end] || '', abierto = dc === end, tx = abierto && s.dcard.txt != null ? s.dcard.txt : null;
+        const otro = tx != null ? tx : val && !DG_CARD.includes(val) ? val : '';
         return {
           end, txt: nombre + ': ' + (val || '–'), title: nombre === 'Origen' ? 'Qué se escribe en el extremo de origen: nada, 1, N o lo que quieras' : 'Qué se escribe en el extremo de destino: nada, 1, N o lo que quieras',
           abierto, cls: abierto ? 'diagrama-card-boton-on' : '',
-          toggle: () => { this._dcardSnap = false; this.setState(st => ({ dcard: st.dcard && st.dcard.edge === ek.id && st.dcard.end === end ? null : { edge: ek.id, end } }), () => { if (this.state.dcard) { const i = document.querySelector('[data-cardotro]'); if (i && i.value) { i.focus(); i.select(); } } }); },
+          // Al abrir, el cursor NO va a «Otro»: así funcionan los atajos 1 y N hasta que se pulse el campo
+          toggle: () => { this._dcardSnap = false; this.setState(st => ({ dcard: st.dcard && st.dcard.edge === ek.id && st.dcard.end === end ? null : { edge: ek.id, end, txt: null } })); },
           titulo: nombre,
-          opts: DG_CARD.map(c => ({ txt: c || '–', title: c ? c : 'Nada', cls: val === c ? 'diagrama-card-opcion-on' : '', pick: () => { this.dgEdgeSet(ek.id, k => ({ ...k, [end]: c })); this.setState({ dcard: null }); } })),
+          opts: DG_CARD.map(c => ({ txt: c || '–', title: c ? (c === '1' ? '1 (tecla 1)' : 'N (tecla N)') : 'Nada', cls: !otro && val === c ? 'diagrama-card-opcion-on' : '', pick: () => this.dgCardPick(ek.id, end, c) })),
           otro, otroCls: otro ? 'diagrama-card-otro-on' : '',
           // Un solo paso de deshacer para todo lo que se escriba cada vez que se abre el menú (se guarda al escribir la primera letra)
-          otroChange: e => { if (!this._dcardSnap) { this.dgSnap(); this._dcardSnap = true; } const t = e.target.value.replace(/\r?\n/g, ' '); this.dgSet(x => ({ ...x, edges: (x.edges || []).map(k => k.id === ek.id ? { ...k, [end]: t } : k) })); },
+          otroChange: e => { if (!this._dcardSnap) { this.dgSnap(); this._dcardSnap = true; } const t = e.target.value.replace(/\r?\n/g, ' '); this.dgSet(x => ({ ...x, edges: (x.edges || []).map(k => k.id === ek.id ? { ...k, [end]: t } : k) }), false, { dcard: { edge: ek.id, end, txt: t } }); },
           otroKey: e => { if (e.key === 'Enter' || e.key === 'Escape') { e.preventDefault(); this.dgCardClose(); } }
         };
       });

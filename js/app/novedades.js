@@ -27,6 +27,14 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '4.7.5.1',
+    fecha: '18 de noviembre de 2026',
+    cambios: [
+      { titulo: 'La tecla N ya elige «N» en los extremos de una relación', texto: 'Con el menú de Origen o de Destino abierto, la tecla 1 ponía «1», pero la tecla N no ponía «N». Ahora las dos funcionan igual, sin tener que hacer clic.', tipos: ['correccion'] },
+      { titulo: 'Ya puedes escribir un 1 o una N en «Otro»', texto: 'Al escribir un 1 en el campo «Otro» de un extremo, el campo se quedaba vacío y se marcaba la opción «1». Ahora, mientras escribes en «Otro», las teclas 1 y N solo escriben: lo que pongas se queda en el campo.', tipos: ['correccion'] }
+    ]
+  },
+  {
     version: '4.7.5.0',
     fecha: '18 de noviembre de 2026',
     cambios: [
@@ -53,14 +61,6 @@ const NA_NOVEDADES = [
     cambios: [
       { titulo: 'Escribe junto a tus diagramas', texto: 'Cada hoja de Diagrama tiene ahora su propio texto, igual que una hoja de Notas. Ábrelo con el botón nuevo que hay a la derecha del interruptor de vista limpia/sucia: aparece flotando encima del lienzo, a la izquierda, y lo puedes hacer más ancho o más estrecho arrastrando su borde. Sirve para explicar el diagrama, por ejemplo qué hace cada tabla. Tiene todo lo del texto de Notas: formato, menciones, casillas, buscar, copiar y exportar.', tipos: ['visual', 'estructural'] },
       { titulo: 'La lista de entidades, en las tres ventanas', texto: 'El botón de la lista de entidades se ha mudado: ahora está arriba, a la derecha del interruptor de vista limpia/sucia, y funciona en Notas, en la Agenda y en Diagrama. En Diagrama la lista también flota encima del lienzo, al lado del texto.', tipos: ['visual'] }
-    ]
-  },
-  {
-    version: '4.4.3.2',
-    fecha: '18 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Elige varias claves para un campo', texto: 'En las tablas de los diagramas, el botón de la clave de cada campo abre ahora un pequeño menú con PK, FK y UQ. Marca las que quieras: una, varias o ninguna. Así puedes tener combinaciones que antes no existían, como FK UQ (apunta a otra tabla y no se puede repetir) o las tres a la vez. Esc o un clic fuera cierran el menú.', tipos: ['visual', 'estructural'] },
-      { titulo: 'Escribe todo lo que quieras en los diagramas', texto: 'En Diagrama ya no hay límite de letras en ningún texto: el nombre y la descripción de las tablas, sus campos, los valores de cada campo, las etiquetas de las líneas y el nombre del diagrama y de sus hojas. Por ejemplo, puedes apuntar todos los estados de una reserva aunque sean muchos. Lo que no cabe a lo ancho sigue en la línea de abajo, nunca se corta, y la tabla se hace más alta sola (y más baja si borras texto).', tipos: ['visual', 'estructural'] }
     ]
   }
 ];
