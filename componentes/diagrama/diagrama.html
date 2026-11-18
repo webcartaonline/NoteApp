@@ -105,7 +105,7 @@
       </sc-for>
       <!-- «1» y «N» en los extremos de las relaciones -->
       <sc-for list="{{ dgCards }}" as="c" hint-placeholder-count="0">
-        <span class="diagrama-cardinal" style="left:{{ c.x }};top:{{ c.y }};color:{{ c.color }};">{{ c.text }}</span>
+        <span class="diagrama-cardinal" style="left:{{ c.x }};top:{{ c.y }};color:{{ c.color }};transform:{{ c.tf }};">{{ c.text }}</span>
       </sc-for>
       <sc-for list="{{ dgLabels }}" as="l" hint-placeholder-count="0">
         <div data-edge="{{ l.id }}" class="diagrama-etiqueta" style="left:{{ l.x }};top:{{ l.y }};border-color:{{ l.color }};">
@@ -149,8 +149,26 @@
         <button onClick="{{ dgEdgeFlip }}" title="Cambiar el sentido (también intercambia el 1 y la N)" class="diagrama-boton-texto-2">Invertir</button>
         <span class="diagrama-barra-separador"></span>
         <button onClick="{{ dgEdgeRoute }}" title="Línea recta o en ángulo recto" class="diagrama-boton-texto-2">{{ dgEdgeRouteTxt }}</button>
-        <button onClick="{{ dgEdgeC1 }}" title="Cuántos en el origen: nada, 1 o N (muchos)" class="diagrama-boton-texto-2">{{ dgEdgeC1Txt }}</button>
-        <button onClick="{{ dgEdgeC2 }}" title="Cuántos en el destino: nada, 1 o N (muchos)" class="diagrama-boton-texto-2">{{ dgEdgeC2Txt }}</button>
+        <!-- Texto de cada extremo: menú con –, 1, N y un campo para escribir lo que se quiera -->
+        <sc-for list="{{ dgEnds }}" as="c" hint-placeholder-count="2">
+          <div data-cardmenu="1" class="diagrama-card-caja">
+            <button onClick="{{ c.toggle }}" title="{{ c.title }}" aria-haspopup="menu" aria-expanded="{{ c.abierto }}" class="diagrama-boton-texto-2 diagrama-card-boton {{ c.cls }}">{{ c.txt }}</button>
+            <sc-if value="{{ c.abierto }}" hint-placeholder-val="{{ false }}">
+              <div role="menu" aria-label="{{ c.titulo }}" class="diagrama-card-menu">
+                <span class="diagrama-card-titulo">{{ c.titulo }}</span>
+                <div class="diagrama-card-opciones">
+                  <sc-for list="{{ c.opts }}" as="o" hint-placeholder-count="3">
+                    <button role="menuitemradio" onClick="{{ o.pick }}" title="{{ o.title }}" class="diagrama-card-opcion {{ o.cls }}">{{ o.txt }}</button>
+                  </sc-for>
+                </div>
+                <label class="diagrama-card-otro {{ c.otroCls }}">
+                  <span class="diagrama-card-otro-txt">Otro</span>
+                  <input data-cardotro="1" value="{{ c.otro }}" onChange="{{ c.otroChange }}" onKeyDown="{{ c.otroKey }}" spellCheck="false" placeholder="Escribe lo que quieras" aria-label="Texto personalizado" class="diagrama-card-campo">
+                </label>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
         <span class="diagrama-barra-separador"></span>
         <button onClick="{{ dgEdgeDel }}" title="Borrar conexión (Supr)" aria-label="Borrar conexión" class="diagrama-boton diagrama-boton-borrar"></button>
       </div>

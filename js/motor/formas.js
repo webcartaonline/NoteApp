@@ -80,7 +80,7 @@ const DG_KEY_INFO = { PK: ['Clave primaria', 'Identifica cada fila'], FK: ['Clav
 const dgKeys = k => DG_KEY_LIST.filter(x => String(k || '').includes(x));            // 'PKFK' → ['PK', 'FK']
 const dgKeyStr = list => DG_KEY_LIST.filter(x => (list || []).includes(x)).join('');  // ['FK', 'PK'] → 'PKFK' (siempre en orden)
 const dgKeyTxt = k => dgKeys(k).join(' ');                                           // 'FKUQ' → 'FK UQ': un solo texto, así todas empiezan en el mismo sitio
-const DG_CARD = ['', '1', 'N']; // cuántos en cada extremo de una relación
+const DG_CARD = ['', '1', 'N']; // opciones rápidas para cada extremo de una relación; además se puede escribir cualquier texto (c1 / c2 libres)
 const dgRow = (name, k, note) => ({ id: uid('r'), k: dgKeyStr(dgKeys(k)), name: name || '', note: note || '' });
 const dgTablaH = n => DG_TABLA.head + DG_TABLA.padT + (n.rows || []).reduce((a, r) => a + DG_TABLA.row + (r.note ? DG_TABLA.note : 0), 0) + DG_TABLA.padB;
 // Tabla nueva. rows: lista de campos ya hechos (dgRow) o nada (empieza con un campo «id» como clave primaria).
@@ -207,11 +207,13 @@ function dgRoutes(byId, edges) {
   });
   return out;
 }
-// Dónde se escribe el «1» o la «N» de un extremo: junto a la forma y a un lado de la línea, para que no la tape.
+// Dónde se escribe el texto de un extremo («1», «N» o lo que se haya escrito): junto a la forma, a un lado de la línea y
+// creciendo hacia fuera de la forma, para que un texto largo no tape ni la línea ni la forma.
+// Devuelve el punto y tf = cómo se coloca el texto respecto a ese punto (transform de CSS).
 function dgCardPos(e) {
-  if (Math.abs(e.dx) < 0.01) return { x: e.x + 13, y: e.y + e.dy * 15 };   // línea vertical: a su derecha
-  if (Math.abs(e.dy) < 0.01) return { x: e.x + e.dx * 15, y: e.y - 13 };   // línea horizontal: encima
-  return { x: e.x + e.dx * 20 + e.dy * 12, y: e.y + e.dy * 20 - e.dx * 12 }; // línea inclinada
+  if (Math.abs(e.dx) < 0.01) return { x: e.x + 8, y: e.y + e.dy * 14, tf: 'translate(0,-50%)' };                       // línea vertical: a su derecha
+  if (Math.abs(e.dy) < 0.01) return { x: e.x + e.dx * 8, y: e.y - 6, tf: e.dx > 0 ? 'translate(0,-100%)' : 'translate(-100%,-100%)' }; // horizontal: encima
+  return { x: e.x + e.dx * 20 + e.dy * 12, y: e.y + e.dy * 20 - e.dx * 12, tf: 'translate(-50%,-50%)' };              // inclinada
 }
 // Copia de una forma con IDs nuevos (para duplicar)
 const dgCopyNode = (n, dx, dy) => {

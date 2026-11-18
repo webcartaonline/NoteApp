@@ -747,13 +747,17 @@
 }
 
 /* «1» y «N» en los extremos de una relación */
+/* Texto de cada extremo: «1», «N» o lo que se haya escrito. Crece hacia fuera de la forma (transform de dgCardPos) y,
+   si es muy largo, sigue en la línea de abajo a partir de 200 px. */
 .diagrama-cardinal {
   position: absolute;
   z-index: 1;
-  transform: translate(-50%,-50%);
+  width: max-content;
+  max-width: 200px;
   font-size: 12.5px;
   font-weight: 700;
   line-height: 14px;
+  overflow-wrap: anywhere;
   pointer-events: none;
 }
 
@@ -859,4 +863,103 @@
   font-size: 11.5px;
   line-height: 15px;
   color: #8a8a8a;
+}
+
+/* ===== Menú del texto de un extremo de una conexión (barra de la conexión) =====
+   Opciones rápidas –, 1 y N, y un campo «Otro» para escribir cualquier texto. */
+.diagrama-card-caja {
+  position: relative;
+  display: flex;
+}
+.diagrama-card-boton {
+  max-width: 170px; /* solo para que la barra no se haga enorme: el texto guardado no tiene límite */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.diagrama-card-boton-on,
+.diagrama-card-boton-on:hover {
+  background: #008000 !important;
+  color: #fff !important;
+}
+.diagrama-card-menu {
+  position: absolute;
+  top: 34px;
+  left: 0;
+  z-index: 20;
+  width: 220px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 10px;
+  background: #1c1c1c;
+  box-shadow: 0 10px 28px rgba(0,0,0,.6), inset 0 0 0 1px #2e2e2e;
+  white-space: normal;
+  cursor: default;
+}
+.diagrama-card-titulo {
+  padding: 0 2px;
+  font: 600 11px Figtree, system-ui, sans-serif;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #7a7a7a;
+}
+.diagrama-card-opciones {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+.diagrama-card-opcion {
+  height: 30px;
+  border: 0;
+  border-radius: 7px;
+  background: #2a2a2a;
+  color: #d0d0d0;
+  font: 700 14px Figtree, system-ui, sans-serif;
+  cursor: pointer;
+}
+.diagrama-card-opcion:hover {
+  background: #383838 !important;
+  color: #fff !important;
+}
+.diagrama-card-opcion-on,
+.diagrama-card-opcion-on:hover {
+  background: #008000 !important;
+  color: #fff !important;
+}
+.diagrama-card-otro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 4px 0 9px;
+  border-radius: 7px;
+  background: #2a2a2a;
+  cursor: text;
+}
+.diagrama-card-otro-on {
+  box-shadow: inset 0 0 0 1.5px #008000;
+}
+.diagrama-card-otro-txt {
+  flex: none;
+  font: 500 12.5px Figtree, system-ui, sans-serif;
+  color: #8a8a8a;
+}
+.diagrama-card-campo {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  padding: 0 4px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #fff;
+  font: 500 13px Figtree, system-ui, sans-serif;
+  caret-color: #1fe85c;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.diagrama-card-campo::placeholder {
+  color: #6a6a6a;
 }

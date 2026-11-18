@@ -27,6 +27,13 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '4.7.5.0',
+    fecha: '18 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Escribe lo que quieras en los extremos de una relación', texto: 'En Diagrama, al seleccionar una línea, los botones Origen y Destino abren ahora un pequeño menú: elige nada, 1 o N como antes, o escribe en «Otro» el texto que quieras, por ejemplo 0..1, 1..N o muchos. El texto se coloca junto a la tabla sin tapar la línea, y si es largo sigue en la línea de abajo.', tipos: ['visual', 'estructural'] }
+    ]
+  },
+  {
     version: '4.6.4.0',
     fecha: '18 de noviembre de 2026',
     cambios: [
@@ -54,13 +61,6 @@ const NA_NOVEDADES = [
     cambios: [
       { titulo: 'Elige varias claves para un campo', texto: 'En las tablas de los diagramas, el botón de la clave de cada campo abre ahora un pequeño menú con PK, FK y UQ. Marca las que quieras: una, varias o ninguna. Así puedes tener combinaciones que antes no existían, como FK UQ (apunta a otra tabla y no se puede repetir) o las tres a la vez. Esc o un clic fuera cierran el menú.', tipos: ['visual', 'estructural'] },
       { titulo: 'Escribe todo lo que quieras en los diagramas', texto: 'En Diagrama ya no hay límite de letras en ningún texto: el nombre y la descripción de las tablas, sus campos, los valores de cada campo, las etiquetas de las líneas y el nombre del diagrama y de sus hojas. Por ejemplo, puedes apuntar todos los estados de una reserva aunque sean muchos. Lo que no cabe a lo ancho sigue en la línea de abajo, nunca se corta, y la tabla se hace más alta sola (y más baja si borras texto).', tipos: ['visual', 'estructural'] }
-    ]
-  },
-  {
-    version: '4.2.1.2',
-    fecha: '16 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Las claves de las tablas, bien alineadas', texto: 'En las tablas de los diagramas entidad-relación, las claves de los campos (PK, FK, PK FK y UQ) empiezan ahora todas en el mismo sitio, pegadas a la izquierda de su columna, y se ven todas igual. Antes cada una caía en un sitio distinto según la clave que tuviera.', tipos: ['correccion'] }
     ]
   }
 ];

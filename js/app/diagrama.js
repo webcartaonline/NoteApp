@@ -16,7 +16,10 @@ NoteApp.partes.push(Base => class extends Base {
     this._dgWheelH = e => this.dgWheel(e);
     this._dgKeyH = e => this.dgKey(e);
     // Un clic fuera del menú de las claves de un campo lo cierra
-    this._dgKeyMenuH = e => { if (this.state.dkey && !(e.target.closest && e.target.closest('[data-keymenu]'))) this.setState({ dkey: null }); };
+    this._dgKeyMenuH = e => {
+      if (this.state.dkey && !(e.target.closest && e.target.closest('[data-keymenu]'))) this.setState({ dkey: null });
+      if (this.state.dcard && !(e.target.closest && e.target.closest('[data-cardmenu]'))) this.dgCardClose(); // menú del texto de un extremo
+    };
     document.addEventListener('mousedown', this._dgKeyMenuH, true);
     document.addEventListener('pointermove', this._dgMoveH);
     document.addEventListener('pointerup', this._dgUpH);
@@ -184,6 +187,11 @@ NoteApp.partes.push(Base => class extends Base {
   }
   // Sin límite de largo (los saltos de línea de lo pegado se cambian por espacios: cada campo es una sola línea que se parte sola)
   dgRowSet(id, rid, key, val) { const v = String(val).replace(/\r?\n/g, ' '); this.dgTablaSet(id, n => ({ ...n, rows: (n.rows || []).map(r => r.id === rid ? { ...r, [key]: v } : r) })); }
+  // Cierra el menú del texto de un extremo de una conexión (quitando los espacios de sobra de lo escrito)
+  dgCardClose() {
+    const d = this.state.dcard; if (!d) return;
+    this.setState(st => ({ dcard: null, notes: this.mapSheet(st, x => ({ ...x, edges: (x.edges || []).map(k => k.id === d.edge && typeof k[d.end] === 'string' && k[d.end] !== k[d.end].trim() ? { ...k, [d.end]: k[d.end].trim() } : k) })) }));
+  }
   // Pone o quita una clave (PK, FK o UQ) de un campo; se pueden tener varias a la vez (menú de las claves, state.dkey)
   dgRowKey(id, rid, key) {
     this.dgTablaSet(id, n => ({ ...n, rows: (n.rows || []).map(r => { if (r.id !== rid) return r; const ks = dgKeys(r.k); return { ...r, k: dgKeyStr(ks.includes(key) ? ks.filter(x => x !== key) : ks.concat(key)) }; }) }));
@@ -393,6 +401,7 @@ NoteApp.partes.push(Base => class extends Base {
     const k = e.key, mod = e.ctrlKey || e.metaKey, sel = s.dsel, nodes = (sel && sel.nodes) || [];
     if (k === 'Escape') {
       if (s.dkey) { e.preventDefault(); this.setState({ dkey: null }); return; } // menú de las claves de un campo
+      if (s.dcard) { e.preventDefault(); this.dgCardClose(); return; } // menú del texto de un extremo de una conexión
       if (s.dedit) { e.preventDefault(); this.dgEndEdit(); return; }
       if (s.dlabel || typing) return;
       if (s.dmen) { this.setState({ dmen: null }); return; }
@@ -529,7 +538,7 @@ NoteApp.partes.push(Base => class extends Base {
       // «1» o «N» en cada extremo (relaciones de un diagrama entidad-relación)
       [[k.c1, g.e1, k.head === 'both'], [k.c2, g.e2, k.head !== 'none']].forEach(([txt, e, punta], i) => {
         if (!txt) return; const q = dgCardPos(punta ? { ...e, x: e.x + e.dx * 10, y: e.y + e.dy * 10 } : e);
-        cards.push({ id: k.id + ':' + i, x: q.x + 'px', y: q.y + 'px', text: txt, color: on ? '#3fd45f' : '#e6e6e6' });
+        cards.push({ id: k.id + ':' + i, x: q.x + 'px', y: q.y + 'px', tf: q.tf, text: txt, color: on ? '#3fd45f' : '#e6e6e6' });
       });
       edges.push({ id: k.id, d: g.d, hit: g.hit, heads: g.heads, color, dash: k.dash ? '7 6' : 'none', cur: dirty ? 'pointer' : 'grab', down: e => this.dgEdgeDown(e, k), dbl: e => { e.stopPropagation(); this.dgLabelEdit(k.id); } });
       const editing = dirty && s.dlabel === k.id;
@@ -602,13 +611,25 @@ NoteApp.partes.push(Base => class extends Base {
       v.dgEdgeHeadTxt = ek.head === 'both' ? '↔' : ek.head === 'none' ? '—' : '→';
       v.dgEdgeFlip = () => this.dgEdgeSet(ek.id, k => ({ ...k, from: k.to, to: k.from }));
       // Entidad-relación: línea recta o en ángulo, y cuántos en cada extremo (nada → 1 → N)
-      const sig = c => DG_CARD[(DG_CARD.indexOf(c || '') + 1) % DG_CARD.length];
       v.dgEdgeRoute = () => this.dgEdgeSet(ek.id, k => ({ ...k, route: k.route === 'codo' ? '' : 'codo' }));
       v.dgEdgeRouteTxt = ek.route === 'codo' ? 'En ángulo' : 'Recta';
-      v.dgEdgeC1 = () => this.dgEdgeSet(ek.id, k => ({ ...k, c1: sig(k.c1) }));
-      v.dgEdgeC2 = () => this.dgEdgeSet(ek.id, k => ({ ...k, c2: sig(k.c2) }));
-      v.dgEdgeC1Txt = 'Origen: ' + (ek.c1 || '–');
-      v.dgEdgeC2Txt = 'Destino: ' + (ek.c2 || '–');
+      // Texto de cada extremo (18/11/2026): el botón abre un menú con «–» (nada), «1», «N» y un campo «Otro» para escribir
+      // cualquier texto (0..1, muchos…). state.dcard = { edge, end: 'c1' | 'c2' } mientras está abierto.
+      const dc = s.dcard && s.dcard.edge === ek.id ? s.dcard.end : null;
+      v.dgEnds = [['c1', 'Origen'], ['c2', 'Destino']].map(([end, nombre]) => {
+        const val = ek[end] || '', abierto = dc === end, otro = val && !DG_CARD.includes(val) ? val : '';
+        return {
+          end, txt: nombre + ': ' + (val || '–'), title: nombre === 'Origen' ? 'Qué se escribe en el extremo de origen: nada, 1, N o lo que quieras' : 'Qué se escribe en el extremo de destino: nada, 1, N o lo que quieras',
+          abierto, cls: abierto ? 'diagrama-card-boton-on' : '',
+          toggle: () => { this._dcardSnap = false; this.setState(st => ({ dcard: st.dcard && st.dcard.edge === ek.id && st.dcard.end === end ? null : { edge: ek.id, end } }), () => { if (this.state.dcard) { const i = document.querySelector('[data-cardotro]'); if (i && i.value) { i.focus(); i.select(); } } }); },
+          titulo: nombre,
+          opts: DG_CARD.map(c => ({ txt: c || '–', title: c ? c : 'Nada', cls: val === c ? 'diagrama-card-opcion-on' : '', pick: () => { this.dgEdgeSet(ek.id, k => ({ ...k, [end]: c })); this.setState({ dcard: null }); } })),
+          otro, otroCls: otro ? 'diagrama-card-otro-on' : '',
+          // Un solo paso de deshacer para todo lo que se escriba cada vez que se abre el menú (se guarda al escribir la primera letra)
+          otroChange: e => { if (!this._dcardSnap) { this.dgSnap(); this._dcardSnap = true; } const t = e.target.value.replace(/\r?\n/g, ' '); this.dgSet(x => ({ ...x, edges: (x.edges || []).map(k => k.id === ek.id ? { ...k, [end]: t } : k) })); },
+          otroKey: e => { if (e.key === 'Enter' || e.key === 'Escape') { e.preventDefault(); this.dgCardClose(); } }
+        };
+      });
       v.dgEdgeDel = () => this.dgDelete();
     }
     // Buscador de menciones
