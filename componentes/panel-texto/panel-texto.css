@@ -1,4 +1,4 @@
-/* Componente "panel-texto": Panel de texto de la hoja (solo en Notas): barra superior (buscar, ocultar
+/* Componente "panel-texto": Panel de texto de la hoja (Notas, y flotante en Diagrama): barra superior (buscar, ocultar
    entidades, copiar y exportar a Markdown), las líneas y el asa para cambiar el ancho. */
 
 .panel-texto-seccion {
@@ -158,11 +158,6 @@
   width: 15px;
   height: 15px;
   transition: background-color .15s;
-}
-/* Botón de la lista de entidades (a la izquierda del buscador): abre el panel del componente lista-entidades */
-.panel-texto-icono-lista {
-  mask: url(../../assets/lista-entidades.svg) center / contain no-repeat;
-  -webkit-mask: url(../../assets/lista-entidades.svg) center / contain no-repeat;
 }
 .panel-texto-icono-ancho {
   mask: url(../../assets/ancho-completo.svg) center / contain no-repeat;

@@ -271,6 +271,13 @@ const AYUDA = [
         'Al seleccionar la línea puedes cambiar el 1 y la N de cada extremo (**Origen** y **Destino**), darles la vuelta con **Invertir** o ponerla recta.'
       ], ficha: [['PK', 'Clave primaria: identifica cada fila'], ['FK', 'Clave foránea: apunta a otra tabla'], ['UQ', 'Único: no se puede repetir'], ['PK FK', 'Clave primaria que además apunta a otra tabla'], ['FK UQ', 'Apunta a otra tabla y no se puede repetir'], ['1 — N', 'Uno a muchos: un restaurante tiene muchas mesas'], ['`*role*_id`', 'Lo que va entre asteriscos se ve en verde']],
         nota: ['**Truco:** el color de la barra cambia la cabecera de la tabla; úsalo para agrupar (por ejemplo, azul para la carta y verde para las reservas). El cuadrado verde cambia el ancho; el alto se ajusta solo a sus campos.'] },
+      { t: 'Texto de la hoja (campo MKD)', ic: 'panel-mkd', p: [
+        'Cada hoja de un diagrama tiene su propio texto, como una hoja de Notas, para apuntar explicaciones, dudas o resúmenes junto al dibujo. Ábrelo con el botón que hay **a la derecha del interruptor de vista limpia/sucia**: sale flotando encima del lienzo, a la izquierda. El mismo botón lo esconde. Cada hoja recuerda si lo tenías abierto.',
+        '- Funciona igual que el texto de Notas: formato MKD, menciones, casillas, copiables, imágenes pegadas… y su barra de arriba para **buscar**, **copiar** y **exportar** a Markdown.',
+        '- Arrastra su **borde derecho** para hacerlo más ancho o más estrecho. Doble clic en el borde lo deja como al principio.',
+        '- Las casillas con nombre que escribas aquí, como `([True] Revisado)`, son entidades de este diagrama: salen en la lista de entidades y se pueden mencionar.'
+      ], ej: ['# Routers', 'Contienen las operaciones de cada tabla: *crear*, *leer*, *cambiar* y *borrar*.', '> Recuerda: los datos se comprueban mirando los _models_.', '([False] Revisado)'],
+        nota: ['**Truco:** abre también la **lista de entidades** (el botón de al lado) y verás los dos paneles juntos, la lista a la izquierda del texto.'] },
       { t: 'Moverse por el lienzo', p: [
         '- Arrastra el fondo, o usa la rueda del ratón, para desplazarte.',
         '- **Ctrl + rueda** acerca o aleja.',
@@ -302,7 +309,7 @@ const AYUDA = [
         '- **Esc**: cerrar la búsqueda.'
       ] },
       { t: 'Lista de entidades', ic: 'lista-entidades', p: [
-        'El botón de la lista, a la izquierda del buscador, abre un panel al lado del texto con las entidades. Sirve para consultar un nombre, un valor o una ruta sin ir a buscarlos.',
+        'El botón de la lista está arriba, **a la derecha del interruptor de vista limpia/sucia**, en Notas, Agenda y Diagrama. Abre un panel con las entidades: en Notas a la izquierda del texto, en la Agenda a la izquierda de sus entidades y en Diagrama flotando encima del lienzo. Sirve para consultar un nombre, un valor o una ruta sin ir a buscarlos.',
         '- Cada entidad enseña su **nombre**, su **descripción** y su **valor**. Su botón de copiar te deja elegir entre la **ruta entera** (lista para pegarla en cualquier hoja) o **solo el nombre** (para la misma hoja).',
         '- Los botones **Agenda**, **Notas** y **Diagramas** eligen dónde buscar. Puedes activar varios a la vez. Sin ninguno, ves solo las entidades de la nota abierta.',
         '- En el buscador de la lista, escribe parte del nombre para encontrar una entidad.',

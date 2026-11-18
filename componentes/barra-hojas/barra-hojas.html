@@ -1,4 +1,5 @@
-<!-- Componente "barra-hojas" de NoteApp. Barra superior del panel: vista limpia/sucia, reloj (Agenda), pestañas de las hojas y menú de opciones.
+<!-- Componente "barra-hojas" de NoteApp. Barra superior del panel: vista limpia/sucia, a su derecha el botón del campo de texto
+     MKD (solo Diagrama) y el de la lista de entidades (las tres ventanas), reloj (Agenda), pestañas de las hojas y menú de opciones.
      El botón de ocultar entidades vive ahora en panel-texto (su barra superior), junto con buscar y exportar.
      Los estilos fijos están en barra-hojas.css; los que cambian ({{ }}) siguen aquí.
      Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
@@ -10,6 +11,18 @@
         <span class="barra-hojas-texto" style="left:{{ knobLeft }};top:0;background:{{ knobColor }};"></span>
       </span>
     </button>
+    <!-- Diagrama: mostrar u ocultar el campo de texto MKD flotante de la hoja -->
+    <sc-if value="{{ dgMkdBtn }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ dgMkdToggle }}" aria-label="Campo de texto MKD" aria-pressed="{{ dgMkdOn }}" title="{{ dgMkdTitle }}" class="barra-hojas-boton">
+        <span class="barra-hojas-boton-icono barra-hojas-icono-mkd" style="background:{{ dgMkdColor }};"></span>
+      </button>
+    </sc-if>
+    <!-- Lista de entidades (las tres ventanas) -->
+    <sc-if value="{{ leBtn }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ leToggle }}" aria-label="Lista de entidades" aria-pressed="{{ leOn }}" title="{{ leTitle }}" class="barra-hojas-boton">
+        <span class="barra-hojas-boton-icono barra-hojas-icono-lista" style="background:{{ leColor }};"></span>
+      </button>
+    </sc-if>
     <div class="barra-hojas-caja-3"><sc-if value="{{ isAgenda }}" hint-placeholder-val="{{ false }}"><span class="barra-hojas-texto-2">{{ clockTxt }}</span></sc-if>
       <div class="barra-hojas-caja-4">
         <div class="barra-hojas-caja-5">

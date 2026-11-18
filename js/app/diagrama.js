@@ -132,6 +132,29 @@ NoteApp.partes.push(Base => class extends Base {
     this.setState({ dedit: null, dkey: null, focusId: null });
   }
 
+  // ----- Campo de texto MKD flotante de la hoja (botón de la barra de hojas, a la derecha del interruptor de vista) -----
+  // Campo "mkd" de la hoja (true = se ve; se guarda) y su texto en hoja.lines, igual que una hoja de Notas: buscar, copiar,
+  // exportar, menciones, casillas-entidad… Su ancho es hoja.width (asa de la derecha).
+  dgMkdToggle() {
+    const a = document.activeElement; if (a && a.closest && a.closest('[data-lines="sheet"]')) a.blur();
+    this._msel = null;
+    let foco = null;
+    this.setState(s => {
+      const x = this.dgSheet(s); if (!x) return null;
+      const on = !x.mkd, lines = x.lines && x.lines.length ? x.lines : mkLines(['']);
+      if (on && !s.clean) foco = lines[lines.length - 1];
+      return { copyMenu: false, search: on ? s.search : null, focusId: on ? s.focusId : null, dedit: on ? null : s.dedit, dmen: null,
+        notes: this.mapSheet(s, y => { const { mkd, ...z } = y; return on ? { ...z, mkd: true, lines, width: y.width || W0 } : z; }) };
+    }, () => { if (foco) this.focusLine(foco.id, foco.text.length); });
+  }
+  // Un clic en los paneles flotantes termina lo que se estaba editando en el lienzo
+  dgFlotDown(e) {
+    const s = this.state;
+    if (s.dedit) this.dgEndEdit();
+    if (s.dlabel) this.dgLabelDone(true);
+    if (s.dmen || s.dkey) this.setState({ dmen: null, dkey: null });
+  }
+
   // ----- Conexiones -----
   dgEdgeSet(id, fn) { this.dgSet(x => ({ ...x, edges: (x.edges || []).map(k => k.id === id ? fn(k) : k) }), true); }
   dgConnect(from, to) {

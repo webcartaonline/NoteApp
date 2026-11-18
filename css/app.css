@@ -31,3 +31,33 @@
   gap: 4px;
   padding-top: 5px;
 }
+
+/* Ventana Diagrama: el lienzo y, encima, los paneles flotantes (lista de entidades y campo de texto MKD de la hoja).
+   Se abren con los botones de la barra de hojas, a la derecha del interruptor de vista limpia/sucia. */
+.app-diagrama {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-diagrama-flotante {
+  position: absolute;
+  z-index: 6;
+  left: 10px;
+  top: 15px;
+  bottom: 10px;
+  max-width: calc(100% - 20px);
+  display: flex;
+  gap: 6px;
+}
+.app-diagrama-flotante .panel-texto-seccion,
+.app-diagrama-flotante .lista-entidades-panel {
+  border: 1px solid #3a3a3a;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.5);
+}
+.app-diagrama-flotante .lista-entidades-panel {
+  max-width: none;
+}

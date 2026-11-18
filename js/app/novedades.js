@@ -27,6 +27,14 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '4.5.4.0',
+    fecha: '18 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Escribe junto a tus diagramas', texto: 'Cada hoja de Diagrama tiene ahora su propio texto, igual que una hoja de Notas. Ábrelo con el botón nuevo que hay a la derecha del interruptor de vista limpia/sucia: aparece flotando encima del lienzo, a la izquierda, y lo puedes hacer más ancho o más estrecho arrastrando su borde. Sirve para explicar el diagrama, por ejemplo qué hace cada tabla. Tiene todo lo del texto de Notas: formato, menciones, casillas, buscar, copiar y exportar.', tipos: ['visual', 'estructural'] },
+      { titulo: 'La lista de entidades, en las tres ventanas', texto: 'El botón de la lista de entidades se ha mudado: ahora está arriba, a la derecha del interruptor de vista limpia/sucia, y funciona en Notas, en la Agenda y en Diagrama. En Diagrama la lista también flota encima del lienzo, al lado del texto.', tipos: ['visual'] }
+    ]
+  },
+  {
     version: '4.4.3.2',
     fecha: '18 de noviembre de 2026',
     cambios: [
@@ -58,13 +66,6 @@ const NA_NOVEDADES = [
       { titulo: 'Exportar e importar en un solo archivo', texto: 'En Ajustes › Sincronización › Exportar eliges qué guardar: una nota, una agenda, un diagrama, todas las de una ventana o todo. Sale un único archivo, con sus imágenes dentro, para tener una copia o enviarlo de una vez por mensajería. Al lado está Importar: si lo que traes se llama igual que algo tuyo, NoteApp te pregunta si guardas las dos (la importada con un número al final, como «Viajes (2)») o si sustituye a la tuya.', tipos: ['visual', 'estructural'] },
       { titulo: 'Historial de espacios de trabajo', texto: 'En Ajustes › Sincronización › Historial aparecen las carpetas que has ido abriendo. A cada una le puedes poner un título y apuntar su ruta para reconocerla, y con «Abrir» cambias a ella al momento.', tipos: ['visual'] },
       { titulo: 'Lista de entidades', texto: 'En Notas, a la izquierda del buscador del texto, hay un botón nuevo que abre una lista con las entidades: su nombre, su descripción, su valor y un botón para copiar su ruta o solo su nombre. Con los botones Agenda, Notas y Diagramas eliges dónde buscar (puedes activar varios) y, sin ninguno, ves las de la nota abierta. En su buscador, escribe un nombre o empieza con una barra (/) para elegir primero el título y después la hoja.', tipos: ['visual'] }
-    ]
-  },
-  {
-    version: '3.6.2.0',
-    fecha: '15 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Cambia de vista con el teclado', texto: 'Pulsa Alt+V para pasar de la vista limpia a la sucia y al revés, sin tener que ir al interruptor con el ratón. Funciona en Notas, en la Agenda y en el Diagrama, incluso mientras escribes.', tipos: ['visual'] }
     ]
   }
 ];

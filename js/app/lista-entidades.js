@@ -1,6 +1,8 @@
-// Lista de entidades (componente componentes/lista-entidades/). Panel que se abre a la izquierda del texto MKD (solo en
-// Notas) con el botón de la lista, a la izquierda del buscador del texto. Sirve para consultar rápido el nombre, la
-// descripción, el valor y la ruta de cualquier entidad sin ir a buscarla.
+// Lista de entidades (componente componentes/lista-entidades/). Se abre en las tres ventanas con el botón de la lista de la
+// barra de hojas, a la derecha del interruptor de vista limpia/sucia (18/11/2026; antes estaba a la izquierda del buscador
+// del texto y solo en Notas). En Notas va a la izquierda del texto MKD, en Agenda a la izquierda de las entidades y en
+// Diagrama flota encima del lienzo (index.html). Sirve para consultar rápido el nombre, la descripción, el valor y la
+// ruta de cualquier entidad sin ir a buscarla.
 //   · Tres botones de filtro (Agenda, Notas, Diagramas): se pueden activar varios a la vez. Sin ninguno, solo salen las
 //     entidades de la nota abierta (todas sus hojas; primero la hoja abierta).
 //   · Buscador: texto normal = busca por nombre (y descripción) dentro de lo filtrado. Con una barra delante se navega:
@@ -43,7 +45,7 @@ NoteApp.partes.push(Base => class extends Base {
     const hojasDe = list => { const o = []; list.forEach(([w, n]) => (n.sheets || []).forEach(x => o.push([w, n, x]))); return o; };
     const q = String(L.q || ''); let hojas, nombre = '', opciones = null;
     if (q[0] === '/') {
-      // Sin filtros, los títulos entre los que se navega son los de la ventana abierta (Notas).
+      // Sin filtros, los títulos entre los que se navega son los de la ventana abierta.
       const base = alguno ? titulos : (all[s.mode].notes || []).map(n => [s.mode, n]), p = q.slice(1).split('/'), tq = leNorm(p[0]);
       if (p.length === 1) {
         const hits = base.filter(([w, n]) => !tq || leNorm(n.name).includes(tq));
@@ -89,13 +91,13 @@ NoteApp.partes.push(Base => class extends Base {
 
   // Valores para las plantillas (se añaden en renderVals). W = makeWorld(s) de este dibujo.
   leVals(s, W) {
-    const L = s.elist, on = !!(L && L.on) && s.mode === 'notas' && !!this.curSheet(s);
-    const v = { leOn: on, leToggle: () => this.leToggle(), leColor: on ? '#008000' : '#8a8a8a', leTitle: on ? 'Cerrar la lista de entidades' : 'Lista de entidades: consulta nombres, valores y rutas' };
+    const L = s.elist, hay = !!this.curSheet(s), on = !!(L && L.on) && hay;
+    const v = { leOn: on, leBtn: hay, leToggle: () => this.leToggle(), leColor: on ? '#008000' : '#8a8a8a', leTitle: on ? 'Cerrar la lista de entidades' : 'Lista de entidades: consulta nombres, valores y rutas' };
     if (!on) return v;
     const d = this.leDatos(s, W), f = L.f || {};
     v.leFiltros = LE_WINS.map(k => ({ txt: LE_NOMBRE[k], on: !!f[k], cls: f[k] ? 'lista-entidades-filtro-on' : '', pick: () => this.leFiltro(k), title: f[k] ? 'Dejar de buscar en ' + LE_NOMBRE[k] : 'Buscar también en ' + LE_NOMBRE[k] }));
     const elegidas = LE_WINS.filter(k => f[k]).map(k => LE_NOMBRE[k]);
-    v.leAmbito = d.alguno ? 'En ' + (elegidas.length > 1 ? elegidas.slice(0, -1).join(', ') + ' y ' + elegidas[elegidas.length - 1] : elegidas[0]) : (L.q || '')[0] === '/' ? 'En los títulos de Notas' : d.note ? 'En la nota abierta: «' + (leLimpio(d.note.name) || 'Sin nombre') + '»' : 'Sin nota abierta';
+    v.leAmbito = d.alguno ? 'En ' + (elegidas.length > 1 ? elegidas.slice(0, -1).join(', ') + ' y ' + elegidas[elegidas.length - 1] : elegidas[0]) : (L.q || '')[0] === '/' ? 'En los títulos de ' + LE_NOMBRE[s.mode] : d.note ? 'En la nota abierta: «' + (leLimpio(d.note.name) || 'Sin nombre') + '»' : 'Sin nota abierta';
     v.leCuenta = d.total === 1 ? '1 entidad' : d.total + ' entidades';
     v.leQ = L.q || '';
     v.leOnQ = e => this.leSet({ q: e.target.value, menu: null });
@@ -112,7 +114,9 @@ NoteApp.partes.push(Base => class extends Base {
     v.leOpVacioTxt = d.opciones ? d.opciones.vacio : '';
     v.leFilas = d.filas;
     v.leVacio = !d.filas.length;
-    v.leVacioTxt = !d.note && !d.alguno ? 'Abre una nota para ver sus entidades.' : d.nq ? 'Ninguna entidad coincide con lo que buscas.' : 'Aquí no hay ninguna entidad todavía.';
+    v.leVacioTxt = !d.note && !d.alguno ? 'Abre una nota para ver sus entidades.' : d.nq ? 'Ninguna entidad coincide con lo que buscas.'
+      : !d.alguno && s.mode === 'diagrama' ? 'Este diagrama no tiene entidades: solo las casillas con nombre que escribas en su texto MKD, como ([True] Hecho). Para ver las de Notas o la Agenda, activa sus botones de arriba.'
+      : 'Aquí no hay ninguna entidad todavía.';
     v.leAvisoDg = !!f.diagrama && !d.hayDiagrama;
     v.leMas = d.total > LE_MAX;
     v.leStop = e => e.stopPropagation();

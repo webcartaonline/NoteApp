@@ -67,12 +67,12 @@ NoteApp.partes.push(Base => class extends Base {
       toggleView: () => this.toggleView(),
       panelCursor: s.clean ? 'default' : 'text',
       panelRef: this.panelRef,
-      panelWidth: (sheet ? sheet.width : W0) + 'px',
+      panelWidth: ((sheet && sheet.width) || W0) + 'px',
       // Ocultar entidades (solo Notas): campo "full" de la hoja. true = el texto usa todo el ancho.
       canFull: nt && !!sheet,
       full: nt && !!(sheet && sheet.full),
       showEnts: !(nt && sheet && sheet.full),
-      panelFlex: nt && sheet && sheet.full ? '1 1 0%' : '0 1 ' + (sheet ? sheet.width : W0) + 'px',
+      panelFlex: nt && sheet && sheet.full ? '1 1 0%' : '0 1 ' + ((sheet && sheet.width) || W0) + 'px',
       fullColor: sheet && sheet.full ? '#008000' : '#8a8a8a',
       fullTitle: sheet && sheet.full ? 'Mostrar entidades' : 'Ocultar entidades (el texto ocupa todo el ancho)',
       toggleFull: () => this.toggleFull(),
@@ -108,9 +108,11 @@ NoteApp.partes.push(Base => class extends Base {
         e.preventDefault();
         const last = src[src.length - 1];
         if (last) this.focusLine(last.id, last.text.length);
+        else if (sheet) { const ln = mkLines([''])[0]; this.setLines([ln], ln.id, 0); } // hoja sin líneas (p. ej. un diagrama antiguo)
       },
       resizeDown: e => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); this._rs = { x: e.clientX, w: this.panelRef.current.getBoundingClientRect().width }; this.setState({ dragging: true }); document.body.style.cursor = 'col-resize'; },
-      resizeMove: e => { if (!this._rs) return; const p = this.panelRef.current.parentElement.closest(':not(.sc-host)').getBoundingClientRect().width; const le = this.state.elist && this.state.elist.on ? LE_ANCHO : 0; const w = Math.round(Math.max(200, Math.min(p - 440 - le, this._rs.w + e.clientX - this._rs.x))); const cur = this.curSheet(this.state); if (cur && w !== cur.width) this.setWidth(w); },
+      // En Diagrama el panel flota sobre el lienzo: el máximo sale del ancho del lienzo y deja 120 px a la vista.
+      resizeMove: e => { if (!this._rs) return; const el = this.panelRef.current, dgBox = el.closest('.app-diagrama'); const p = (dgBox || el.parentElement.closest(':not(.sc-host)')).getBoundingClientRect().width; const le = this.state.elist && this.state.elist.on ? LE_ANCHO : 0; const w = Math.round(Math.max(dgBox ? 260 : 200, Math.min(p - (dgBox ? 120 : 440) - le, this._rs.w + e.clientX - this._rs.x))); const cur = this.curSheet(this.state); if (cur && w !== cur.width) this.setWidth(w); },
       resizeUp: () => { if (!this._rs) return; this._rs = null; this.setState({ dragging: false }); document.body.style.cursor = ''; },
       resizeReset: () => this.setWidth(W0),
       fsPick: () => this.fsPick(),
@@ -134,7 +136,14 @@ NoteApp.partes.push(Base => class extends Base {
       addNotaDg: () => this.dgAdd('nota'),
       addTextoDg: () => this.dgAdd('texto'),
       addZona: () => this.dgAdd('zona'),
-      addTablaDg: () => this.dgAdd('tabla') // tabla de un diagrama entidad-relación
+      addTablaDg: () => this.dgAdd('tabla'), // tabla de un diagrama entidad-relación
+      // Campo de texto MKD flotante del Diagrama (campo "mkd" de cada hoja: true = se ve). Su texto va en hoja.lines.
+      dgMkdBtn: dg && !!sheet,
+      dgMkdOn: dg && !!(sheet && sheet.mkd),
+      dgMkdToggle: () => this.dgMkdToggle(),
+      dgMkdColor: dg && sheet && sheet.mkd ? '#008000' : '#8a8a8a',
+      dgMkdTitle: dg && sheet && sheet.mkd ? 'Ocultar el campo de texto MKD' : 'Mostrar el campo de texto MKD de esta hoja',
+      dgFlotDown: e => this.dgFlotDown(e)
     };
     Object.assign(v, this.confirmVals(s)); // ventana de confirmación al eliminar
     Object.assign(v, this.novVals(s)); // ventana de novedades tras una actualización (js/app/novedades.js)
@@ -142,6 +151,10 @@ NoteApp.partes.push(Base => class extends Base {
     if (dg && sheet) Object.assign(v, this.dgVals(s, sheet)); // lienzo del diagrama
     Object.assign(v, this.ajVals(s)); // página de Ajustes: Ayuda, Sincronización y Actualizaciones (js/app/ajustes.js)
     Object.assign(v, this.leVals(s, W)); // lista de entidades, a la izquierda del texto (js/app/lista-entidades.js)
+    v.dgFlotOn = v.dgMkdOn || (dg && v.leOn); // paneles flotantes del Diagrama (index.html)
+    // Ancho de la caja flotante: el del campo MKD (hoja.width) más el de la lista. Hace falta darlo: una caja flotante
+    // sin ancho se encoge y aplastaría el campo MKD (su max-width en CSS evita que se salga del lienzo).
+    v.dgFlotW = ((v.dgMkdOn ? ((sheet && sheet.width) || W0) : 0) + (dg && v.leOn ? 300 + (v.dgMkdOn ? 6 : 0) : 0)) + 'px';
     v.ui = v; // los componentes reciben todos estos valores con dc-props="{{ ui }}"
     return v;
   }

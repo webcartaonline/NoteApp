@@ -71,7 +71,18 @@
       <sc-if value="{{ showEnts }}" hint-placeholder-val="{{ true }}"><dc-import name="entidades" dc-props="{{ ui }}"></dc-import></sc-if>
     </div>
     </sc-if>
-    <sc-if value="{{ isDiagrama }}" hint-placeholder-val="{{ false }}"><dc-import name="diagrama" dc-props="{{ ui }}"></dc-import></sc-if>
+    <sc-if value="{{ isDiagrama }}" hint-placeholder-val="{{ false }}">
+    <div class="app-diagrama">
+      <dc-import name="diagrama" dc-props="{{ ui }}"></dc-import>
+      <!-- Paneles flotantes del Diagrama (encima del lienzo, a la izquierda): lista de entidades y campo de texto MKD de la hoja -->
+      <sc-if value="{{ dgFlotOn }}" hint-placeholder-val="{{ false }}">
+      <div onPointerDown="{{ dgFlotDown }}" class="app-diagrama-flotante" style="width:{{ dgFlotW }};">
+        <sc-if value="{{ leOn }}" hint-placeholder-val="{{ false }}"><dc-import name="lista-entidades" dc-props="{{ ui }}"></dc-import></sc-if>
+        <sc-if value="{{ dgMkdOn }}" hint-placeholder-val="{{ true }}"><dc-import name="panel-texto" dc-props="{{ ui }}"></dc-import></sc-if>
+      </div>
+      </sc-if>
+    </div>
+    </sc-if>
     </sc-if>
   </main>
   <dc-import name="mensajes" dc-props="{{ ui }}"></dc-import>

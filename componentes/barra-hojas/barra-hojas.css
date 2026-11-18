@@ -47,6 +47,37 @@
   transition: left .22s cubic-bezier(.4,0,.2,1),background-color .22s;
 }
 
+/* Botones a la derecha del interruptor: campo de texto MKD (Diagrama) y lista de entidades. Mismo fondo que el interruptor. */
+.barra-hojas-boton {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: #2a2a2a;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.barra-hojas-boton-icono {
+  width: 15px;
+  height: 15px;
+  transition: background-color .15s;
+}
+.barra-hojas-icono-mkd {
+  mask: url(../../assets/panel-mkd.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/panel-mkd.svg) center / contain no-repeat;
+}
+.barra-hojas-icono-lista {
+  mask: url(../../assets/lista-entidades.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/lista-entidades.svg) center / contain no-repeat;
+}
+.barra-hojas-boton:hover .barra-hojas-boton-icono {
+  background: #fff !important;
+}
 
 .barra-hojas-caja-3 {
   flex: 1;
