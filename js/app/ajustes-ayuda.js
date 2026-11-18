@@ -261,14 +261,15 @@ const AYUDA = [
       { t: 'Diagramas entidad-relación', ic: 'forma-tabla', p: [
         'Sirven para planear una base de datos: qué tablas hay, qué campos tiene cada una y cómo se relacionan. El botón **Tabla** de la barra lateral añade una.',
         '**Doble clic** en una tabla para editarla. Arriba van su nombre y, si quieres, para qué sirve. Debajo, sus campos:',
-        '- El botón de la izquierda de cada campo cambia su **clave** con cada clic: sin clave, PK, FK, PK FK o UQ.',
+        '- El botón de la izquierda de cada campo abre un menú con sus **claves**: PK, FK y UQ. Marca las que tenga ese campo, una, varias o ninguna; por ejemplo, FK y UQ para una clave foránea que no se puede repetir. **Esc** o un clic fuera cierran el menú.',
         '- En **valores** puedes apuntar los que admite ese campo, por ejemplo mañana · tarde. Salen en pequeño debajo del nombre.',
         '- **Intro** añade un campo debajo. Las flechas pequeñas lo suben o lo bajan y la papelera lo quita.',
         '- **Esc**, o un clic fuera, termina de editar.',
+        'Ningún texto de un diagrama tiene límite de largo: ni el nombre de la tabla, ni su descripción, ni los campos, ni sus valores, ni las etiquetas de las líneas, ni el nombre del diagrama o de sus hojas. Lo que no cabe a lo ancho sigue en la línea de abajo y la tabla crece sola.',
         'En el nombre de un campo y en sus valores puedes **resaltar** una parte poniéndola entre asteriscos: `*role*_id` se ve como role_id con «role» en verde. Los asteriscos solo se ven mientras editas. Va bien para señalar a qué tabla apunta una clave foránea.',
         'Para **relacionar** dos tablas, arrastra desde un punto verde de una hasta la otra. La línea sale en ángulo, con un **1** en la tabla de la que sales y una **N** en la otra. Empieza por la tabla del 1: por ejemplo, de restaurante a mesa, porque un restaurante tiene muchas mesas.',
         'Al seleccionar la línea puedes cambiar el 1 y la N de cada extremo (**Origen** y **Destino**), darles la vuelta con **Invertir** o ponerla recta.'
-      ], ficha: [['PK', 'Clave primaria: identifica cada fila'], ['FK', 'Clave foránea: apunta a otra tabla'], ['PK FK', 'Clave primaria que además apunta a otra tabla'], ['UQ', 'Único: no se puede repetir'], ['1 — N', 'Uno a muchos: un restaurante tiene muchas mesas'], ['`*role*_id`', 'Lo que va entre asteriscos se ve en verde']],
+      ], ficha: [['PK', 'Clave primaria: identifica cada fila'], ['FK', 'Clave foránea: apunta a otra tabla'], ['UQ', 'Único: no se puede repetir'], ['PK FK', 'Clave primaria que además apunta a otra tabla'], ['FK UQ', 'Apunta a otra tabla y no se puede repetir'], ['1 — N', 'Uno a muchos: un restaurante tiene muchas mesas'], ['`*role*_id`', 'Lo que va entre asteriscos se ve en verde']],
         nota: ['**Truco:** el color de la barra cambia la cabecera de la tabla; úsalo para agrupar (por ejemplo, azul para la carta y verde para las reservas). El cuadrado verde cambia el ancho; el alto se ajusta solo a sus campos.'] },
       { t: 'Moverse por el lienzo', p: [
         '- Arrastra el fondo, o usa la rueda del ratón, para desplazarte.',

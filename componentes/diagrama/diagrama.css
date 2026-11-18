@@ -145,19 +145,21 @@
   color: #e0e0e0;
   font-size: 14px;
   line-height: 18px;
-  white-space: nowrap;
   max-width: 260px;
+  width: max-content;
 }
 
+/* Sin límite de largo: si el texto no cabe en 260 px, sigue en la línea de abajo (no se corta con «…») */
 .diagrama-etiqueta-texto {
   display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
   cursor: pointer;
 }
 
 .diagrama-etiqueta-campo {
-  width: 170px;
+  width: 240px;
   padding: 0;
   border: 0;
   outline: none;
@@ -527,30 +529,28 @@
   box-shadow: inset 0 0 0 1px #2e2e2e;
   font-family: ui-monospace, 'Cascadia Mono', 'SF Mono', Consolas, 'Liberation Mono', monospace;
 }
+/* Ningún texto de la tabla tiene límite de largo: lo que no cabe a lo ancho sigue en la línea de abajo (nunca se corta
+   con «…») y la tabla crece hacia abajo. El alto lo mide dgGrow (diagrama.js) a partir de lo que ocupa de verdad. */
 .diagrama-tabla-cabeza {
   flex: none;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: 2px;
-  height: 56px;
-  padding: 0 16px;
+  min-height: 56px;
+  padding: 9px 16px;
 }
 .diagrama-tabla-nombre {
   font-size: 15.5px;
   font-weight: 700;
   line-height: 20px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 .diagrama-tabla-sub {
   font-family: 'Google Sans','Product Sans',Figtree,system-ui,sans-serif;
   font-size: 12.5px;
   line-height: 16px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 .diagrama-tabla-cuerpo {
   flex: 1;
@@ -591,33 +591,34 @@
   display: flex;
   flex-direction: column;
 }
+/* Una línea de nombre mide 26 px (20 + 3 + 3), como antes; si no cabe, sigue debajo */
 .diagrama-tabla-dato-nombre {
-  height: 26px;
+  padding: 3px 0;
   font-size: 14px;
-  line-height: 26px;
+  line-height: 20px;
   color: #e6e6e6;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 .diagrama-tabla-nota {
-  height: 16px;
   margin-top: -3px;
   padding-bottom: 3px;
   font-family: 'Google Sans','Product Sans',Figtree,system-ui,sans-serif;
   font-size: 11px;
   line-height: 16px;
   color: #9a9a9a;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 /* Tabla mientras se edita (vista sucia, doble clic): todo son campos para escribir */
 .diagrama-tabla-campo {
+  display: block;
   min-width: 0;
   margin: 0;
-  padding: 0 7px;
+  padding: 3px 7px;
+  resize: none;
+  overflow: hidden;
+  field-sizing: content; /* el cuadro crece hacia abajo con el texto (sin límite de largo) */
+  overflow-wrap: anywhere;
   border: 0;
   border-radius: 5px;
   outline: none;
@@ -640,13 +641,17 @@
   padding: 8px 10px 9px;
 }
 .diagrama-tabla-campo-nombre {
-  height: 24px;
+  min-height: 24px;
+  line-height: 18px;
   font-size: 15px;
   font-weight: 700;
   background: rgba(0,0,0,.16);
 }
 .diagrama-tabla-campo-sub {
-  height: 21px;
+  min-height: 21px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  line-height: 17px;
   font-family: 'Google Sans','Product Sans',Figtree,system-ui,sans-serif;
   font-size: 12.5px;
   background: rgba(0,0,0,.16);
@@ -661,7 +666,7 @@
   gap: 3px;
 }
 .diagrama-tabla-fila-editar {
-  align-items: center;
+  align-items: flex-start;
   gap: 4px;
 }
 .diagrama-tabla-clave-boton {
@@ -682,13 +687,15 @@
   color: #6a6a6a;
 }
 .diagrama-tabla-campo-dato {
-  flex: 1.3;
-  height: 24px;
+  flex: 1 1 0;
+  min-height: 24px;
+  line-height: 18px;
   font-size: 13.5px;
 }
 .diagrama-tabla-campo-nota {
-  flex: 1;
-  height: 24px;
+  flex: 1.3 1 0; /* los valores suelen ser lo más largo: un poco más de sitio */
+  min-height: 24px;
+  line-height: 18px;
   font-family: 'Google Sans','Product Sans',Figtree,system-ui,sans-serif;
   font-size: 12px;
   color: #cfcfcf;
@@ -748,4 +755,108 @@
   font-weight: 700;
   line-height: 14px;
   pointer-events: none;
+}
+
+/* ===== Menú de las claves de un campo (al editar una tabla) =====
+   El botón de la clave abre este menú con PK, FK y UQ: se puede marcar cualquier combinación. Mientras se edita, la tabla
+   deja que el menú se salga por debajo (overflow visible) y la cabecera conserva sus esquinas redondeadas. */
+.diagrama-tabla:has(.diagrama-tabla-campo-nombre) {
+  overflow: visible;
+}
+.diagrama-tabla:has(.diagrama-tabla-campo-nombre) .diagrama-tabla-cabeza {
+  border-radius: 10px 10px 0 0;
+}
+.diagrama-tabla-clave-caja {
+  position: relative;
+  flex: none;
+}
+.diagrama-tabla-clave-boton[data-abierto="true"] {
+  background: #008000 !important;
+  color: #fff;
+}
+.diagrama-tabla-claves-menu {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  z-index: 20;
+  width: 232px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-radius: 10px;
+  background: #1c1c1c;
+  box-shadow: 0 10px 28px rgba(0,0,0,.6), inset 0 0 0 1px #2e2e2e;
+  font-family: 'Google Sans','Product Sans',Figtree,system-ui,sans-serif;
+}
+.diagrama-tabla-claves-titulo {
+  padding: 3px 8px 5px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #7a7a7a;
+}
+.diagrama-tabla-claves-opcion {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #e6e6e6;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.diagrama-tabla-claves-opcion:hover {
+  background: #2a2a2a !important;
+}
+/* Casilla: vacía si no tiene esa clave; verde con un tic si la tiene */
+.diagrama-tabla-claves-marca {
+  flex: none;
+  position: relative;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1.5px #5a5a5a;
+}
+.diagrama-tabla-claves-on .diagrama-tabla-claves-marca {
+  background: #008000;
+  box-shadow: none;
+}
+.diagrama-tabla-claves-on .diagrama-tabla-claves-marca::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.diagrama-tabla-claves-codigo {
+  flex: none;
+  width: 22px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  color: #b0b0b0;
+}
+.diagrama-tabla-claves-textos {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.diagrama-tabla-claves-nombre {
+  font-size: 13px;
+  line-height: 17px;
+}
+.diagrama-tabla-claves-desc {
+  font-size: 11.5px;
+  line-height: 15px;
+  color: #8a8a8a;
 }

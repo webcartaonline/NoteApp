@@ -134,12 +134,12 @@ function impParse(txt) {
   if (!j || typeof j !== 'object' || j.app !== 'NoteApp') return null;
   const hoja = x => x && typeof x === 'object' && typeof x.id === 'string';
   const nota = n => n && typeof n === 'object' && typeof n.id === 'string' && Array.isArray(n.sheets) && n.sheets.every(hoja);
-  const limpia = n => ({ ...n, name: String(n.name == null ? '' : n.name).slice(0, TAB_MAX), sheets: n.sheets.map(x => ({ ...x, name: String(x.name == null ? '' : x.name).slice(0, TAB_MAX), lines: Array.isArray(x.lines) ? x.lines : [], entities: Array.isArray(x.entities) ? x.entities : [] })) });
+  const limpia = (n, w) => ({ ...n, name: String(n.name == null ? '' : n.name).slice(0, tabMax(w)), sheets: n.sheets.map(x => ({ ...x, name: String(x.name == null ? '' : x.name).slice(0, tabMax(w)), lines: Array.isArray(x.lines) ? x.lines : [], entities: Array.isArray(x.entities) ? x.entities : [] })) });
   const out = { notas: [], agenda: [], diagrama: [], imagenes: {} };
   if (j.tipo === EXP_TIPO) {
-    WINS.forEach(k => { if (Array.isArray(j[k])) out[k] = j[k].filter(nota).map(limpia); });
+    WINS.forEach(k => { if (Array.isArray(j[k])) out[k] = j[k].filter(nota).map(n => limpia(n, k)); });
     if (j.imagenes && typeof j.imagenes === 'object') for (const n in j.imagenes) if (IMG_FILE_RX.test(n) && typeof j.imagenes[n] === 'string') out.imagenes[n] = j.imagenes[n];
-  } else if (j.nota && WINS.includes(j.seccion) && nota(j.nota)) out[j.seccion] = [limpia(j.nota)];
+  } else if (j.nota && WINS.includes(j.seccion) && nota(j.nota)) out[j.seccion] = [limpia(j.nota, j.seccion)];
   else return null;
   return out;
 }
@@ -163,9 +163,10 @@ function impReId(data) {
 }
 // Nombre libre para una nota importada que se llama igual que otra: «Viajes» → «Viajes (2)», «Viajes (3)»…
 // usados = nombres que ya existen (pasados por normN).
-function impNombre(base, usados) {
-  base = String(base || '').trim() || 'Sin nombre';
-  for (let k = 2; ; k++) { const suf = ' (' + k + ')', nm = base.slice(0, TAB_MAX - suf.length).trimEnd() + suf; if (!usados.has(normN(nm))) return nm; }
+// max = largo máximo del nombre en su ventana (tabMax); en Diagrama no hay límite.
+function impNombre(base, usados, max) {
+  base = String(base || '').trim() || 'Sin nombre'; if (max == null) max = TAB_MAX;
+  for (let k = 2; ; k++) { const suf = ' (' + k + ')', nm = base.slice(0, max - suf.length).trimEnd() + suf; if (!usados.has(normN(nm))) return nm; }
 }
 // Cambia el nombre de una nota importada DENTRO de lo importado, poniendo al día las rutas que la mencionan
 // (=/Viajes/Hoja/Entidad → =/Viajes (2)/Hoja/Entidad). data = { notas, agenda, diagrama }.

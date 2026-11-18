@@ -8,7 +8,7 @@ NoteApp.partes.push(Base => class extends Base {
   commit(kind, id) {
     this.setState(s => {
       if (!s.editing || s.editing.kind !== kind || s.editing.id !== id) return null;
-      const MAX = kind === 'ent' ? ENT_MAX : TAB_MAX;
+      const MAX = kind === 'ent' ? ENT_MAX : tabMax(s.mode); // en Diagrama, sin límite (ids.js)
       let v = s.draft.trim().slice(0, MAX);
       if (kind === 'ent') {
         v = v.replace(/\s+/g, '_').replace(new RegExp('[^' + ID_CH + ']', 'g'), '');

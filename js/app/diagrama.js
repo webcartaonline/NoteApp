@@ -4,7 +4,8 @@
 // desplazamiento/zoom del lienzo en hoja.view.
 // Estado temporal (no se guarda): dsel { nodes, edge } selección · dedit forma cuyo texto se edita ·
 // dlabel/ddraft etiqueta de conexión que se edita · dlink línea mientras se conecta · dlinkTo forma de destino ·
-// dbox recuadro de selección · ddrag qué se arrastra · dmen { id, q } buscador de menciones.
+// dbox recuadro de selección · ddrag qué se arrastra · dmen { id, q } buscador de menciones ·
+// dkey campo de una tabla con el menú de las claves abierto.
 // Diagramas entidad-relación: la forma «tabla» (título, descripción y campos con su clave; se edita en la propia tabla,
 // con dedit) y las conexiones en ángulo con «1» y «N» en los extremos (route, c1 y c2). Ver «Tablas» en formas.js.
 NoteApp.partes.push(Base => class extends Base {
@@ -14,6 +15,9 @@ NoteApp.partes.push(Base => class extends Base {
     this._dgUpH = e => this.dgUp(e);
     this._dgWheelH = e => this.dgWheel(e);
     this._dgKeyH = e => this.dgKey(e);
+    // Un clic fuera del menú de las claves de un campo lo cierra
+    this._dgKeyMenuH = e => { if (this.state.dkey && !(e.target.closest && e.target.closest('[data-keymenu]'))) this.setState({ dkey: null }); };
+    document.addEventListener('mousedown', this._dgKeyMenuH, true);
     document.addEventListener('pointermove', this._dgMoveH);
     document.addEventListener('pointerup', this._dgUpH);
     document.addEventListener('pointercancel', this._dgUpH);
@@ -27,6 +31,7 @@ NoteApp.partes.push(Base => class extends Base {
     document.removeEventListener('pointercancel', this._dgUpH);
     document.removeEventListener('wheel', this._dgWheelH);
     document.removeEventListener('keydown', this._dgKeyH);
+    document.removeEventListener('mousedown', this._dgKeyMenuH, true);
   }
   componentDidUpdate(a, b) {
     if (super.componentDidUpdate) super.componentDidUpdate(a, b);
@@ -124,7 +129,7 @@ NoteApp.partes.push(Base => class extends Base {
   dgEndEdit() {
     const a = document.activeElement; if (a && (a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && a.closest('[data-node]')))) a.blur();
     this._msel = null;
-    this.setState({ dedit: null, focusId: null });
+    this.setState({ dedit: null, dkey: null, focusId: null });
   }
 
   // ----- Conexiones -----
@@ -154,8 +159,12 @@ NoteApp.partes.push(Base => class extends Base {
     const el = rid ? nd.querySelector('[data-fila="' + rid + '"] ' + (nota ? '[data-campo-nota]' : '[data-campo]')) : nd.querySelector('[data-tabla-titulo]');
     if (el) { el.focus(); try { el.setSelectionRange(el.value.length, el.value.length); } catch (_) {} }
   }
-  dgRowSet(id, rid, key, val) { const max = key === 'note' ? 60 : 40; this.dgTablaSet(id, n => ({ ...n, rows: (n.rows || []).map(r => r.id === rid ? { ...r, [key]: String(val).slice(0, max) } : r) })); }
-  dgRowKey(id, rid) { this.dgTablaSet(id, n => ({ ...n, rows: (n.rows || []).map(r => r.id === rid ? { ...r, k: DG_KEYS[(DG_KEYS.indexOf(r.k) + 1) % DG_KEYS.length] } : r) })); }
+  // Sin límite de largo (los saltos de línea de lo pegado se cambian por espacios: cada campo es una sola línea que se parte sola)
+  dgRowSet(id, rid, key, val) { const v = String(val).replace(/\r?\n/g, ' '); this.dgTablaSet(id, n => ({ ...n, rows: (n.rows || []).map(r => r.id === rid ? { ...r, [key]: v } : r) })); }
+  // Pone o quita una clave (PK, FK o UQ) de un campo; se pueden tener varias a la vez (menú de las claves, state.dkey)
+  dgRowKey(id, rid, key) {
+    this.dgTablaSet(id, n => ({ ...n, rows: (n.rows || []).map(r => { if (r.id !== rid) return r; const ks = dgKeys(r.k); return { ...r, k: dgKeyStr(ks.includes(key) ? ks.filter(x => x !== key) : ks.concat(key)) }; }) }));
+  }
   // Campo nuevo debajo de la fila «tras» (o al final)
   dgRowAdd(id, tras) {
     const r = dgRow('');
@@ -175,7 +184,7 @@ NoteApp.partes.push(Base => class extends Base {
   }
   dgLabelDone(save) {
     const s = this.state, id = s.dlabel; if (!id) return;
-    const t = String(s.ddraft || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+    const t = String(s.ddraft || '').replace(/\s+/g, ' ').trim(); // sin límite de largo
     if (save) { const x = this.dgSheet(), k = x && (x.edges || []).find(e => e.id === id); if (k && (k.label || '') !== t) { this.dgEdgeSet(id, e => ({ ...e, label: t })); } }
     this.setState({ dlabel: null, ddraft: '' });
   }
@@ -360,6 +369,7 @@ NoteApp.partes.push(Base => class extends Base {
     const ae = document.activeElement, typing = ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable);
     const k = e.key, mod = e.ctrlKey || e.metaKey, sel = s.dsel, nodes = (sel && sel.nodes) || [];
     if (k === 'Escape') {
+      if (s.dkey) { e.preventDefault(); this.setState({ dkey: null }); return; } // menú de las claves de un campo
       if (s.dedit) { e.preventDefault(); this.dgEndEdit(); return; }
       if (s.dlabel || typing) return;
       if (s.dmen) { this.setState({ dmen: null }); return; }
@@ -381,20 +391,29 @@ NoteApp.partes.push(Base => class extends Base {
       this.dgSetNodes(n => ids.has(n.id) ? { ...n, x: n.x + mv[0] * st, y: n.y + mv[1] * st } : n, true);
     }
   }
-  // Las formas crecen solas si su texto no cabe
+  // Las formas crecen solas si su texto no cabe. Las tablas, además, encogen: su alto es siempre el que ocupan sus campos
   dgGrow() {
     const s = this.state; if (s.mode !== 'diagrama' || (this._dg && this._dg.kind === 'resize')) return;
     const x = this.curSheet(s); if (!x) return;
     const els = document.querySelectorAll('[data-node]'); if (!els.length) return;
-    const byId = new Map(this.dgNodes(x).map(n => [n.id, n])), fix = {};
+    const byId = new Map(this.dgNodes(x).map(n => [n.id, n])), fix = {}, tfix = {};
     els.forEach(el => {
-      const n = byId.get(el.getAttribute('data-node')); if (!n || n.shape === 'zona' || n.shape === 'tabla') return;
+      const n = byId.get(el.getAttribute('data-node')); if (!n || n.shape === 'zona') return;
+      if (n.shape === 'tabla') {
+        // Tabla: su alto = cabecera + campos (cada uno con las líneas que necesite) + márgenes. Crece y también encoge.
+        if (s.dedit === n.id) return; // mientras se edita, la tabla se dibuja con su alto natural
+        const cab = el.querySelector('.diagrama-tabla-cabeza'); if (!cab) return;
+        let need = cab.offsetHeight + DG_TABLA.padT + DG_TABLA.padB;
+        el.querySelectorAll('.diagrama-tabla-fila').forEach(f => { need += f.offsetHeight; });
+        if (Math.abs(need - n.h) > 0.5) tfix[n.id] = need;
+        return;
+      }
       const inner = el.querySelector('.diagrama-texto-in'); if (!inner) return;
       const p = dgPad(n), c = inner.offsetHeight;
       const need = n.shape === 'decision' ? c / 0.6 : c + p[0] + p[2];
       if (need > n.h + 1) fix[n.id] = Math.ceil(need / DG_GRID) * DG_GRID;
     });
-    if (Object.keys(fix).length) this.setState(st => ({ notes: this.mapSheet(st, y => ({ ...y, entities: (y.entities || []).map(n => fix[n.id] ? { ...n, h: Math.max(n.h, fix[n.id]) } : n) })) }));
+    if (Object.keys(fix).length || Object.keys(tfix).length) this.setState(st => ({ notes: this.mapSheet(st, y => ({ ...y, entities: (y.entities || []).map(n => tfix[n.id] ? { ...n, h: tfix[n.id] } : fix[n.id] ? { ...n, h: Math.max(n.h, fix[n.id]) } : n) })) }));
   }
 
   // ----- Valores para la plantilla (componentes/diagrama/) -----
@@ -409,29 +428,38 @@ NoteApp.partes.push(Base => class extends Base {
     const marcas = t => dgMarks(t).map((g, i) => ({ ...g, key: i, cls: g.on ? 'diagrama-tabla-marca' : '' }));
     const mkTabla = n => {
       const editing = edit === n.id, on = dirty && selN.has(n.id), col = DG_TABLA_COLORS[n.color] || DG_TABLA_COLORS.azul, rows = n.rows || [];
+      // Columna de las claves: más ancha si algún campo tiene las tres (PK FK UQ); igual en toda la tabla, para que los nombres sigan alineados
+      const tres = rows.some(r => dgKeys(r.k).length === 3);
       return {
         id: n.id, x: n.x + 'px', y: n.y + 'px', w: (editing ? Math.max(n.w, DG_TABLA.editW) : n.w) + 'px', h: editing ? 'auto' : n.h + 'px',
         esTabla: true, noTabla: false, editing, ver: !editing, zi: editing ? 5 : 'auto',
         cab: col[0], cabTxt: col[1], cabSub: col[2],
         titulo: n.title || '', sub: n.sub || '', tituloVer: n.title || 'tabla', hasSub: !!n.sub,
-        onTitulo: e => this.dgTablaSet(n.id, m => ({ ...m, title: e.target.value.slice(0, 40) })),
-        onSub: e => this.dgTablaSet(n.id, m => ({ ...m, sub: e.target.value.slice(0, 60) })),
+        onTitulo: e => this.dgTablaSet(n.id, m => ({ ...m, title: e.target.value.replace(/\r?\n/g, ' ') })),
+        onSub: e => this.dgTablaSet(n.id, m => ({ ...m, sub: e.target.value.replace(/\r?\n/g, ' ') })),
         cabKey: e => { if (e.key === 'Enter') { e.preventDefault(); if (e.target.hasAttribute('data-tabla-titulo')) { const i = e.target.parentElement.querySelector('[data-tabla-sub]'); if (i) i.focus(); } else if (rows.length) this.dgTablaFoco(n.id, rows[0].id); else this.dgRowAdd(n.id); } },
         filas: rows.map((r, i) => ({
           id: r.id, nombre: r.name, nombreVer: marcas(r.name || '\u00a0'), nota: r.note || '', notaVer: marcas(r.note), hasNota: !!r.note,
-          kTxt: DG_KEY_TXT[r.k || ''], kEdit: DG_KEY_TXT[r.k || ''] || 'clave', sinClave: !r.k, kTitle: DG_KEY_NAME[r.k || ''] + ' (clic para cambiar)',
-          clave: () => this.dgRowKey(n.id, r.id),
+          kTxt: dgKeyTxt(r.k), kEdit: dgKeyTxt(r.k) || 'clave', sinClave: !dgKeys(r.k).length, kTitle: 'Elegir las claves del campo (PK, FK, UQ)',
+          // Menú de las claves: se abre con el botón y deja marcar varias; se cierra con Esc o con un clic fuera
+          clave: () => this.setState(st => ({ dkey: st.dkey === r.id ? null : r.id })), kMenu: s.dkey === r.id,
+          kOpts: DG_KEY_LIST.map(key => { const on = dgKeys(r.k).includes(key); return { key, nombre: DG_KEY_INFO[key][0], desc: DG_KEY_INFO[key][1], on, cls: on ? 'diagrama-tabla-claves-on' : '', pick: () => this.dgRowKey(n.id, r.id, key) }; }),
           onNombre: e => this.dgRowSet(n.id, r.id, 'name', e.target.value), onNota: e => this.dgRowSet(n.id, r.id, 'note', e.target.value),
           // Intro: campo nuevo debajo · Retroceso en un campo vacío: lo borra · Alt + flechas: lo sube o lo baja
           key: e => {
             if (e.key === 'Enter') { e.preventDefault(); this.dgRowAdd(n.id, r.id); }
             else if (e.key === 'Backspace' && !r.name && !r.note && !e.target.hasAttribute('data-campo-nota')) { e.preventDefault(); this.dgRowDel(n.id, r.id); }
             else if (e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { e.preventDefault(); this.dgRowMove(n.id, r.id, e.key === 'ArrowUp' ? -1 : 1); }
-            else if (!e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) { const o = rows[i + (e.key === 'ArrowUp' ? -1 : 1)]; if (o) { e.preventDefault(); this.dgTablaFoco(n.id, o.id, e.target.hasAttribute('data-campo-nota')); } }
+            else if (!e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+              // El texto largo ocupa varias líneas: las flechas se mueven por él y solo saltan de campo desde el principio o el final
+              const el = e.target, arriba = e.key === 'ArrowUp', borde = arriba ? el.selectionStart === 0 : el.selectionEnd === el.value.length;
+              const o = rows[i + (arriba ? -1 : 1)]; if (o && borde) { e.preventDefault(); this.dgTablaFoco(n.id, o.id, el.hasAttribute('data-campo-nota')); }
+            }
           },
           sube: () => this.dgRowMove(n.id, r.id, -1), baja: () => this.dgRowMove(n.id, r.id, 1), borra: () => this.dgRowDel(n.id, r.id),
           noSube: i === 0, noBaja: i === rows.length - 1
         })),
+        kw: tres ? '68px' : '56px', kwEdit: tres ? '70px' : '54px',
         sinFilas: !rows.length, anadir: () => this.dgRowAdd(n.id),
         sel: on ? '1' : '', hl: s.dlinkTo === n.id ? '1' : '',
         cur: !dirty ? 'grab' : editing ? 'default' : 'move',

@@ -45,7 +45,7 @@ NoteApp.partes.push(Base => class extends Base {
       onChange: e => {
         if (!editing) return;
         const el = e.target, p = el.selectionStart, v = kind === 'ent' ? el.value.replace(/ /g, '_') : el.value;
-        this.setState({ draft: v.slice(0, kind === 'ent' ? ENT_MAX : TAB_MAX) }, kind === 'ent' ? () => { try { el.setSelectionRange(p, p); } catch (_) {} } : undefined);
+        this.setState({ draft: v.slice(0, kind === 'ent' ? ENT_MAX : tabMax(s.mode)) }, kind === 'ent' ? () => { try { el.setSelectionRange(p, p); } catch (_) {} } : undefined);
       },
       onKey: e => {
         if (!editing) return;

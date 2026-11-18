@@ -48,15 +48,15 @@
                   <sc-if value="{{ n.hasSub }}" hint-placeholder-val="{{ true }}"><span class="diagrama-tabla-sub" style="color:{{ n.cabSub }};">{{ n.sub }}</span></sc-if>
                 </sc-if>
                 <sc-if value="{{ n.editing }}" hint-placeholder-val="{{ false }}">
-                  <input data-tabla-titulo="1" value="{{ n.titulo }}" onChange="{{ n.onTitulo }}" onKeyDown="{{ n.cabKey }}" maxLength="40" spellCheck="false" placeholder="nombre_de_la_tabla" aria-label="Nombre de la tabla" class="diagrama-tabla-campo diagrama-tabla-campo-nombre" style="color:{{ n.cabTxt }};">
-                  <input data-tabla-sub="1" value="{{ n.sub }}" onChange="{{ n.onSub }}" onKeyDown="{{ n.cabKey }}" maxLength="60" spellCheck="false" placeholder="Para qué sirve (opcional)" aria-label="Descripción de la tabla" class="diagrama-tabla-campo diagrama-tabla-campo-sub" style="color:{{ n.cabSub }};">
+                  <textarea data-tabla-titulo="1" rows="1" value="{{ n.titulo }}" onChange="{{ n.onTitulo }}" onKeyDown="{{ n.cabKey }}" spellCheck="false" placeholder="nombre_de_la_tabla" aria-label="Nombre de la tabla" class="diagrama-tabla-campo diagrama-tabla-campo-nombre" style="color:{{ n.cabTxt }};"></textarea>
+                  <textarea data-tabla-sub="1" rows="1" value="{{ n.sub }}" onChange="{{ n.onSub }}" onKeyDown="{{ n.cabKey }}" spellCheck="false" placeholder="Para qué sirve (opcional)" aria-label="Descripción de la tabla" class="diagrama-tabla-campo diagrama-tabla-campo-sub" style="color:{{ n.cabSub }};"></textarea>
                 </sc-if>
               </div>
               <div class="diagrama-tabla-cuerpo">
                 <sc-for list="{{ n.filas }}" as="r" hint-placeholder-count="3">
                   <sc-if value="{{ n.ver }}" hint-placeholder-val="{{ true }}">
                     <div data-fila="{{ r.id }}" class="diagrama-tabla-fila">
-                      <span class="diagrama-tabla-clave">{{ r.kTxt }}</span>
+                      <span class="diagrama-tabla-clave" style="width:{{ n.kw }};">{{ r.kTxt }}</span>
                       <span class="diagrama-tabla-dato">
                         <span class="diagrama-tabla-dato-nombre"><sc-for list="{{ r.nombreVer }}" as="g" hint-placeholder-count="1"><span class="{{ g.cls }}">{{ g.t }}</span></sc-for></span>
                         <sc-if value="{{ r.hasNota }}" hint-placeholder-val="{{ false }}"><span class="diagrama-tabla-nota"><sc-for list="{{ r.notaVer }}" as="g" hint-placeholder-count="1"><span class="{{ g.cls }}">{{ g.t }}</span></sc-for></span></sc-if>
@@ -65,9 +65,23 @@
                   </sc-if>
                   <sc-if value="{{ n.editing }}" hint-placeholder-val="{{ false }}">
                     <div data-fila="{{ r.id }}" class="diagrama-tabla-fila diagrama-tabla-fila-editar">
-                      <button onClick="{{ r.clave }}" title="{{ r.kTitle }}" aria-label="Cambiar la clave del campo" data-vacia="{{ r.sinClave }}" class="diagrama-tabla-clave diagrama-tabla-clave-boton">{{ r.kEdit }}</button>
-                      <input data-campo="1" value="{{ r.nombre }}" onChange="{{ r.onNombre }}" onKeyDown="{{ r.key }}" maxLength="40" spellCheck="false" placeholder="nombre_del_campo" aria-label="Nombre del campo" class="diagrama-tabla-campo diagrama-tabla-campo-dato">
-                      <input data-campo-nota="1" value="{{ r.nota }}" onChange="{{ r.onNota }}" onKeyDown="{{ r.key }}" maxLength="60" spellCheck="false" placeholder="valores (opcional)" title="Valores permitidos, por ejemplo: mañana · tarde" aria-label="Valores permitidos" class="diagrama-tabla-campo diagrama-tabla-campo-nota">
+                      <div data-keymenu="1" class="diagrama-tabla-clave-caja">
+                        <button onClick="{{ r.clave }}" title="{{ r.kTitle }}" aria-label="Elegir las claves del campo" aria-haspopup="menu" aria-expanded="{{ r.kMenu }}" data-vacia="{{ r.sinClave }}" data-abierto="{{ r.kMenu }}" class="diagrama-tabla-clave diagrama-tabla-clave-boton" style="width:{{ n.kwEdit }};">{{ r.kEdit }}</button>
+                        <sc-if value="{{ r.kMenu }}" hint-placeholder-val="{{ false }}">
+                          <div role="menu" aria-label="Claves del campo" class="diagrama-tabla-claves-menu">
+                            <span class="diagrama-tabla-claves-titulo">Claves del campo</span>
+                            <sc-for list="{{ r.kOpts }}" as="o" hint-placeholder-count="3">
+                              <button role="menuitemcheckbox" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" class="diagrama-tabla-claves-opcion {{ o.cls }}">
+                                <span class="diagrama-tabla-claves-marca"></span>
+                                <span class="diagrama-tabla-claves-codigo">{{ o.key }}</span>
+                                <span class="diagrama-tabla-claves-textos"><span class="diagrama-tabla-claves-nombre">{{ o.nombre }}</span><span class="diagrama-tabla-claves-desc">{{ o.desc }}</span></span>
+                              </button>
+                            </sc-for>
+                          </div>
+                        </sc-if>
+                      </div>
+                      <textarea data-campo="1" rows="1" value="{{ r.nombre }}" onChange="{{ r.onNombre }}" onKeyDown="{{ r.key }}" spellCheck="false" placeholder="nombre_del_campo" aria-label="Nombre del campo" class="diagrama-tabla-campo diagrama-tabla-campo-dato"></textarea>
+                      <textarea data-campo-nota="1" rows="1" value="{{ r.nota }}" onChange="{{ r.onNota }}" onKeyDown="{{ r.key }}" spellCheck="false" placeholder="valores (opcional)" title="Valores permitidos, por ejemplo: mañana · tarde" aria-label="Valores permitidos" class="diagrama-tabla-campo diagrama-tabla-campo-nota"></textarea>
                       <button onClick="{{ r.sube }}" disabled="{{ r.noSube }}" title="Subir (Alt + flecha arriba)" aria-label="Subir el campo" class="diagrama-tabla-mini diagrama-tabla-mini-sube"></button>
                       <button onClick="{{ r.baja }}" disabled="{{ r.noBaja }}" title="Bajar (Alt + flecha abajo)" aria-label="Bajar el campo" class="diagrama-tabla-mini diagrama-tabla-mini-baja"></button>
                       <button onClick="{{ r.borra }}" title="Quitar el campo" aria-label="Quitar el campo" class="diagrama-tabla-mini diagrama-tabla-mini-borra"></button>
@@ -96,7 +110,7 @@
       <sc-for list="{{ dgLabels }}" as="l" hint-placeholder-count="0">
         <div data-edge="{{ l.id }}" class="diagrama-etiqueta" style="left:{{ l.x }};top:{{ l.y }};border-color:{{ l.color }};">
           <sc-if value="{{ l.show }}" hint-placeholder-val="{{ true }}"><span onPointerDown="{{ l.down }}" onDoubleClick="{{ l.dbl }}" title="{{ l.title }}" class="diagrama-etiqueta-texto">{{ l.text }}</span></sc-if>
-          <sc-if value="{{ l.editing }}" hint-placeholder-val="{{ false }}"><input data-etiqueta="1" value="{{ dgLabelDraft }}" onChange="{{ dgLabelChange }}" onKeyDown="{{ dgLabelKey }}" onBlur="{{ dgLabelBlur }}" onPointerDown="{{ dgStop }}" maxLength="120" spellCheck="false" placeholder="Etiqueta" class="diagrama-etiqueta-campo"></sc-if>
+          <sc-if value="{{ l.editing }}" hint-placeholder-val="{{ false }}"><input data-etiqueta="1" value="{{ dgLabelDraft }}" onChange="{{ dgLabelChange }}" onKeyDown="{{ dgLabelKey }}" onBlur="{{ dgLabelBlur }}" onPointerDown="{{ dgStop }}" spellCheck="false" placeholder="Etiqueta" class="diagrama-etiqueta-campo"></sc-if>
         </div>
       </sc-for>
     </div>

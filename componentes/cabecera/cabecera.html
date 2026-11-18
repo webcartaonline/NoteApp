@@ -15,7 +15,7 @@
             <sc-if value="{{ t.canLeft }}" hint-placeholder-val="{{ false }}"><button onMouseDown="{{ t.noFocus }}" onClick="{{ t.moveLeft }}" aria-label="Mover nota a la izquierda" title="Mover a la izquierda" class="cabecera-mover-izquierda"></button></sc-if>
             <sc-if value="{{ t.canRight }}" hint-placeholder-val="{{ false }}"><button onMouseDown="{{ t.noFocus }}" onClick="{{ t.moveRight }}" aria-label="Mover nota a la derecha" title="Mover a la derecha" class="cabecera-mover-derecha"></button></sc-if>
             <span class="cabecera-texto" style="font-weight:{{ t.weight }};">{{ t.display }}</span>
-            <input value="{{ t.text }}" readOnly="{{ t.readOnly }}" maxLength="22" spellCheck="false" title="Doble clic para editar" onDoubleClick="{{ t.onDbl }}" onChange="{{ t.onChange }}" onKeyDown="{{ t.onKey }}" onBlur="{{ t.onBlur }}" onMouseDown="{{ t.onDown }}" onClick="{{ t.onClick }}" class="cabecera-nombre" style="font:inherit;font-weight:{{ t.weight }};color:{{ t.color }};cursor:{{ t.cursor }};box-shadow:{{ t.underline }};">
+            <input value="{{ t.text }}" readOnly="{{ t.readOnly }}" spellCheck="false" title="Doble clic para editar" onDoubleClick="{{ t.onDbl }}" onChange="{{ t.onChange }}" onKeyDown="{{ t.onKey }}" onBlur="{{ t.onBlur }}" onMouseDown="{{ t.onDown }}" onClick="{{ t.onClick }}" class="cabecera-nombre" style="font:inherit;font-weight:{{ t.weight }};color:{{ t.color }};cursor:{{ t.cursor }};box-shadow:{{ t.underline }};">
           </div>
         </sc-for>
       </div>

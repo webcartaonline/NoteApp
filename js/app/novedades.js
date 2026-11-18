@@ -27,6 +27,14 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '4.4.3.2',
+    fecha: '18 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Elige varias claves para un campo', texto: 'En las tablas de los diagramas, el botón de la clave de cada campo abre ahora un pequeño menú con PK, FK y UQ. Marca las que quieras: una, varias o ninguna. Así puedes tener combinaciones que antes no existían, como FK UQ (apunta a otra tabla y no se puede repetir) o las tres a la vez. Esc o un clic fuera cierran el menú.', tipos: ['visual', 'estructural'] },
+      { titulo: 'Escribe todo lo que quieras en los diagramas', texto: 'En Diagrama ya no hay límite de letras en ningún texto: el nombre y la descripción de las tablas, sus campos, los valores de cada campo, las etiquetas de las líneas y el nombre del diagrama y de sus hojas. Por ejemplo, puedes apuntar todos los estados de una reserva aunque sean muchos. Lo que no cabe a lo ancho sigue en la línea de abajo, nunca se corta, y la tabla se hace más alta sola (y más baja si borras texto).', tipos: ['visual', 'estructural'] }
+    ]
+  },
+  {
     version: '4.2.1.2',
     fecha: '16 de noviembre de 2026',
     cambios: [
@@ -57,13 +65,6 @@ const NA_NOVEDADES = [
     fecha: '15 de noviembre de 2026',
     cambios: [
       { titulo: 'Cambia de vista con el teclado', texto: 'Pulsa Alt+V para pasar de la vista limpia a la sucia y al revés, sin tener que ir al interruptor con el ratón. Funciona en Notas, en la Agenda y en el Diagrama, incluso mientras escribes.', tipos: ['visual'] }
-    ]
-  },
-  {
-    version: '3.5.2.0',
-    fecha: '12 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Las rutas dicen en qué ventana buscar', texto: 'Una ruta sin nada delante busca ahora solo en la ventana en la que la escribes: desde Notas, en Notas; desde la Agenda, en la Agenda; desde el Diagrama, en el Diagrama. Para usar una entidad de otra ventana, empieza la ruta con su nombre (Notas, Agenda o Diagrama). Por ejemplo, desde una nota: un igual seguido de /Agenda/Proyecto final/Reuniones/Fecha_1. Así no hay confusión aunque una nota y una agenda se llamen igual. No tienes que cambiar nada: las rutas que ya tenías escritas se ponen al día solas.', tipos: ['estructural'] }
     ]
   }
 ];

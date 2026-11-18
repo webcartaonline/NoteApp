@@ -69,7 +69,7 @@ NoteApp.partes.push(Base => class extends Base {
       v.confirmTitle = 'Ya tienes ' + que + ' con ese nombre';
       v.confirmName = (c.name || '').trim() || 'Sin nombre';
       v.confirmDetail = (c.total > 1 ? 'Coincidencia ' + (c.i + 1) + ' de ' + c.total + ' · ' : '') + WIN_TITLE[c.w];
-      v.confirmWarn = 'Guardar las dos: la tuya se queda como está y la importada se añade con un número al final del nombre, por ejemplo «' + impNombre(c.name, new Set()) + '». Sustituir la mía: la importada ocupa el sitio de la tuya, que se pierde.';
+      v.confirmWarn = 'Guardar las dos: la tuya se queda como está y la importada se añade con un número al final del nombre, por ejemplo «' + impNombre(c.name, new Set(), tabMax(c.w)) + '». Sustituir la mía: la importada ocupa el sitio de la tuya, que se pierde.';
       v.confirmBoth = () => this.impResponder('ambas');
       v.confirmReplace = () => this.impResponder('sustituir');
       return v;

@@ -193,7 +193,7 @@ NoteApp.partes.push(Base => class extends Base {
       // 1) Las que se guardan «las dos» reciben su nombre nuevo dentro de lo importado (así sus rutas siguen apuntando a ellas)
       WINS.forEach(k => {
         const usados = new Set((all[k].notes || []).concat(data[k]).map(m => normN(m.name)));
-        data[k].slice().forEach(n => { if (imp.resp[n.id] !== 'ambas') return; const nm = impNombre(n.name, usados); usados.add(normN(nm)); data = impRenombrar(data, n.id, nm); });
+        data[k].slice().forEach(n => { if (imp.resp[n.id] !== 'ambas') return; const nm = impNombre(n.name, usados, tabMax(k)); usados.add(normN(nm)); data = impRenombrar(data, n.id, nm); });
       });
       // 2) Se juntan con lo que ya hay
       WINS.forEach(k => {

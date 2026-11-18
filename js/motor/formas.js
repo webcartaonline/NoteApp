@@ -43,10 +43,11 @@ function dgNode(shape, x, y, text, extra) {
 }
 // ===== Tablas (diagramas entidad-relación) =====
 // Una tabla es una forma con cabecera de color (nombre y descripción) y una lista de campos. Cada campo (fila):
-//   k = clave: '' | 'PK' (primaria) | 'FK' (foránea) | 'PKFK' (primaria y foránea) | 'UQ' (único)
+//   k = claves del campo: cualquier combinación de PK (primaria), FK (foránea) y UQ (único), escritas juntas y siempre en
+//       ese orden: '', 'PK', 'FK', 'UQ', 'PKFK', 'PKUQ', 'FKUQ' o 'PKFKUQ' (ver dgKeys; los datos de antes siguen valiendo)
 //   name = nombre del campo · note = valores permitidos, en pequeño debajo (p. ej. «mañana · tarde»)
 // El alto no lo elige el usuario: sale de sus campos (dgTablaH). Estas medidas son las mismas que en diagrama.css.
-const DG_TABLA = { head: 56, row: 26, note: 16, padT: 9, padB: 11, minW: 220, editW: 420 };
+const DG_TABLA = { head: 56, row: 26, note: 16, padT: 9, padB: 11, minW: 220, editW: 480 };
 // Color de la cabecera: [fondo, nombre, descripción]
 const DG_TABLA_COLORS = {
   gris:     ['#3a3a3a', '#ffffff', '#d6d6d6'],
@@ -73,11 +74,14 @@ function dgMarks(txt) {
   if (last < t.length || !out.length) out.push({ t: t.slice(last), on: false });
   return out;
 }
-const DG_KEYS = ['', 'PK', 'FK', 'PKFK', 'UQ'];
-const DG_KEY_TXT = { '': '', PK: 'PK', FK: 'FK', PKFK: 'PK FK', UQ: 'UQ' }; // se dibuja como un solo texto, para que todas las claves empiecen en el mismo sitio
-const DG_KEY_NAME = { '': 'Sin clave', PK: 'Clave primaria: identifica cada fila', FK: 'Clave foránea: apunta a otra tabla', PKFK: 'Clave primaria que además apunta a otra tabla', UQ: 'Único: no se puede repetir' };
+// Claves de un campo (18/11/2026): se eligen en un menú y se puede marcar cualquier combinación (FK UQ, PK FK, las tres…).
+const DG_KEY_LIST = ['PK', 'FK', 'UQ'];
+const DG_KEY_INFO = { PK: ['Clave primaria', 'Identifica cada fila'], FK: ['Clave foránea', 'Apunta a otra tabla'], UQ: ['Único', 'No se puede repetir'] };
+const dgKeys = k => DG_KEY_LIST.filter(x => String(k || '').includes(x));            // 'PKFK' → ['PK', 'FK']
+const dgKeyStr = list => DG_KEY_LIST.filter(x => (list || []).includes(x)).join('');  // ['FK', 'PK'] → 'PKFK' (siempre en orden)
+const dgKeyTxt = k => dgKeys(k).join(' ');                                           // 'FKUQ' → 'FK UQ': un solo texto, así todas empiezan en el mismo sitio
 const DG_CARD = ['', '1', 'N']; // cuántos en cada extremo de una relación
-const dgRow = (name, k, note) => ({ id: uid('r'), k: DG_KEYS.includes(k) ? k : '', name: name || '', note: note || '' });
+const dgRow = (name, k, note) => ({ id: uid('r'), k: dgKeyStr(dgKeys(k)), name: name || '', note: note || '' });
 const dgTablaH = n => DG_TABLA.head + DG_TABLA.padT + (n.rows || []).reduce((a, r) => a + DG_TABLA.row + (r.note ? DG_TABLA.note : 0), 0) + DG_TABLA.padB;
 // Tabla nueva. rows: lista de campos ya hechos (dgRow) o nada (empieza con un campo «id» como clave primaria).
 function dgTabla(x, y, extra) {
