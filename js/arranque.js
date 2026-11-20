@@ -27,6 +27,7 @@
     'entidades',
     'mensajes',
     'confirmar',
+    'menu-copiar',
     'novedades',
     'calculadora',
     'ajustes',

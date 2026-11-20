@@ -389,7 +389,29 @@
   overflow-wrap: anywhere;
 }
 
-/* ===== Historial ===== */
+/* ===== Historial (dentro de Espacios de trabajo, debajo de los botones) ===== */
+.ajustes-sinc-sub {
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px;
+  padding-top: 26px;
+  border-top: 1px solid #333;
+}
+.ajustes-sinc-sub-cabeza {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 16px;
+}
+.ajustes-sinc-sub-titulo {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.1px;
+}
+.ajustes-sinc-sub-cabeza .ajustes-sinc-intro {
+  font-size: 14.5px;
+  line-height: 21px;
+}
 .ajustes-sinc-hist {
   display: flex;
   flex-direction: column;

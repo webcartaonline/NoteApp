@@ -136,11 +136,11 @@ NoteApp.partes.push(Base => class extends Base {
     return v;
   }
   // Botón de copiar de una celda: se pone verde un momento al copiar. get: copia directa (celda de código);
-  // menu: celda copiable, abre el menú «Copiar Markdown» / «Copiado literal» (askCopy en js/app/confirmar.js).
+  // menu: celda copiable, abre el menú «Copiar Markdown» / «Copiado literal» (askCopy en js/app/menu-copiar.js).
   cellCopy(v, ln, k, get, menu) {
     const key = ln.id + '|' + k, copied = this.state.copied === key;
     Object.assign(v, { hasCopy: true, disp: 'inline-flex', copyTitle: copied ? 'Copiado' : 'Copiar', copyColor: copied ? '#008000' : '#8a8a8a',
-      onCopy: e => { e.preventDefault(); e.stopPropagation(); if (menu) this.askCopy({ ...menu(), key }); else this.copyText(get(), key); } });
+      onCopy: e => { e.preventDefault(); e.stopPropagation(); if (menu) this.askCopy({ ...menu(), key }, e); else this.copyText(get(), key); } });
   }
   // Busca "query" en los trozos de una línea (concatenando su texto visible) y apunta en cada trozo qué partes hay
   // que resaltar (_hl: texto, código o enlace; _hlL: nombre o valor de una mención; _hlE: el "=" de la mención).
@@ -207,7 +207,7 @@ NoteApp.partes.push(Base => class extends Base {
       if (sg.t === 'chipbtn') {
         const key = ln.id + '@' + sg.cs, copied = s.copied === key;
         return { ...v, isChipBtn: true, cbg: '#333', cpad: '2px 4px 2px 5px', crad: '0 4px 4px 0', copyTitle: copied ? 'Copiado' : 'Copiar', copyColor: copied ? '#008000' : '#8a8a8a',
-          onCopy: e => { e.preventDefault(); e.stopPropagation(); this.askCopy({ ...copyRangeTexts(ln.text, sg.cs, sg.ce), what: 'Copiable en una frase', key }); }, onStop: e => e.stopPropagation() };
+          onCopy: e => { e.preventDefault(); e.stopPropagation(); this.askCopy({ ...copyRangeTexts(ln.text, sg.cs, sg.ce), what: 'Copiable en una frase', key }, e); }, onStop: e => e.stopPropagation() };
       }
       const fw = sg.b ? 700 : 'inherit', fst = sg.i ? 'italic' : 'normal', td = sg.s ? 'line-through' : 'none';
       if (sg.t === 'text') return sg.href
@@ -273,7 +273,7 @@ NoteApp.partes.push(Base => class extends Base {
             onCopy: e => {
               e.stopPropagation();
               // Copiable: menú «Copiar Markdown» / «Copiado literal». Código: siempre tal cual, sin menú.
-              if (!code) { const tx = copyBlockTexts(src, blocks, b); return this.askCopy({ ...tx, key, what: b.pos === 'single' ? 'Línea copiable' : 'Bloque copiable · ' + tx.lit.split('\n').length + (tx.lit.split('\n').length === 1 ? ' línea' : ' líneas') }); }
+              if (!code) { const tx = copyBlockTexts(src, blocks, b); return this.askCopy({ ...tx, key, what: b.pos === 'single' ? 'Línea copiable' : 'Bloque copiable · ' + tx.lit.split('\n').length + (tx.lit.split('\n').length === 1 ? ' línea' : ' líneas') }, e); }
               const txt = []; for (let k = b.from; k <= b.to; k++) { const bk = blocks[k], t = src[k].text; txt.push(t.slice(bk.start, Math.max(bk.start, bk.end))); }
               while (txt.length > 1 && !txt[0]) txt.shift(); while (txt.length > 1 && !txt[txt.length - 1]) txt.pop(); this.copyText(txt.join('\n'), key);
             } });

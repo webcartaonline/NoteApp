@@ -1,7 +1,7 @@
 <!-- Componente "ajustes-sinc" de NoteApp. Contenido del menú Sincronización de la página de Ajustes:
-     · Espacios de trabajo: el espacio abierto y los botones Cambiar, Copiar y Mudar.
+     · Espacios de trabajo: el espacio abierto, los botones Cambiar, Copiar y Mudar y, debajo, el Historial
+       (los espacios de trabajo abiertos antes, con su título y su ruta, para cambiar rápido).
      · Exportar: dos columnas, exportar a un solo archivo (izquierda) e importar un archivo (derecha).
-     · Historial: los espacios de trabajo abiertos antes, con su título y su ruta, para cambiar rápido.
      Los estilos fijos están en ajustes-sinc.css; los valores {{ }} vienen de sincVals() (js/app/ajustes-sinc.js). -->
 <x-dc>
   <sc-if value="{{ sincEsEspacios }}" hint-placeholder-val="{{ true }}">
@@ -46,6 +46,45 @@
         <span class="ajustes-sinc-pie ajustes-sinc-pie-aviso">Este navegador no deja trabajar con carpetas, así que aquí no hay espacios de trabajo: tus notas se guardan en el navegador. Funciona en Chrome o Edge de ordenador. Para llevarte tus notas a otro sitio, usa la sección Exportar.</span>
       </sc-if>
       <span class="ajustes-sinc-pie">Al copiar o mudar, elige una carpeta vacía (puedes crearla en la misma ventana de elegir carpeta). Antes de mudar se comprueba que la copia está completa, y de la carpeta anterior solo se borran los archivos de NoteApp.</span>
+      <!-- Historial de espacios de trabajo (antes era una sección aparte): las carpetas abiertas en este navegador -->
+      <sc-if value="{{ sincHistFs }}" hint-placeholder-val="{{ true }}">
+        <div class="ajustes-sinc-sub">
+          <div class="ajustes-sinc-sub-cabeza">
+            <span class="ajustes-sinc-sub-titulo">Historial</span>
+            <span class="ajustes-sinc-intro">Las carpetas que has abierto en este navegador. Ponle a cada una un título y apunta su ruta para reconocerla, y pulsa «Abrir» para cambiar a ella al momento.</span>
+          </div>
+          <sc-if value="{{ sincHistVacio }}" hint-placeholder-val="{{ false }}">
+            <div class="ajustes-sinc-vacio">
+              <span class="ajustes-sinc-accion-icono"><span class="ajustes-sinc-icono ajustes-sinc-icono-carpeta"></span></span>
+              <span class="ajustes-sinc-vacio-texto">Todavía no hay ningún espacio de trabajo en el historial. Aparecerán aquí según vayas abriendo carpetas con «Cambiar» o con el botón de la carpeta.</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ sincHistHay }}" hint-placeholder-val="{{ true }}">
+            <div class="ajustes-sinc-hist">
+              <sc-for list="{{ sincHist }}" as="h" hint-placeholder-count="2">
+                <div class="ajustes-sinc-hist-fila {{ h.cls }}">
+                  <div class="ajustes-sinc-hist-campos">
+                    <div class="ajustes-sinc-hist-linea">
+                      <input value="{{ h.titulo }}" onChange="{{ h.onTitulo }}" maxLength="40" spellCheck="false" placeholder="Título" aria-label="Título del espacio de trabajo" class="ajustes-sinc-campo ajustes-sinc-campo-titulo">
+                      <sc-if value="{{ h.actual }}" hint-placeholder-val="{{ false }}"><span class="ajustes-sinc-chip-actual">Abierto ahora</span></sc-if>
+                      <sc-if value="{{ h.falta }}" hint-placeholder-val="{{ false }}"><span class="ajustes-sinc-chip-falta">No encontrada</span></sc-if>
+                    </div>
+                    <input value="{{ h.ruta }}" onChange="{{ h.onRuta }}" maxLength="260" spellCheck="false" placeholder="Ruta: escríbela o pégala aquí (por ejemplo, C:\Usuarios\Camilo\OneDrive\Clases)" aria-label="Ruta de la carpeta" class="ajustes-sinc-campo ajustes-sinc-campo-ruta">
+                    <span class="ajustes-sinc-hist-sub">Carpeta «{{ h.carpeta }}» · {{ h.cuando }}</span>
+                  </div>
+                  <div class="ajustes-sinc-hist-botones">
+                    <sc-if value="{{ h.otro }}" hint-placeholder-val="{{ true }}">
+                      <button onClick="{{ h.abrir }}" class="ajustes-sinc-boton ajustes-sinc-boton-verde">Abrir</button>
+                      <button onClick="{{ h.quitar }}" title="Quitar del historial (la carpeta y sus notas no se borran)" class="ajustes-sinc-boton ajustes-sinc-boton-suave">Quitar</button>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <span class="ajustes-sinc-pie">El navegador no deja que NoteApp vea la ruta completa de una carpeta, solo su nombre: por eso la ruta la escribes tú, una vez. Al abrir un espacio, puede que el navegador te pida permiso para su carpeta. «Quitar» solo lo borra de esta lista: la carpeta y sus notas siguen en su sitio.</span>
+        </div>
+      </sc-if>
     </div>
   </sc-if>
 
@@ -102,51 +141,6 @@
         </section>
       </div>
       <span class="ajustes-sinc-pie">El archivo lleva dentro las imágenes pegadas. Si una nota menciona entidades de otra nota que no va en el archivo, esas menciones saldrán sin valor (ND) hasta que la otra nota también esté.</span>
-    </div>
-  </sc-if>
-
-  <sc-if value="{{ sincEsHistorial }}" hint-placeholder-val="{{ false }}">
-    <div class="ajustes-sinc">
-      <div class="ajustes-sinc-cabeza">
-        <span class="ajustes-sinc-titulo">Historial de espacios de trabajo</span>
-        <span class="ajustes-sinc-intro">Las carpetas que has abierto en este navegador. Ponle a cada una un título y apunta su ruta para reconocerla, y pulsa «Abrir» para cambiar a ella al momento.</span>
-      </div>
-      <sc-if value="{{ sincHayMsg }}" hint-placeholder-val="{{ false }}">
-        <div role="status" class="ajustes-sinc-estado {{ sincMsgCls }}"><span class="ajustes-sinc-estado-punto"></span><span>{{ sincMsgTxt }}</span></div>
-      </sc-if>
-      <sc-if value="{{ sincHistVacio }}" hint-placeholder-val="{{ false }}">
-        <div class="ajustes-sinc-vacio">
-          <span class="ajustes-sinc-accion-icono"><span class="ajustes-sinc-icono ajustes-sinc-icono-carpeta"></span></span>
-          <span class="ajustes-sinc-vacio-texto">Todavía no hay ningún espacio de trabajo en el historial. Aparecerán aquí según vayas abriendo carpetas con «Cambiar» o con el botón de la carpeta.</span>
-        </div>
-      </sc-if>
-      <sc-if value="{{ sincHistHay }}" hint-placeholder-val="{{ true }}">
-        <div class="ajustes-sinc-hist">
-          <sc-for list="{{ sincHist }}" as="h" hint-placeholder-count="2">
-            <div class="ajustes-sinc-hist-fila {{ h.cls }}">
-              <div class="ajustes-sinc-hist-campos">
-                <div class="ajustes-sinc-hist-linea">
-                  <input value="{{ h.titulo }}" onChange="{{ h.onTitulo }}" maxLength="40" spellCheck="false" placeholder="Título" aria-label="Título del espacio de trabajo" class="ajustes-sinc-campo ajustes-sinc-campo-titulo">
-                  <sc-if value="{{ h.actual }}" hint-placeholder-val="{{ false }}"><span class="ajustes-sinc-chip-actual">Abierto ahora</span></sc-if>
-                  <sc-if value="{{ h.falta }}" hint-placeholder-val="{{ false }}"><span class="ajustes-sinc-chip-falta">No encontrada</span></sc-if>
-                </div>
-                <input value="{{ h.ruta }}" onChange="{{ h.onRuta }}" maxLength="260" spellCheck="false" placeholder="Ruta: escríbela o pégala aquí (por ejemplo, C:\Usuarios\Camilo\OneDrive\Clases)" aria-label="Ruta de la carpeta" class="ajustes-sinc-campo ajustes-sinc-campo-ruta">
-                <span class="ajustes-sinc-hist-sub">Carpeta «{{ h.carpeta }}» · {{ h.cuando }}</span>
-              </div>
-              <div class="ajustes-sinc-hist-botones">
-                <sc-if value="{{ h.otro }}" hint-placeholder-val="{{ true }}">
-                  <button onClick="{{ h.abrir }}" class="ajustes-sinc-boton ajustes-sinc-boton-verde">Abrir</button>
-                  <button onClick="{{ h.quitar }}" title="Quitar del historial (la carpeta y sus notas no se borran)" class="ajustes-sinc-boton ajustes-sinc-boton-suave">Quitar</button>
-                </sc-if>
-              </div>
-            </div>
-          </sc-for>
-        </div>
-      </sc-if>
-      <sc-if value="{{ sincNoFs }}" hint-placeholder-val="{{ false }}">
-        <span class="ajustes-sinc-pie ajustes-sinc-pie-aviso">Este navegador no deja trabajar con carpetas, así que no hay historial. Funciona en Chrome o Edge de ordenador.</span>
-      </sc-if>
-      <span class="ajustes-sinc-pie">El navegador no deja que NoteApp vea la ruta completa de una carpeta, solo su nombre: por eso la ruta la escribes tú, una vez. Al abrir un espacio, puede que el navegador te pida permiso para su carpeta. «Quitar» solo lo borra de esta lista: la carpeta y sus notas siguen en su sitio.</span>
     </div>
   </sc-if>
 </x-dc>

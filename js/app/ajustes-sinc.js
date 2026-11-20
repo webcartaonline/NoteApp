@@ -1,7 +1,8 @@
-// Menú Sincronización de la página de Ajustes (componente componentes/ajustes-sinc/). Tres secciones (arriba a la derecha):
-//   · Espacios de trabajo: cambiar a otra carpeta, copiar el espacio en otra carpeta o mudarlo (copiarlo y borrar el anterior).
+// Menú Sincronización de la página de Ajustes (componente componentes/ajustes-sinc/). Dos secciones (arriba a la derecha):
+//   · Espacios de trabajo: cambiar a otra carpeta, copiar el espacio en otra carpeta o mudarlo (copiarlo y borrar el anterior)
+//     y, debajo, el Historial: los espacios abiertos antes en este navegador, con su título y su ruta, para cambiar rápido.
+//     (Hasta la 4.8.5.0 el Historial era una sección aparte.)
 //   · Exportar: exportar a UN solo archivo (una nota, una agenda, un diagrama, todas las de una ventana o todo) e importar.
-//   · Historial: los espacios de trabajo abiertos antes en este navegador, con su título y su ruta, para cambiar rápido.
 // Las funciones que no tocan la interfaz (copiar carpetas, crear y leer el archivo…) están en js/motor/espacios.js.
 //
 // Estado temporal (no se guarda: no está en NA_KEEP):
@@ -11,7 +12,7 @@
 //   state.histCur = id del espacio de trabajo abierto dentro del historial
 // Ventanas de confirmación (componente confirmar, js/app/confirmar.js): kind 'move' antes de mudar (carpeta pendiente en
 // this._mv) y kind 'import' cuando lo importado se llama igual que algo que ya existe (pendiente en this._imp).
-const AJ_SINC_SECS = [['espacios', 'Espacios de trabajo'], ['exportar', 'Exportar'], ['historial', 'Historial']];
+const AJ_SINC_SECS = [['espacios', 'Espacios de trabajo'], ['exportar', 'Exportar']];
 const SINC_TODAS = { notas: 'Todas las notas', agenda: 'Toda la agenda', diagrama: 'Todos los diagramas' };
 const sincCuantos = (n, uno, varios) => n + ' ' + (n === 1 ? uno : varios);
 
@@ -109,7 +110,7 @@ NoteApp.partes.push(Base => class extends Base {
       const aviso = im.faltan ? ' Aviso: ' + sincCuantos(im.faltan, 'imagen no se ha podido copiar.', 'imágenes no se han podido copiar.') : '';
       if (!mudar) {
         await this.histRecord(dest);
-        this.sincMsg(im.faltan ? 'aviso' : 'ok', 'Copia creada en «' + dest.name + '». ' + (oldName ? 'Sigues trabajando en «' + oldName + '»' : 'Sigues trabajando donde estabas') + '; la copia está en el Historial para abrirla cuando quieras.' + aviso);
+        this.sincMsg(im.faltan ? 'aviso' : 'ok', 'Copia creada en «' + dest.name + '». ' + (oldName ? 'Sigues trabajando en «' + oldName + '»' : 'Sigues trabajando donde estabas') + '; la copia está en el Historial, más abajo, para abrirla cuando quieras.' + aviso);
         return;
       }
       // Mudanza: desde aquí todo se guarda en la carpeta nueva…
@@ -218,7 +219,7 @@ NoteApp.partes.push(Base => class extends Base {
     const sc = s.sinc || {}, busy = !!sc.busy, msg = sc.msg, k = fsNoteCount(s), on = s.fs === 'on', off = s.fs !== 'on' && !s.fsName;
     const curId = s.fsName ? s.histCur : null, cur = (s.hist || []).find(h => h.id === curId);
     const v = {
-      sincEsEspacios: sec === 'espacios', sincEsExportar: sec === 'exportar', sincEsHistorial: sec === 'historial',
+      sincEsEspacios: sec !== 'exportar', sincEsExportar: sec === 'exportar',
       sincHayMsg: busy || !!msg, sincMsgTxt: busy ? sc.busy : msg ? msg.texto : '',
       sincMsgCls: 'ajustes-sinc-estado-' + (busy ? 'trabajando' : msg ? msg.tipo : 'ok'),
       sincNoFs: !FS_OK
@@ -233,6 +234,20 @@ NoteApp.partes.push(Base => class extends Base {
       v.sincCopiar = () => this.wsCopiar(false);
       v.sincMudar = () => this.wsCopiar(true);
       v.sincOcupado = busy;
+      // Historial (debajo de los botones; solo con carpetas: Chrome o Edge de ordenador)
+      v.sincHistFs = FS_OK;
+      const fecha = t => t ? new Date(t).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+      const lista = (s.hist || []).slice().sort((a, b) => (b.id === curId) - (a.id === curId) || (b.ultima || 0) - (a.ultima || 0));
+      v.sincHist = lista.map(h => ({
+        id: h.id, titulo: h.titulo || '', ruta: h.ruta || '', carpeta: h.carpeta, actual: h.id === curId, otro: h.id !== curId, falta: !!h.falta && h.id !== curId,
+        cls: h.id === curId ? 'ajustes-sinc-hist-actual' : '',
+        cuando: h.id === curId ? 'Abierto ahora' : 'Abierto por última vez el ' + fecha(h.ultima),
+        onTitulo: e => this.histEdit(h.id, 'titulo', e.target.value), onRuta: e => this.histEdit(h.id, 'ruta', e.target.value),
+        // Sube arriba del panel para ver el mensaje y la tarjeta del espacio que se abre
+        abrir: () => { this.ajArriba(); this.histAbrir(h.id); }, quitar: () => this.histRemove(h.id)
+      }));
+      v.sincHistVacio = !lista.length;
+      v.sincHistHay = !!lista.length;
     }
     if (v.sincEsExportar) {
       const sel = this.expSel(s), all = winsOf(s);
@@ -249,19 +264,6 @@ NoteApp.partes.push(Base => class extends Base {
       v.sincExportar = () => this.expHacer();
       v.sincImportar = () => this.impElegir();
       v.sincOcupado = busy;
-    }
-    if (v.sincEsHistorial) {
-      const fecha = t => t ? new Date(t).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
-      const lista = (s.hist || []).slice().sort((a, b) => (b.id === curId) - (a.id === curId) || (b.ultima || 0) - (a.ultima || 0));
-      v.sincHist = lista.map(h => ({
-        id: h.id, titulo: h.titulo || '', ruta: h.ruta || '', carpeta: h.carpeta, actual: h.id === curId, otro: h.id !== curId, falta: !!h.falta && h.id !== curId,
-        cls: h.id === curId ? 'ajustes-sinc-hist-actual' : '',
-        cuando: h.id === curId ? 'Abierto ahora' : 'Abierto por última vez el ' + fecha(h.ultima),
-        onTitulo: e => this.histEdit(h.id, 'titulo', e.target.value), onRuta: e => this.histEdit(h.id, 'ruta', e.target.value),
-        abrir: () => this.histAbrir(h.id), quitar: () => this.histRemove(h.id)
-      }));
-      v.sincHistVacio = !lista.length;
-      v.sincHistHay = !!lista.length;
     }
     return v;
   }

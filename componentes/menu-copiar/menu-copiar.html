@@ -1,0 +1,13 @@
+<!-- Componente "menu-copiar" de NoteApp. Menú flotante que se despliega junto al botón de copiar de algo copiable
+     ('x', '' o celda copiable) con dos opciones: «Copiar Markdown» y «Copiado literal». Mismo aspecto que el menú del
+     círculo de la barra de hojas. Clic fuera, Esc o desplazar la página = cerrar sin copiar.
+     Los estilos fijos están en menu-copiar.css; los valores {{ }} vienen de renderVals() (js/app/render.js)
+     y la lógica de js/app/menu-copiar.js. -->
+<x-dc>
+  <sc-if value="{{ cmOpen }}" hint-placeholder-val="{{ false }}">
+    <div data-cmenu="1" role="menu" aria-label="{{ cmLabel }}" class="menu-copiar" style="top:{{ cmTop }};left:{{ cmLeft }};transform:{{ cmTf }};">
+      <button role="menuitem" onClick="{{ cmMd }}" title="Markdown estándar: el formato en Markdown y las menciones con su valor, igual que al exportar" class="menu-copiar-opcion">Copiar Markdown</button>
+      <button role="menuitem" onClick="{{ cmLit }}" title="El texto exactamente como está escrito, con las menciones y todos los símbolos" class="menu-copiar-opcion">Copiado literal</button>
+    </div>
+  </sc-if>
+</x-dc>

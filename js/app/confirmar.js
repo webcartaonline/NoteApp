@@ -2,8 +2,6 @@
 // - antes de eliminar una nota o una hoja: { kind: 'sheet' | 'note', noteId, sheetId }
 // - al conectar una carpeta vacía sin carpeta anterior (o si la anterior ya no existe), para preguntar si se pasan
 //   las notas del navegador: { kind: 'folder', name, gone, count } (ver fsPick y fsAnswer en js/app/carpeta.js)
-// - al pulsar el botón de copiar de algo copiable ('x', '' o celda copiable), para elegir cómo copiarlo:
-//   { kind: 'copy', md, lit, key, what } (md = en Markdown, lit = tal cual está escrito; ver askCopy)
 // - antes de mudar el espacio de trabajo a otra carpeta: { kind: 'move', name, from } (wsCopiar y wsMudarOk, en
 //   js/app/ajustes-sinc.js; la carpeta pendiente está en this._mv)
 // - al importar algo que se llama igual que una nota, agenda o diagrama que ya existe: { kind: 'import', i, total, name, w }
@@ -24,12 +22,6 @@ NoteApp.partes.push(Base => class extends Base {
     if (c && c.kind === 'import') { this._imp = null; this.sincMsg('aviso', 'Importación cancelada: no se ha añadido ni cambiado nada.'); }
     this.setState({ confirm: null });
   }
-  // Menú de copiar de lo copiable: { md, lit, key, what }. Al elegir, copia y el botón de copiar se pone verde.
-  askCopy(c) {
-    const a = document.activeElement; if (a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT')) a.blur();
-    this.setState({ menu: false, copyMenu: false, confirm: { kind: 'copy', ...c } }, () => { const b = document.querySelector('[data-confirmar="md"]'); if (b) b.focus(); });
-  }
-  doCopy(lit) { const c = this.state.confirm; if (!c || c.kind !== 'copy') return; this.setState({ confirm: null }); this.copyText(lit ? c.lit : c.md, c.key); }
   // Elimina de verdad lo que se estaba confirmando
   confirmDelete() {
     this.setState(st => {
@@ -51,8 +43,8 @@ NoteApp.partes.push(Base => class extends Base {
   }
   // Valores para la plantilla (se añaden en renderVals)
   confirmVals(s) {
-    const otras = ['folder', 'copy', 'move', 'import'];
-    const c = s.confirm, v = { confirmOpen: !!c, confirmFolder: !!c && c.kind === 'folder', confirmCopy: !!c && c.kind === 'copy', confirmMove: !!c && c.kind === 'move', confirmImport: !!c && c.kind === 'import', confirmDel: !!c && !otras.includes(c.kind) };
+    const otras = ['folder', 'move', 'import'];
+    const c = s.confirm, v = { confirmOpen: !!c, confirmFolder: !!c && c.kind === 'folder', confirmMove: !!c && c.kind === 'move', confirmImport: !!c && c.kind === 'import', confirmDel: !!c && !otras.includes(c.kind) };
     if (!c) return v;
     v.confirmCancel = () => this.closeConfirm();
     v.confirmBack = e => { if (e.target === e.currentTarget) this.closeConfirm(); };
@@ -72,16 +64,6 @@ NoteApp.partes.push(Base => class extends Base {
       v.confirmWarn = 'Guardar las dos: la tuya se queda como está y la importada se añade con un número al final del nombre, por ejemplo «' + impNombre(c.name, new Set(), tabMax(c.w)) + '». Sustituir la mía: la importada ocupa el sitio de la tuya, que se pierde.';
       v.confirmBoth = () => this.impResponder('ambas');
       v.confirmReplace = () => this.impResponder('sustituir');
-      return v;
-    }
-    if (c.kind === 'copy') {
-      const first = (c.lit.split('\n').find(l => l.trim()) || '').trim();
-      v.confirmTitle = 'Copiar';
-      v.confirmName = first || '(vacío)';
-      v.confirmDetail = c.what || 'Copiable';
-      v.confirmWarn = 'Copiar Markdown: con el formato en Markdown estándar y las menciones con su valor, igual que al exportar. Copiado literal: tal cual está escrito, con las menciones y todos los símbolos.';
-      v.confirmMd = () => this.doCopy(false);
-      v.confirmLit = () => this.doCopy(true);
       return v;
     }
     if (c.kind === 'folder') {

@@ -27,6 +27,14 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '4.9.5.0',
+    fecha: '20 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Cambios al copiar un texto copiable', texto: 'Al pulsar el botón de copiar de un texto copiable (el que va entre comillas simples) ya no se abre una ventana en medio de la pantalla: se despliega un menú pequeño junto al botón, con «Copiar Markdown» y «Copiado literal». Se cierra al elegir, con Esc o pulsando fuera.', tipos: ['visual'] },
+      { titulo: 'El historial, dentro de Espacios de trabajo', texto: 'En Ajustes › Sincronización, el Historial ya no es una sección aparte: ahora está en «Espacios de trabajo», debajo de los botones Cambiar, Copiar y Mudar. Así ves en un solo sitio el espacio que tienes abierto y puedes pasar a otro sin cambiar de sección.', tipos: ['visual'] }
+    ]
+  },
+  {
     version: '4.7.5.1',
     fecha: '18 de noviembre de 2026',
     cambios: [
@@ -53,14 +61,6 @@ const NA_NOVEDADES = [
     fecha: '18 de noviembre de 2026',
     cambios: [
       { titulo: 'Seleccionar texto ya no te lleva al final', tipos: ['correccion'], texto: 'Antes, al hacer clic en un hueco del texto de una hoja (debajo de la última línea, entre dos líneas o en los márgenes), el cursor saltaba al final de todo, y eso estorbaba al seleccionar. Ahora un clic en un hueco no hace nada: el cursor se queda donde estaba. Para escribir, haz clic en una línea.' }
-    ]
-  },
-  {
-    version: '4.5.4.0',
-    fecha: '18 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Escribe junto a tus diagramas', texto: 'Cada hoja de Diagrama tiene ahora su propio texto, igual que una hoja de Notas. Ábrelo con el botón nuevo que hay a la derecha del interruptor de vista limpia/sucia: aparece flotando encima del lienzo, a la izquierda, y lo puedes hacer más ancho o más estrecho arrastrando su borde. Sirve para explicar el diagrama, por ejemplo qué hace cada tabla. Tiene todo lo del texto de Notas: formato, menciones, casillas, buscar, copiar y exportar.', tipos: ['visual', 'estructural'] },
-      { titulo: 'La lista de entidades, en las tres ventanas', texto: 'El botón de la lista de entidades se ha mudado: ahora está arriba, a la derecha del interruptor de vista limpia/sucia, y funciona en Notas, en la Agenda y en Diagrama. En Diagrama la lista también flota encima del lienzo, al lado del texto.', tipos: ['visual'] }
     ]
   }
 ];

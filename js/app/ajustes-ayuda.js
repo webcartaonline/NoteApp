@@ -126,7 +126,7 @@ const AYUDA = [
       { t: 'Copiables', ic: 'clon', p: [
         'Entre comillas simples, el texto sale en un recuadro con un botón para copiarlo de un clic: perfecto para claves, números de cuenta o direcciones.',
         'Si toda la línea va entre comillas, el recuadro ocupa la línea. Para un bloque de varias líneas, ábrelo y ciérralo con dos comillas simples solas en su línea.',
-        'Al pulsar copiar eliges: **Copiar Markdown** (como se ve) o **Copiado literal** (tal cual está escrito).'
+        'Al pulsar copiar se despliega un menú pequeño para elegir: **Copiar Markdown** (como se ve) o **Copiado literal** (tal cual está escrito).'
       ], ej: ["'ES12 3456 7890 1234'", "La clave del wifi es 'casa-2026' y no caduca.", "''", '**Datos de envío**', 'Calle Mayor 1, Murcia', "''"],
         nota: ["Un apóstrofo, como en don't o en l'aigua, nunca crea un copiable."] },
       { t: 'Menciones', ic: 'funcion', p: [
@@ -356,13 +356,13 @@ const AYUDA = [
         'Al abrir otra carpeta no se copia nada: si está vacía, empiezas de cero; si ya tiene datos, se cargan los suyos. La primera vez que conectas una carpeta vacía, te pregunta si quieres guardar ahí lo que tienes abierto.'
       ] },
       { t: 'Cambiar, copiar o mudar un espacio', ic: 'sincronizacion', p: [
-        'En **Ajustes › Sincronización › Espacios de trabajo** ves qué espacio tienes abierto y tres botones:',
+        'En **Ajustes › Sincronización › Espacios de trabajo** ves qué espacio tienes abierto, tres botones y, debajo, el historial:',
         '- **Cambiar**: abre otra carpeta. Hace lo mismo que el botón de la carpeta.',
-        '- **Copiar**: hace una copia de todo en otra carpeta. Tú sigues en la de siempre y la copia queda en el Historial. Útil para empezar un espacio parecido sin partir de cero.',
+        '- **Copiar**: hace una copia de todo en otra carpeta. Tú sigues en la de siempre y la copia queda en el historial, más abajo. Útil para empezar un espacio parecido sin partir de cero.',
         '- **Mudar**: como cortar y pegar. Lleva todo a otra carpeta y, cuando comprueba que la copia está completa, borra de la anterior los archivos de NoteApp.'
       ], nota: ['Para copiar o mudar, elige una carpeta vacía. Al mudar, los archivos que no son de NoteApp no se tocan nunca.'] },
       { t: 'Historial de espacios', ic: 'reloj', p: [
-        'En **Ajustes › Sincronización › Historial** están las carpetas que has abierto en este navegador. Pulsa **Abrir** para cambiar a una al momento.',
+        'En **Ajustes › Sincronización › Espacios de trabajo**, debajo de los botones, está el **Historial**: las carpetas que has abierto en este navegador. Pulsa **Abrir** para cambiar a una al momento.',
         'A cada una le puedes poner un **título** y apuntar su **ruta**, para saber cuál es cuál. La ruta la escribes tú, porque el navegador solo le enseña a NoteApp el nombre de la carpeta.',
         '**Quitar** solo la borra de la lista: la carpeta y sus notas siguen en su sitio.'
       ] },
