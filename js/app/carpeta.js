@@ -6,6 +6,17 @@
 const FS_ATASCO = 30000;   // un cambio de carpeta que dura más que esto se da por atascado
 const FS_ESPERA = 15000;   // lo que se espera, como mucho, a que termine de guardarse la carpeta anterior al cambiar
 const FS_REINTENTOS = 3;   // veces que se reintenta guardar tras un «no se encuentra» antes de avisar
+const FS_LEER = 30000;     // lo que puede tardar, como mucho, leer una carpeta (OneDrive puede tener que descargar archivos)
+const FS_GUARDAR = 60000;  // lo que puede tardar, como mucho, un guardado automático en la carpeta
+// Qué está haciendo un cambio de carpeta, para decirlo en los avisos (this._fsPaso)
+const FS_PASOS = { guardar: 'guardar lo último en la carpeta anterior', leer: 'leer la carpeta nueva', abrir: 'abrir la carpeta nueva' };
+// Aviso según el paso que no ha respondido a tiempo (err.paso de conLimite, guardado.js)
+function fsTardaTexto(paso, nombre) {
+  const od = ' Si la carpeta está en OneDrive, comprueba que OneDrive no está en pausa y, si puedes, marca la carpeta con «Mantener siempre en este dispositivo» (clic derecho en el Explorador de archivos).';
+  if (paso === 'navegador') return 'El almacenamiento del navegador no responde. Cierra todas las ventanas de NoteApp (y de Edge) y vuelve a abrirla.';
+  if (paso === 'guardar') return 'La carpeta «' + nombre + '» tarda demasiado en guardar.' + od;
+  return 'La carpeta «' + nombre + '» tarda demasiado en leerse.' + od;
+}
 NoteApp.partes.push(Base => class extends Base {
   // ----- Guardado en carpeta -----
   fsToast(title, body) {
@@ -36,7 +47,8 @@ NoteApp.partes.push(Base => class extends Base {
   fsLibre() {
     if (!this._fsPicking) return true;
     if (Date.now() - (this._fsPickT || 0) > FS_ATASCO) { this._fsPicking = false; return true; }
-    this.fsToast('Espera un momento', 'NoteApp todavía está cambiando de carpeta. Cuando termine, vuelve a intentarlo.');
+    const s = Math.round((Date.now() - (this._fsPickT || 0)) / 1000), paso = FS_PASOS[this._fsPaso];
+    this.fsToast('Espera un momento', 'NoteApp todavía está cambiando de carpeta' + (paso ? ' (intentando ' + paso + ', lleva ' + s + ' s)' : '') + '. Cuando termine, vuelve a intentarlo.');
     return false;
   }
   // Espera a que termine el guardado en la carpeta que esté en marcha, como mucho ms. Devuelve false si no ha terminado.
@@ -47,11 +59,12 @@ NoteApp.partes.push(Base => class extends Base {
   }
   // Un «no se encuentra» (NotFoundError) no siempre es que se haya borrado la carpeta: OneDrive o otra ventana de
   // NoteApp pueden quitar un archivo justo mientras se guarda. Solo se da por desaparecida si la carpeta ya no está.
-  async fsDesaparecida(dir) { return !!dir && !(await dirExists(dir)); }
+  // Si comprobarlo no responde en 10 s, se da por que sigue ahí (mejor no desconectar sin estar seguros).
+  async fsDesaparecida(dir) { if (!dir) return false; try { return !(await conLimite(dirExists(dir), 10000, 'leer')); } catch (_) { return false; } }
   // Abre el espacio de trabajo de una carpeta ya elegida (con el selector o desde el Historial de Ajustes › Sincronización).
   async fsGo(dir) {
     if (!this.fsLibre()) return;
-    this._fsPicking = true; this._fsPickT = Date.now();
+    this._fsPicking = true; this._fsPickT = Date.now(); this._fsPaso = 'guardar';
     try {
       const prev = this.state.fsName, leave = await this.fsLeave(dir);
       if (leave === 'slow') {
@@ -65,7 +78,10 @@ NoteApp.partes.push(Base => class extends Base {
       // Sin carpeta anterior (primera vez) o la anterior ya no existe, y la elegida está vacía: las notas del
       // navegador son la única copia, así que se pregunta si pasarlas a la carpeta o empezar vacía (fsAnswer).
       if (leave === 'none' || leave === 'gone') {
-        let empty = false; try { empty = !(await fsRead(dir)); } catch (_) {}
+        this._fsPaso = 'leer';
+        let empty = false;
+        try { empty = !(await conLimite(fsRead(dir), FS_LEER, 'leer')); }
+        catch (err) { if (err && err.name === 'TimeoutError') { this.fsToast('No se ha abierto la carpeta', fsTardaTexto('leer', dir.name)); return; } }
         const count = fsNoteCount(this.state);
         if (empty && count.total) {
           const gone = leave === 'gone' ? prev : this._fsGone || '';
@@ -76,8 +92,9 @@ NoteApp.partes.push(Base => class extends Base {
       }
       // Misma carpeta: se queda con lo más reciente. Carpeta anterior guardada: la nueva es otro espacio de
       // trabajo (se carga lo suyo o empieza vacía).
+      this._fsPaso = 'abrir';
       await this.fsStart(dir, leave !== 'same', leave === 'ok' ? prev : null);
-    } finally { this._fsPicking = false; }
+    } finally { this._fsPicking = false; this._fsPaso = null; }
   }
   // Antes de abrir otra carpeta, guarda lo último en la actual. Devuelve:
   // 'none' = no había carpeta · 'same' = ha elegido la misma · 'ok' = la anterior está guardada
@@ -92,8 +109,11 @@ NoteApp.partes.push(Base => class extends Base {
     let p = 'denied'; try { p = await old.queryPermission({ mode: 'readwrite' }); } catch (_) {}
     if (p === 'granted') {
       this._fsBusy = true;
-      try { await this.fsSync(); return 'ok'; }
-      catch (err) { if (err && err.name === 'NotFoundError' && await this.fsDesaparecida(old)) return 'gone'; }
+      try { await conLimite(this.fsSync(), FS_ESPERA, 'guardar'); return 'ok'; }
+      catch (err) {
+        if (err && err.name === 'TimeoutError') return 'slow';
+        if (err && err.name === 'NotFoundError' && await this.fsDesaparecida(old)) return 'gone';
+      }
       finally { this._fsBusy = false; }
     }
     return (this._rev || 0) > fsSavedRev() ? 'blocked' : 'ok';
@@ -110,7 +130,7 @@ NoteApp.partes.push(Base => class extends Base {
   // empty = empezar vacía (se ha elegido no pasar las notas del navegador)
   async fsStart(dir, chosen, prev, empty) {
     try {
-      const data = await fsRead(dir);
+      const data = await conLimite(fsRead(dir), FS_LEER, 'leer');
       const has = !!data, fresh = !!prev || !!empty;
       const load = has && (chosen || (+data.meta.rev || 0) > (this._rev || 0));
       this._fsDir = dir; this._fsCache = {}; this._fsImgs = new Set(); imgFolder(dir);
@@ -124,9 +144,9 @@ NoteApp.partes.push(Base => class extends Base {
       else if (empty && !load) this.fsToast('Espacio de trabajo nuevo', '«' + dir.name + '» empieza vacío; todo lo que crees se guardará ahí.');
       else if (chosen) this.fsToast('Carpeta conectada', load ? 'Se han cargado las notas guardadas en «' + dir.name + '». A partir de ahora todo se guarda ahí automáticamente.' : 'A partir de ahora todo se guarda automáticamente en «' + dir.name + '».');
       else if (load) this.fsToast('Notas actualizadas', 'Se han cargado los cambios más recientes de la carpeta «' + dir.name + '».');
-    } catch (_) {
+    } catch (err) {
       this._fsDir = dir; this.setState({ fs: 'err', fsName: dir.name });
-      this.fsToast('No se pudo abrir la carpeta', 'Pulsa el botón de la carpeta (abajo a la izquierda) para intentarlo de nuevo.');
+      this.fsToast('No se pudo abrir la carpeta', err && err.name === 'TimeoutError' ? fsTardaTexto(err.paso, dir.name) : 'Pulsa el botón de la carpeta (abajo a la izquierda) para intentarlo de nuevo.');
     }
   }
   // Estado temporal que se limpia al cargar otros datos (menús abiertos, edición, selección…).
@@ -161,7 +181,7 @@ NoteApp.partes.push(Base => class extends Base {
     if (this._fsBusy) { this._fsAgain = true; return; }
     this._fsBusy = true;
     const dir = this._fsDir;
-    this.fsSync().then(() => { this._fsFallos = 0; }).catch(err => this.fsFail(err, dir)).finally(() => { this._fsBusy = false; if (this._fsAgain) { this._fsAgain = false; this.fsQueue(); } });
+    conLimite(this.fsSync(), FS_GUARDAR, 'guardar').then(() => { this._fsFallos = 0; }).catch(err => this.fsFail(err, dir)).finally(() => { this._fsBusy = false; if (this._fsAgain) { this._fsAgain = false; this.fsQueue(); } });
   }
   async fsFail(err, dir) {
     if (this.state.fs !== 'on' || (dir && dir !== this._fsDir)) return;
@@ -185,6 +205,7 @@ NoteApp.partes.push(Base => class extends Base {
       this.fsToast('La carpeta «' + name + '» ya no existe', 'Lo que tenías abierto sigue en la app. Pulsa el botón de la carpeta (abajo a la izquierda) para elegir dónde guardarlo; si la moviste, elígela en su nuevo sitio.');
       return;
     }
+    if (err && err.name === 'TimeoutError') { this.setState({ fs: 'err' }); this.fsToast('No se pudo guardar en la carpeta', fsTardaTexto(err.paso, this.state.fsName) + ' Tus cambios siguen guardados en el navegador; pulsa el botón de la carpeta para reintentar.'); return; }
     const perm = !!err && (err.name === 'NotAllowedError' || err.name === 'SecurityError');
     this.setState({ fs: perm ? 'perm' : 'err' });
     this.fsToast('No se pudo guardar en la carpeta', perm ? 'Pulsa el botón de la carpeta (abajo a la izquierda) para dar permiso de nuevo. Tus cambios siguen guardados en el navegador.' : 'Pulsa el botón de la carpeta (abajo a la izquierda) para reintentar. Tus cambios siguen guardados en el navegador.');

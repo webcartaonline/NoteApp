@@ -40,13 +40,23 @@ function naSave(s, rev) {
 const FS_OK = typeof window.showDirectoryPicker === 'function';
 const FS_META = 'NoteApp.json', FS_SECS = [['notas', 'Notas'], ['agenda', 'Agenda'], ['diagrama', 'Diagramas']];
 const FS_FILE_RX = /\(([a-z]\d+)\)\.json$/;
-function fsIdb(mode, fn) {
+// Promesa con tiempo máximo: si p no termina en ms, falla con un error TimeoutError (err.paso = que).
+// Sirve para que la app no se quede esperando para siempre a algo que no responde (23/11/2026).
+function conLimite(p, ms, que) {
   return new Promise((res, rej) => {
+    const t = setTimeout(() => { const e = new Error('Tarda demasiado: ' + que); e.name = 'TimeoutError'; e.paso = que; rej(e); }, ms);
+    Promise.resolve(p).then(v => { clearTimeout(t); res(v); }, e => { clearTimeout(t); rej(e); });
+  });
+}
+// La base del navegador que recuerda la carpeta (IndexedDB). Si no responde en 5 s, falla en vez de quedarse esperando.
+function fsIdb(mode, fn) {
+  return conLimite(new Promise((res, rej) => {
     const r = indexedDB.open('noteapp-carpeta', 1);
     r.onupgradeneeded = () => r.result.createObjectStore('h');
+    r.onblocked = () => rej(new Error('IndexedDB bloqueada'));
     r.onerror = () => rej(r.error);
     r.onsuccess = () => { const db = r.result, tx = db.transaction('h', mode), q = fn(tx.objectStore('h')); tx.oncomplete = () => { db.close(); res(q && q.result); }; tx.onerror = tx.onabort = () => { db.close(); rej(tx.error); }; };
-  });
+  }), 5000, 'navegador');
 }
 const fsGetHandle = () => fsIdb('readonly', st => st.get('dir')).catch(() => null);
 const fsSetHandle = h => fsIdb('readwrite', st => h ? st.put(h, 'dir') : st.delete('dir')).catch(() => {});

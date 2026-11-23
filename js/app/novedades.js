@@ -27,6 +27,13 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '4.9.5.2',
+    fecha: '23 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Cambiar de carpeta ya no se queda esperando para siempre', texto: 'Si una carpeta no respondía (por ejemplo, porque OneDrive estaba en pausa o tenía que descargar los archivos), el cambio de carpeta podía quedarse esperando sin terminar nunca. Ahora cada paso tiene un tiempo máximo: si se pasa, NoteApp lo deja, te dice qué carpeta no responde y qué puedes hacer. Y mientras espera, el aviso «Espera un momento» te dice qué está intentando y cuánto lleva.', tipos: ['correccion'] }
+    ]
+  },
+  {
     version: '4.9.5.1',
     fecha: '23 de noviembre de 2026',
     cambios: [
@@ -55,13 +62,6 @@ const NA_NOVEDADES = [
     fecha: '18 de noviembre de 2026',
     cambios: [
       { titulo: 'Escribe lo que quieras en los extremos de una relación', texto: 'En Diagrama, al seleccionar una línea, los botones Origen y Destino abren ahora un pequeño menú: elige nada, 1 o N como antes, o escribe en «Otro» el texto que quieras, por ejemplo 0..1, 1..N o muchos. El texto se coloca junto a la tabla sin tapar la línea, y si es largo sigue en la línea de abajo.', tipos: ['visual', 'estructural'] }
-    ]
-  },
-  {
-    version: '4.6.4.0',
-    fecha: '18 de noviembre de 2026',
-    cambios: [
-      { titulo: 'El buscador se ve mucho mejor', tipos: ['visual', 'correccion'], texto: 'Al buscar en el texto de una hoja, ahora se marcan en verde todas las coincidencias, tengan el formato que tengan: código, enlaces, menciones, celdas de tabla, títulos, listas… Antes algunas no se marcaban. Además, mientras buscas, el resto del texto se oscurece para que lo encontrado destaque, y la hoja salta sola a la primera coincidencia. Por ejemplo, si buscas «casa», cada «casa» queda en verde y todo lo demás pasa a un segundo plano.' }
     ]
   }
 ];
