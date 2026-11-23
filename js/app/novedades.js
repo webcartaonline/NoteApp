@@ -27,6 +27,13 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '4.9.5.3',
+    fecha: '23 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Ves en todo momento cómo va el cambio de carpeta', texto: 'En Ajustes › Sincronización, mientras cambias de espacio de trabajo, el recuadro de estado dice qué está haciendo NoteApp (guardar la carpeta anterior, leer la nueva o abrirla) y cuántos segundos lleva. Y cuando termina, el resultado se queda escrito ahí, para que lo leas con calma: antes solo salía unos segundos en un aviso de la esquina.', tipos: ['correccion'] }
+    ]
+  },
+  {
     version: '4.9.5.2',
     fecha: '23 de noviembre de 2026',
     cambios: [
@@ -55,13 +62,6 @@ const NA_NOVEDADES = [
     cambios: [
       { titulo: 'La tecla N ya elige «N» en los extremos de una relación', texto: 'Con el menú de Origen o de Destino abierto, la tecla 1 ponía «1», pero la tecla N no ponía «N». Ahora las dos funcionan igual, sin tener que hacer clic.', tipos: ['correccion'] },
       { titulo: 'Ya puedes escribir un 1 o una N en «Otro»', texto: 'Al escribir un 1 en el campo «Otro» de un extremo, el campo se quedaba vacío y se marcaba la opción «1». Ahora, mientras escribes en «Otro», las teclas 1 y N solo escriben: lo que pongas se queda en el campo.', tipos: ['correccion'] }
-    ]
-  },
-  {
-    version: '4.7.5.0',
-    fecha: '18 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Escribe lo que quieras en los extremos de una relación', texto: 'En Diagrama, al seleccionar una línea, los botones Origen y Destino abren ahora un pequeño menú: elige nada, 1 o N como antes, o escribe en «Otro» el texto que quieras, por ejemplo 0..1, 1..N o muchos. El texto se coloca junto a la tabla sin tapar la línea, y si es largo sigue en la línea de abajo.', tipos: ['visual', 'estructural'] }
     ]
   }
 ];

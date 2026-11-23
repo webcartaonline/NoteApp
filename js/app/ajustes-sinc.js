@@ -66,7 +66,8 @@ NoteApp.partes.push(Base => class extends Base {
   sincAvisoOcupado() {
     if (this._fsPicking && Date.now() - (this._fsPickT || 0) > FS_ATASCO) this._fsPicking = false;
     if (!this.sincOcupado()) return false;
-    this.sincSet({ msg: { tipo: 'aviso', texto: 'Espera un momento: NoteApp todavía está ' + ((this.state.sinc && this.state.sinc.busy) ? 'terminando otra tarea' : 'cambiando de carpeta') + '. Cuando termine, vuelve a intentarlo.' } });
+    const paso = this._fsPicking && FS_PASOS[this._fsPaso], seg = Math.round((Date.now() - (this._fsPickT || 0)) / 1000);
+    this.sincSet({ msg: { tipo: 'aviso', texto: 'Espera un momento: NoteApp todavía está ' + ((this.state.sinc && this.state.sinc.busy) ? 'terminando otra tarea' : 'cambiando de carpeta' + (paso ? ' (intentando ' + paso + ', lleva ' + seg + ' s)' : '')) + '. Cuando termine, vuelve a intentarlo.' } });
     return true;
   }
 
@@ -224,11 +225,12 @@ NoteApp.partes.push(Base => class extends Base {
 
   // ----- Valores para la plantilla (los añade ajVals, en ajustes.js) -----
   sincVals(s, sec) {
-    const sc = s.sinc || {}, busy = !!sc.busy, msg = sc.msg, k = fsNoteCount(s), on = s.fs === 'on', off = s.fs !== 'on' && !s.fsName;
+    const pr = s.fsProg, prTxt = pr ? 'Cambiando de carpeta: intentando ' + (FS_PASOS[pr.paso] || pr.paso) + '… (' + Math.round((Date.now() - pr.desde) / 1000) + ' s)' : '';
+    const sc = s.sinc || {}, busy = !!sc.busy || !!pr, msg = sc.msg, k = fsNoteCount(s), on = s.fs === 'on', off = s.fs !== 'on' && !s.fsName;
     const curId = s.fsName ? s.histCur : null, cur = (s.hist || []).find(h => h.id === curId);
     const v = {
       sincEsEspacios: sec !== 'exportar', sincEsExportar: sec === 'exportar',
-      sincHayMsg: busy || !!msg, sincMsgTxt: busy ? sc.busy : msg ? msg.texto : '',
+      sincHayMsg: busy || !!msg, sincMsgTxt: sc.busy || prTxt || (msg ? msg.texto : ''),
       sincMsgCls: 'ajustes-sinc-estado-' + (busy ? 'trabajando' : msg ? msg.tipo : 'ok'),
       sincNoFs: !FS_OK
     };

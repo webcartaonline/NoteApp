@@ -8,6 +8,8 @@ const FS_ESPERA = 15000;   // lo que se espera, como mucho, a que termine de gua
 const FS_REINTENTOS = 3;   // veces que se reintenta guardar tras un «no se encuentra» antes de avisar
 const FS_LEER = 30000;     // lo que puede tardar, como mucho, leer una carpeta (OneDrive puede tener que descargar archivos)
 const FS_GUARDAR = 60000;  // lo que puede tardar, como mucho, un guardado automático en la carpeta
+// Avisos de carpeta que son buenas noticias (en Sincronización salen en verde)
+const FS_TOAST_OK = /^(Espacio de trabajo abierto|Espacio de trabajo nuevo|Carpeta conectada|Notas actualizadas)$/;
 // Qué está haciendo un cambio de carpeta, para decirlo en los avisos (this._fsPaso)
 const FS_PASOS = { guardar: 'guardar lo último en la carpeta anterior', leer: 'leer la carpeta nueva', abrir: 'abrir la carpeta nueva' };
 // Aviso según el paso que no ha respondido a tiempo (err.paso de conLimite, guardado.js)
@@ -21,6 +23,9 @@ NoteApp.partes.push(Base => class extends Base {
   // ----- Guardado en carpeta -----
   fsToast(title, body) {
     const id = uid('t');
+    // Con Ajustes abierto, el aviso se copia también en el recuadro de estado de Sincronización, que no se borra a los
+    // 7 s: así se puede leer con calma qué ha pasado (23/11/2026).
+    if (this.state.ajustes && this.sincSet) this.sincSet({ msg: { tipo: FS_TOAST_OK.test(title) ? 'ok' : 'aviso', texto: title + '. ' + body } });
     this.setState(st => ({ toasts: (st.toasts || []).concat({ id, title, body, when: '' }).slice(-4) }));
     setTimeout(() => this.setState(st => ({ toasts: (st.toasts || []).filter(t => t.id !== id) })), 7000);
   }
@@ -51,6 +56,8 @@ NoteApp.partes.push(Base => class extends Base {
     this.fsToast('Espera un momento', 'NoteApp todavía está cambiando de carpeta' + (paso ? ' (intentando ' + paso + ', lleva ' + s + ' s)' : '') + '. Cuando termine, vuelve a intentarlo.');
     return false;
   }
+  // Apunta el paso en marcha de un cambio de carpeta (para los avisos y para Sincronización)
+  fsPasoSet(paso) { this._fsPaso = paso; this.setState({ fsProg: { paso, desde: this._fsPickT || Date.now() } }); }
   // Espera a que termine el guardado en la carpeta que esté en marcha, como mucho ms. Devuelve false si no ha terminado.
   async fsEsperaLibre(ms) {
     const fin = Date.now() + ms;
@@ -64,7 +71,9 @@ NoteApp.partes.push(Base => class extends Base {
   // Abre el espacio de trabajo de una carpeta ya elegida (con el selector o desde el Historial de Ajustes › Sincronización).
   async fsGo(dir) {
     if (!this.fsLibre()) return;
-    this._fsPicking = true; this._fsPickT = Date.now(); this._fsPaso = 'guardar';
+    this._fsPicking = true; this._fsPickT = Date.now(); this.fsPasoSet('guardar');
+    // Mientras dura, Sincronización enseña el paso y los segundos (state.fsProg); se refresca cada segundo.
+    clearInterval(this._fsProgT); this._fsProgT = setInterval(() => this.setState({ fsProgTick: Date.now() }), 1000);
     try {
       const prev = this.state.fsName, leave = await this.fsLeave(dir);
       if (leave === 'slow') {
@@ -78,7 +87,7 @@ NoteApp.partes.push(Base => class extends Base {
       // Sin carpeta anterior (primera vez) o la anterior ya no existe, y la elegida está vacía: las notas del
       // navegador son la única copia, así que se pregunta si pasarlas a la carpeta o empezar vacía (fsAnswer).
       if (leave === 'none' || leave === 'gone') {
-        this._fsPaso = 'leer';
+        this.fsPasoSet('leer');
         let empty = false;
         try { empty = !(await conLimite(fsRead(dir), FS_LEER, 'leer')); }
         catch (err) { if (err && err.name === 'TimeoutError') { this.fsToast('No se ha abierto la carpeta', fsTardaTexto('leer', dir.name)); return; } }
@@ -92,9 +101,9 @@ NoteApp.partes.push(Base => class extends Base {
       }
       // Misma carpeta: se queda con lo más reciente. Carpeta anterior guardada: la nueva es otro espacio de
       // trabajo (se carga lo suyo o empieza vacía).
-      this._fsPaso = 'abrir';
+      this.fsPasoSet('abrir');
       await this.fsStart(dir, leave !== 'same', leave === 'ok' ? prev : null);
-    } finally { this._fsPicking = false; this._fsPaso = null; }
+    } finally { this._fsPicking = false; this._fsPaso = null; clearInterval(this._fsProgT); this.setState({ fsProg: null }); }
   }
   // Antes de abrir otra carpeta, guarda lo último en la actual. Devuelve:
   // 'none' = no había carpeta · 'same' = ha elegido la misma · 'ok' = la anterior está guardada
