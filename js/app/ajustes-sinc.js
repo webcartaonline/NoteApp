@@ -44,7 +44,7 @@ NoteApp.partes.push(Base => class extends Base {
   histRemove(id) { this.setState(s => ({ hist: (s.hist || []).filter(h => h.id !== id) }), () => histSet(this.state.hist || [])); }
   // Abre un espacio de trabajo del historial (cambio rápido): pide permiso a su carpeta y sigue como al elegirla a mano.
   async histAbrir(id) {
-    if (this.sincOcupado()) return;
+    if (this.sincAvisoOcupado()) return;
     const h = (this.state.hist || []).find(x => x.id === id); if (!h || !h.dir) return;
     this.sincSet({ msg: null });
     let p = 'denied'; try { p = await h.dir.requestPermission({ mode: 'readwrite' }); } catch (_) {}
@@ -61,16 +61,24 @@ NoteApp.partes.push(Base => class extends Base {
   sincSet(p) { this.setState(s => ({ sinc: { ...(s.sinc || {}), ...p } })); }
   sincMsg(tipo, texto) { this.sincSet({ busy: '', msg: { tipo, texto } }); }
   sincOcupado() { return !!(this.state.sinc && this.state.sinc.busy) || !!this._fsPicking; }
+  // Como sincOcupado, pero avisa en la página en vez de no hacer nada. Un cambio de carpeta atascado (más de
+  // FS_ATASCO ms, ver carpeta.js) no cuenta como ocupado.
+  sincAvisoOcupado() {
+    if (this._fsPicking && Date.now() - (this._fsPickT || 0) > FS_ATASCO) this._fsPicking = false;
+    if (!this.sincOcupado()) return false;
+    this.sincSet({ msg: { tipo: 'aviso', texto: 'Espera un momento: NoteApp todavía está ' + ((this.state.sinc && this.state.sinc.busy) ? 'terminando otra tarea' : 'cambiando de carpeta') + '. Cuando termine, vuelve a intentarlo.' } });
+    return true;
+  }
 
   // ----- Espacios de trabajo: cambiar, copiar y mudar -----
   async wsCambiar() {
-    if (this.sincOcupado()) return;
+    if (this.sincAvisoOcupado()) return;
     this.sincSet({ msg: null });
     await this.fsPick(true);
   }
   // Copiar (mudar = false) o mudar (mudar = true): primero se elige la carpeta de destino y se comprueba que vale.
   async wsCopiar(mudar) {
-    if (this.sincOcupado()) return;
+    if (this.sincAvisoOcupado()) return;
     if (!FS_OK) { this.sincMsg('aviso', 'Este navegador no deja trabajar con carpetas. Usa Chrome o Edge en un ordenador.'); return; }
     const s = this.state, src = this._fsDir && s.fs === 'on' ? this._fsDir : null;
     if (mudar && !src) {
@@ -142,7 +150,7 @@ NoteApp.partes.push(Base => class extends Base {
     return { w, id };
   }
   async expHacer() {
-    if (this.sincOcupado()) return;
+    if (this.sincAvisoOcupado()) return;
     const s = this.state, sel = this.expSel(s), data = expPick(s, sel);
     if (!WINS.some(k => (data[k] || []).length)) { this.sincMsg('aviso', 'Ahí no hay nada que exportar todavía.'); return; }
     this.sincSet({ busy: 'Preparando el archivo…', msg: null });
@@ -155,7 +163,7 @@ NoteApp.partes.push(Base => class extends Base {
 
   // ----- Importar -----
   impElegir() {
-    if (this.sincOcupado()) return;
+    if (this.sincAvisoOcupado()) return;
     const i = document.createElement('input'); i.type = 'file'; i.accept = '.json,application/json';
     i.onchange = () => { const f = i.files && i.files[0]; if (f) this.impArchivo(f); };
     i.click();

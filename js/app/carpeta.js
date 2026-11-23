@@ -2,6 +2,10 @@
 // Cada carpeta es un ESPACIO DE TRABAJO independiente (como las bóvedas de Obsidian): tiene sus propias
 // notas, agenda y diagramas. Al abrir otra carpeta NO se copia nada de la anterior a la nueva: si la nueva
 // está vacía, se empieza de cero. Lo único que se conserva al cambiar es la configuración (state.config).
+// Límites para no dejar la app «atascada» sin avisar (23/11/2026):
+const FS_ATASCO = 30000;   // un cambio de carpeta que dura más que esto se da por atascado
+const FS_ESPERA = 15000;   // lo que se espera, como mucho, a que termine de guardarse la carpeta anterior al cambiar
+const FS_REINTENTOS = 3;   // veces que se reintenta guardar tras un «no se encuentra» antes de avisar
 NoteApp.partes.push(Base => class extends Base {
   // ----- Guardado en carpeta -----
   fsToast(title, body) {
@@ -13,20 +17,47 @@ NoteApp.partes.push(Base => class extends Base {
   // carpeta conectada le falta el permiso, el botón de la carpeta primero intenta recuperarlo.
   async fsPick(otra) {
     if (!FS_OK) { this.fsToast('Guardado en carpeta no disponible', 'Este navegador no lo permite. Usa Chrome o Edge en un ordenador. Tus notas siguen guardadas en el navegador.'); return; }
-    if (this._fsPicking) return;
+    if (!this.fsLibre()) return;
     if (!otra && this._fsDir && (this.state.fs === 'perm' || this.state.fs === 'err')) {
       let p = 'denied'; try { p = await this._fsDir.requestPermission({ mode: 'readwrite' }); } catch (_) {}
       if (p === 'granted') { this.fsStart(this._fsDir, false); return; }
     }
-    let dir; try { dir = await window.showDirectoryPicker({ id: 'noteapp', mode: 'readwrite' }); } catch (_) { return; }
+    let dir; try { dir = await window.showDirectoryPicker({ id: 'noteapp', mode: 'readwrite' }); }
+    catch (err) {
+      // Cerrar la ventana de elegir carpeta (AbortError) no es un fallo. Cualquier otra cosa se avisa: antes no hacía nada.
+      if (!err || err.name !== 'AbortError') this.fsToast('No se ha abierto la ventana para elegir carpeta', 'El navegador no la ha dejado abrir. Vuelve a pulsar el botón de la carpeta; si sigue sin abrirse, cierra NoteApp y ábrela otra vez.');
+      return;
+    }
     await this.fsGo(dir);
   }
+  // ¿Se puede empezar a cambiar de carpeta? Si ya hay un cambio en marcha, avisa en vez de no hacer nada (23/11/2026:
+  // la app se quedaba «atascada» y no respondía a los clics sin decir por qué). Si ese cambio lleva más de
+  // FS_ATASCO ms, se da por atascado y se deja empezar otro.
+  fsLibre() {
+    if (!this._fsPicking) return true;
+    if (Date.now() - (this._fsPickT || 0) > FS_ATASCO) { this._fsPicking = false; return true; }
+    this.fsToast('Espera un momento', 'NoteApp todavía está cambiando de carpeta. Cuando termine, vuelve a intentarlo.');
+    return false;
+  }
+  // Espera a que termine el guardado en la carpeta que esté en marcha, como mucho ms. Devuelve false si no ha terminado.
+  async fsEsperaLibre(ms) {
+    const fin = Date.now() + ms;
+    while (this._fsBusy) { if (Date.now() > fin) return false; await new Promise(r => setTimeout(r, 50)); }
+    return true;
+  }
+  // Un «no se encuentra» (NotFoundError) no siempre es que se haya borrado la carpeta: OneDrive o otra ventana de
+  // NoteApp pueden quitar un archivo justo mientras se guarda. Solo se da por desaparecida si la carpeta ya no está.
+  async fsDesaparecida(dir) { return !!dir && !(await dirExists(dir)); }
   // Abre el espacio de trabajo de una carpeta ya elegida (con el selector o desde el Historial de Ajustes › Sincronización).
   async fsGo(dir) {
-    if (this._fsPicking) return;
-    this._fsPicking = true;
+    if (!this.fsLibre()) return;
+    this._fsPicking = true; this._fsPickT = Date.now();
     try {
       const prev = this.state.fsName, leave = await this.fsLeave(dir);
+      if (leave === 'slow') {
+        this.fsToast('No se ha cambiado de carpeta', 'La carpeta «' + prev + '» está tardando demasiado en guardar (puede que OneDrive la esté sincronizando). Espera un poco y vuelve a intentarlo.');
+        return;
+      }
       if (leave === 'blocked') {
         this.fsToast('No se ha cambiado de carpeta', 'Hay cambios que aún no se han guardado en «' + prev + '». Pulsa el botón de la carpeta y da permiso a «' + prev + '» para guardarlos; después ya podrás abrir otra carpeta.');
         return;
@@ -51,17 +82,18 @@ NoteApp.partes.push(Base => class extends Base {
   // Antes de abrir otra carpeta, guarda lo último en la actual. Devuelve:
   // 'none' = no había carpeta · 'same' = ha elegido la misma · 'ok' = la anterior está guardada
   // 'gone' = la anterior ya no existe · 'blocked' = hay cambios sin guardar en la anterior y no hay permiso
+  // 'slow' = la anterior lleva demasiado rato guardando (no responde)
   async fsLeave(dir) {
     const old = this._fsDir;
     if (!old) return 'none';
     try { if (await old.isSameEntry(dir)) return 'same'; } catch (_) {}
     clearTimeout(this._naT); naSave(this.state, this._rev);
-    while (this._fsBusy) await new Promise(r => setTimeout(r, 50));
+    if (!(await this.fsEsperaLibre(FS_ESPERA))) return 'slow';
     let p = 'denied'; try { p = await old.queryPermission({ mode: 'readwrite' }); } catch (_) {}
     if (p === 'granted') {
       this._fsBusy = true;
       try { await this.fsSync(); return 'ok'; }
-      catch (err) { if (err && err.name === 'NotFoundError') return 'gone'; }
+      catch (err) { if (err && err.name === 'NotFoundError' && await this.fsDesaparecida(old)) return 'gone'; }
       finally { this._fsBusy = false; }
     }
     return (this._rev || 0) > fsSavedRev() ? 'blocked' : 'ok';
@@ -128,9 +160,21 @@ NoteApp.partes.push(Base => class extends Base {
     if (!this._fsDir || this.state.fs !== 'on') return;
     if (this._fsBusy) { this._fsAgain = true; return; }
     this._fsBusy = true;
-    this.fsSync().catch(err => this.fsFail(err)).finally(() => { this._fsBusy = false; if (this._fsAgain) { this._fsAgain = false; this.fsQueue(); } });
+    const dir = this._fsDir;
+    this.fsSync().then(() => { this._fsFallos = 0; }).catch(err => this.fsFail(err, dir)).finally(() => { this._fsBusy = false; if (this._fsAgain) { this._fsAgain = false; this.fsQueue(); } });
   }
-  fsFail(err) {
+  async fsFail(err, dir) {
+    if (this.state.fs !== 'on' || (dir && dir !== this._fsDir)) return;
+    // «No se encuentra» pero la carpeta sigue ahí: algo quitó un archivo mientras se guardaba. No se desconecta:
+    // se reintenta en unos segundos. Solo si falla varias veces seguidas se avisa (punto naranja).
+    if (err && err.name === 'NotFoundError' && !(await this.fsDesaparecida(this._fsDir))) {
+      this._fsFallos = (this._fsFallos || 0) + 1;
+      if (this._fsFallos < FS_REINTENTOS) { clearTimeout(this._fsReT); this._fsReT = setTimeout(() => this.fsQueue(), 2000 * this._fsFallos); return; }
+      this._fsFallos = 0;
+      this.setState({ fs: 'err' });
+      this.fsToast('No se pudo guardar en la carpeta', 'La carpeta «' + this.state.fsName + '» sigue ahí, pero algo está moviendo sus archivos (por ejemplo, OneDrive sincronizando). Pulsa el botón de la carpeta (abajo a la izquierda) para reintentar. Tus cambios siguen guardados en el navegador.');
+      return;
+    }
     if (this.state.fs !== 'on') return;
     // La carpeta ya no existe (borrada o movida): se olvida. Las notas siguen en el navegador.
     if (err && err.name === 'NotFoundError') {
@@ -159,7 +203,10 @@ NoteApp.partes.push(Base => class extends Base {
       }
       const old = [];
       for await (const [name, h] of d.entries()) if (h.kind === 'file' && FS_FILE_RX.test(name) && !want[name]) old.push(name);
-      for (const name of old) { await d.removeEntry(name); delete cache[folder + '/' + name]; }
+      for (const name of old) {
+        try { await d.removeEntry(name); } catch (err) { if (!err || err.name !== 'NotFoundError') throw err; } // ya lo había quitado otro (OneDrive, otra ventana)
+        delete cache[folder + '/' + name];
+      }
     }
     // Imágenes pegadas (js/motor/imagenes.js): se copian a <carpeta>/Imágenes las que aún no estén. Nunca se borran.
     await imgSyncDir(dir, imgs, this._fsImgs || (this._fsImgs = new Set()));

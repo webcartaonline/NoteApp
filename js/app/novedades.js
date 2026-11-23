@@ -27,6 +27,14 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '4.9.5.1',
+    fecha: '23 de noviembre de 2026',
+    cambios: [
+      { titulo: 'La carpeta ya no se desconecta por un fallo suelto', texto: 'Si al guardar faltaba un archivo por un momento (por ejemplo, porque OneDrive lo estaba sincronizando), NoteApp creía que la carpeta se había borrado y la desconectaba: el icono de la carpeta se quedaba apagado. Ahora comprueba primero si la carpeta sigue ahí y, si está, vuelve a intentar guardar a los pocos segundos.', tipos: ['correccion'] },
+      { titulo: 'Avisos en vez de silencio al cambiar de carpeta', texto: 'A veces, al pulsar el botón de la carpeta o al cambiar de espacio de trabajo, no pasaba nada y no sabías por qué. Ahora NoteApp te avisa si todavía está cambiando de carpeta, si la carpeta anterior tarda demasiado en guardar o si no se ha podido abrir la ventana para elegir carpeta. Y si un cambio de carpeta se queda atascado, al rato deja volver a intentarlo.', tipos: ['correccion'] }
+    ]
+  },
+  {
     version: '4.9.5.0',
     fecha: '20 de noviembre de 2026',
     cambios: [
@@ -54,13 +62,6 @@ const NA_NOVEDADES = [
     fecha: '18 de noviembre de 2026',
     cambios: [
       { titulo: 'El buscador se ve mucho mejor', tipos: ['visual', 'correccion'], texto: 'Al buscar en el texto de una hoja, ahora se marcan en verde todas las coincidencias, tengan el formato que tengan: código, enlaces, menciones, celdas de tabla, títulos, listas… Antes algunas no se marcaban. Además, mientras buscas, el resto del texto se oscurece para que lo encontrado destaque, y la hoja salta sola a la primera coincidencia. Por ejemplo, si buscas «casa», cada «casa» queda en verde y todo lo demás pasa a un segundo plano.' }
-    ]
-  },
-  {
-    version: '4.5.4.3',
-    fecha: '18 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Seleccionar texto ya no te lleva al final', tipos: ['correccion'], texto: 'Antes, al hacer clic en un hueco del texto de una hoja (debajo de la última línea, entre dos líneas o en los márgenes), el cursor saltaba al final de todo, y eso estorbaba al seleccionar. Ahora un clic en un hueco no hace nada: el cursor se queda donde estaba. Para escribir, haz clic en una línea.' }
     ]
   }
 ];

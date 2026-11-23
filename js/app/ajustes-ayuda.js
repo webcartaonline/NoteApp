@@ -349,8 +349,8 @@ const AYUDA = [
       { t: 'En una carpeta de tu ordenador', ic: 'carpeta', p: [
         'Pulsa el botón de la carpeta, abajo a la izquierda, y elige una carpeta. Desde entonces todo se guarda también ahí: un archivo por nota, separados en Notas, Agenda y Diagramas.',
         'Si eliges una carpeta de OneDrive (o parecida), tendrás copia en la nube y podrás seguir en otro ordenador conectando la misma carpeta.'
-      ], ficha: [['Punto verde', 'Se está guardando en la carpeta'], ['Punto naranja', 'Falta permiso: pulsa la carpeta para darlo'], ['Sin punto', 'No hay ninguna carpeta conectada']],
-        nota: ['Solo funciona en Chrome o Edge de ordenador. En el móvil, las notas se guardan en el navegador.'] },
+      ], ficha: [['Punto verde', 'Se está guardando en la carpeta'], ['Punto naranja', 'Falta permiso o no se pudo guardar: pulsa la carpeta para darlo o reintentar'], ['Sin punto', 'No hay ninguna carpeta conectada']],
+        nota: ['Solo funciona en Chrome o Edge de ordenador. En el móvil, las notas se guardan en el navegador.', 'Si algo sale mal con la carpeta (no se puede guardar, la ventana de elegir carpeta no se abre o ya se está cambiando de carpeta), NoteApp te lo dice con un aviso abajo a la derecha.'] },
       { t: 'Espacios de trabajo', p: [
         'Cada carpeta es un **espacio de trabajo** con sus propias notas, agenda y diagramas, como cajones separados (por ejemplo, una carpeta para tus cosas y otra para las clases).',
         'Al abrir otra carpeta no se copia nada: si está vacía, empiezas de cero; si ya tiene datos, se cargan los suyos. La primera vez que conectas una carpeta vacía, te pregunta si quieres guardar ahí lo que tienes abierto.'
