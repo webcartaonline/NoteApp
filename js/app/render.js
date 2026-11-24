@@ -20,14 +20,10 @@ NoteApp.partes.push(Base => class extends Base {
       return { ...t, sid: x.id, canLeft: on && i > 0, canRight: on && i < all.length - 1,
         noFocus: e => e.preventDefault(), moveLeft: () => this.moveSheet(x.id, -1), moveRight: () => this.moveSheet(x.id, 1) };
     }) : [];
-    const src = sheet ? sheet.lines : [];
-
-    const lines = this.mkdLines(src, null);
 
     const v = {
       tabs,
       sheets,
-      lines,
       hasSheet: !!sheet,
       agendaEmpty: ag && !!sheet && !entList.length,
       colMax: ag ? 'max(860px, 82%)' : 'none',
@@ -65,58 +61,11 @@ NoteApp.partes.push(Base => class extends Base {
       knobLeft: s.clean ? '16px' : '0px',
       knobColor: s.clean ? '#008000' : '#8a8a8a',
       toggleView: () => this.toggleView(),
-      panelCursor: s.clean ? 'default' : 'text',
-      panelRef: this.panelRef,
-      panelWidth: ((sheet && sheet.width) || W0) + 'px',
-      // Ocultar entidades (solo Notas): campo "full" de la hoja. true = el texto usa todo el ancho.
-      canFull: nt && !!sheet,
-      full: nt && !!(sheet && sheet.full),
-      showEnts: !(nt && sheet && sheet.full),
-      panelFlex: nt && sheet && sheet.full ? '1 1 0%' : '0 1 ' + ((sheet && sheet.width) || W0) + 'px',
-      fullColor: sheet && sheet.full ? '#008000' : '#8a8a8a',
-      fullTitle: sheet && sheet.full ? 'Mostrar entidades' : 'Ocultar entidades (el texto ocupa todo el ancho)',
-      toggleFull: () => this.toggleFull(),
-      // Copiar todo el texto de la hoja (barra superior del panel de texto): el botón abre un menú con
-      // «Copiar Markdown» y «Copiado literal». El icono se pone verde un momento tras copiar con cualquiera.
-      copyMenuOpen: !!s.copyMenu,
-      toggleCopyMenu: () => this.setState(st => ({ copyMenu: !st.copyMenu })),
-      copyMd: () => this.copySheetMd(),
-      copyRaw: () => this.copySheetRaw(),
-      copyMdColor: sheet && (s.copied === 'md:' + sheet.id || s.copied === 'lit:' + sheet.id) ? '#008000' : s.copyMenu ? '#fff' : '#8a8a8a',
-      copyMdTitle: sheet && (s.copied === 'md:' + sheet.id || s.copied === 'lit:' + sheet.id) ? 'Copiado' : 'Copiar todo el texto de la hoja',
-      // Exportar la hoja activa a Markdown (barra superior del panel de texto).
-      exportMd: () => this.exportSheetMd(),
-      exportColor: sheet && s.exported === sheet.id ? '#008000' : '#8a8a8a',
-      exportTitle: sheet && s.exported === sheet.id ? 'Exportado' : 'Exportar esta hoja a un archivo Markdown (.md)',
-      // Buscar dentro del texto de la hoja (barra superior del panel de texto). Las coincidencias
-      // se calculan en mkdLines (js/app/lineas.js) y se guardan en this._matches.
+      // Campos de texto MKD (componente panel-texto, uno por campo; cada uno recibe sus valores en "c").
+      // Notas: la fila de campos de la hoja (campos, js/app/campos.js). Diagrama: el campo flotante (dgCampo).
+      // Ocultar entidades: campo "full" de la hoja (js/motor/campos.js); entonces no se dibuja la columna de entidades.
+      showEnts: !(nt && campoFull(sheet)),
       stopBar: e => e.stopPropagation(),
-      searchQuery: (s.search && s.search.q) || '',
-      hasSearch: !!(s.search && s.search.q),
-      searching: s.search && s.search.q && s.search.q.trim() ? '1' : '0', // oscurece lo que no coincide (panel-texto.css)
-      searchCountTxt: (() => { const t = (this._matches || []).length; if (!s.search || !s.search.q) return ''; if (!t) return 'Sin resultados'; const k = ((s.search.active % t) + t) % t; return (k + 1) + ' / ' + t; })(),
-      onSearchChange: e => this.setState({ search: { q: e.target.value, active: 0 } }, () => this.searchShow()),
-      onSearchKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.searchStep(e.shiftKey ? -1 : 1); } else if (e.key === 'Escape') { e.preventDefault(); e.target.blur(); this.setState({ search: null }); } },
-      searchPrev: () => this.searchStep(-1),
-      searchNext: () => this.searchStep(1),
-      searchClear: () => this.setState({ search: null }),
-      handleColor: s.dragging ? '#008000' : 'transparent',
-      panelDown: e => {
-        if (s.clean) return;
-        if (e.target.dataset && e.target.dataset.handle) return;
-        if (e.target.closest && e.target.closest('[data-line]')) return;
-        if (e.nativeEvent.offsetX >= e.target.clientWidth) return;
-        // Clic en un hueco (debajo del texto, entre dos líneas o en los márgenes): no se hace nada.
-        // Antes llevaba el cursor al final de la hoja y estorbaba al seleccionar texto (Camilo, 18/11/2026).
-        // preventDefault: no quita el foco de la línea que se esté editando ni empieza una selección suelta.
-        e.preventDefault();
-        if (!src.length && sheet) { const ln = mkLines([''])[0]; this.setLines([ln], ln.id, 0); } // hoja sin líneas (p. ej. un diagrama antiguo)
-      },
-      resizeDown: e => { e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); this._rs = { x: e.clientX, w: this.panelRef.current.getBoundingClientRect().width }; this.setState({ dragging: true }); document.body.style.cursor = 'col-resize'; },
-      // En Diagrama el panel flota sobre el lienzo: el máximo sale del ancho del lienzo y deja 120 px a la vista.
-      resizeMove: e => { if (!this._rs) return; const el = this.panelRef.current, dgBox = el.closest('.app-diagrama'); const p = (dgBox || el.parentElement.closest(':not(.sc-host)')).getBoundingClientRect().width; const le = this.state.elist && this.state.elist.on ? LE_ANCHO : 0; const w = Math.round(Math.max(dgBox ? 260 : 200, Math.min(p - (dgBox ? 120 : 440) - le, this._rs.w + e.clientX - this._rs.x))); const cur = this.curSheet(this.state); if (cur && w !== cur.width) this.setWidth(w); },
-      resizeUp: () => { if (!this._rs) return; this._rs = null; this.setState({ dragging: false }); document.body.style.cursor = ''; },
-      resizeReset: () => this.setWidth(W0),
       fsPick: () => this.fsPick(),
       fsIcon: s.fs === 'on' ? '#fff' : '#5a5a5a',
       fsDot: s.fs === 'on' ? '#00a000' : s.fs === 'perm' || s.fs === 'err' ? '#d08a00' : 'transparent',
@@ -151,6 +100,9 @@ NoteApp.partes.push(Base => class extends Base {
     Object.assign(v, this.cmenuVals(s)); // menú de copiar de lo copiable (js/app/menu-copiar.js)
     Object.assign(v, this.novVals(s)); // ventana de novedades tras una actualización (js/app/novedades.js)
     Object.assign(v, this.calcVals(s)); // calculadora rápida con historial (js/app/calculadora.js)
+    if (nt && sheet) Object.assign(v, this.camposVals(s, sheet)); // fila de campos MKD de la hoja (js/app/campos.js)
+    else Object.assign(v, { campos: [], camposFlex: '0 1 auto', camposFila: '0 0 auto' });
+    v.dgCampo = dg && sheet ? this.campoVals(s, sheet, CAMPO_MAIN, { diag: true }) : null; // campo MKD flotante del Diagrama
     if (dg && sheet) Object.assign(v, this.dgVals(s, sheet)); // lienzo del diagrama
     Object.assign(v, this.ajVals(s)); // página de Ajustes: Ayuda, Sincronización y Actualizaciones (js/app/ajustes.js)
     Object.assign(v, this.leVals(s, W)); // lista de entidades, a la izquierda del texto (js/app/lista-entidades.js)

@@ -303,8 +303,16 @@ const AYUDA = [
     id: 'herramientas', nombre: 'Herramientas', titulo: 'Herramientas',
     intro: 'Botones que te ahorran trabajo. La mayoría están en la barra fina de encima del texto de cada hoja de Notas.',
     temas: [
+      { t: 'Varios campos de texto en una hoja', ic: 'panel-mkd', p: [
+        'El **circulito** de la barra de encima del texto (a la derecha del botón de exportar) abre un menú pequeño para poner otro campo de texto **a la derecha** del que estás usando. Puedes añadir todos los que quieras.',
+        '- **Crear nuevo campo**: un campo vacío, separado del anterior, para empezar desde cero. Por ejemplo, para pasar a limpio unas ideas que apuntaste deprisa.',
+        '- **Crear copia limpia**: un campo pegado al de la izquierda (con una línea verde en medio) que enseña **siempre su texto en vista limpia**, al momento, mientras escribes en la vista sucia. Los dos bajan y suben a la vez. En la copia no se escribe, pero sí puedes marcar casillas y copiar. Cada campo puede tener una sola copia limpia.',
+        '- **Eliminar campo**: quita un campo añadido (antes te pregunta). Si tiene copia limpia, se va con él. El primer campo de la hoja no se puede eliminar.',
+        'Cada campo tiene su propio buscador, su botón de copiar y su botón de exportar, y solo tocan su texto. El ancho se cambia arrastrando el borde derecho de cada campo; un campo y su copia limpia miden siempre lo mismo y se ensanchan desde el borde de la copia.',
+        'Si los campos no caben, aparece una barra abajo para desplazarte a los lados.'
+      ], nota: ['**Truco:** el botón de ocultar las entidades deja a todo el ancho solo ese campo (y su copia limpia). Vuelve a pulsarlo para ver otra vez todo.'] },
       { t: 'Buscar en la hoja', ic: 'buscar', p: [
-        'Escribe en el buscador de encima del texto: las coincidencias se resaltan en verde y ves cuántas hay.',
+        'Escribe en el buscador de encima del texto: las coincidencias se resaltan en verde y ves cuántas hay. Si la hoja tiene varios campos, cada uno busca solo en su texto.',
         '- **Intro**: la siguiente. **Mayús + Intro**: la anterior.',
         '- **Esc**: cerrar la búsqueda.'
       ] },
@@ -325,7 +333,7 @@ const AYUDA = [
         'Descarga la hoja como un archivo .md, que se abre con muchos programas de notas. Las menciones se guardan con su valor.'
       ] },
       { t: 'Ocultar las entidades', ic: 'ancho-completo', p: [
-        'Oculta el panel de entidades para que el texto ocupe todo el ancho. Cada hoja lo recuerda. Al añadir una entidad, el panel vuelve a aparecer.'
+        'Oculta el panel de entidades para que el texto ocupe todo el ancho. Si la hoja tiene varios campos, se ve solo el campo donde lo pulsas (con su copia limpia, si la tiene). Cada hoja lo recuerda. Al añadir una entidad, el panel vuelve a aparecer.'
       ] },
       { t: 'Calculadora', ic: 'calculadora', p: [
         'El botón de la calculadora, abajo a la izquierda, abre cuentas pensadas para el día a día: porcentajes, IVA, factura con IRPF, cuántos clientes necesitas, cuánto te falta para una meta, despejar la x…',

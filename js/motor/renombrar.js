@@ -52,7 +52,9 @@ function renameIn(s, fix) {
       let chE = false; const ents = (x.entities || []).map(e => { const ne = doEnt(e, x.id, w); if (ne !== e) chE = true; return ne; });
       // Conexiones de los diagramas: su etiqueta puede llevar menciones
       let chK = false; const edges = Array.isArray(x.edges) ? x.edges.map(k => { if (typeof k.label !== 'string' || !k.label) return k; const t = inText(k.label, x.id, w); if (t === k.label) return k; chK = true; return { ...k, label: t }; }) : x.edges;
-      if (lines === x.lines && !chE && !chK) return x; chN = true; const nx = { ...x, lines, entities: chE ? ents : x.entities }; if (chK) nx.edges = edges; return nx;
+      // Campos añadidos de la hoja (hoja.campos, Notas): su texto también puede llevar menciones
+      let chC = false; const campos = Array.isArray(x.campos) ? x.campos.map(c => { if (!Array.isArray(c.lines)) return c; const l = doLines(c.lines, x.id, w); if (l === c.lines) return c; chC = true; return { ...c, lines: l }; }) : x.campos;
+      if (lines === x.lines && !chE && !chK && !chC) return x; chN = true; const nx = { ...x, lines, entities: chE ? ents : x.entities }; if (chK) nx.edges = edges; if (chC) nx.campos = campos; return nx;
     });
     return chN ? { ...n, sheets } : n;
   });

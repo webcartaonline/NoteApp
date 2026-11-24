@@ -144,9 +144,10 @@ NoteApp.partes.push(Base => class extends Base {
   }
   // Busca "query" en los trozos de una línea (concatenando su texto visible) y apunta en cada trozo qué partes hay
   // que resaltar (_hl: texto, código o enlace; _hlL: nombre o valor de una mención; _hlE: el "=" de la mención).
-  // this._matches guarda el orden global de las coincidencias, para el contador y los botones de anterior/siguiente.
+  // this._mt (= this._matchesBy[campo]) guarda el orden de las coincidencias de ese campo, para el contador y los
+  // botones de anterior/siguiente; this._mtActive = número de la coincidencia actual (search[campo].active).
   searchLine(segs, query, lineId) {
-    const s = this.state; let plain = ''; const spans = [];
+    let plain = ''; const spans = [];
     const add = (sg, f, t) => { if (!t) return; spans.push({ sg, f, start: plain.length, end: plain.length + t.length }); plain += t; };
     segs.forEach(sg => {
       if (sg.isText || sg.isCode || sg.isLink) add(sg, '_hl', sg.text);
@@ -154,8 +155,8 @@ NoteApp.partes.push(Base => class extends Base {
     });
     const low = plain.toLowerCase(); let pos = 0, i;
     while ((i = low.indexOf(query, pos)) !== -1) {
-      const me = i + query.length, gi = this._matches.length, active = !!(s.search && s.search.active === gi);
-      this._matches.push({ lineId });
+      const me = i + query.length, gi = this._mt.length, active = this._mtActive === gi;
+      this._mt.push({ lineId });
       spans.forEach(sp => { const a = Math.max(sp.start, i), b = Math.min(sp.end, me); if (a < b) (sp.sg[sp.f] = sp.sg[sp.f] || []).push({ a: a - sp.start, b: b - sp.start, active }); });
       pos = me > i ? me : i + 1;
     }
@@ -179,14 +180,20 @@ NoteApp.partes.push(Base => class extends Base {
       Object.assign(sg, { eqBg: e ? (e.active ? '#008000' : 'rgba(0,128,0,.45)') : 'transparent', eqOp: on && !e ? DIM_BUSCAR : '1' });
     }
   }
-  mkdLines(src, entId, out) {
+  // src = líneas; entId = dónde se guardan los cambios (null = campo principal de la hoja, id de entidad de texto o de
+  // campo añadido 'f…'); out = siempre vista limpia y sin editar (p. ej. la copia limpia de un campo);
+  // sk = clave del buscador que se aplica ('sheet' o id del campo; sin él no se busca). Ver js/app/campos.js.
+  mkdLines(src, entId, out, sk) {
     const s = this.state, cleanV = s.clean || !!out;
     const blocks = cleanV ? blockInfo(src) : null;
     // Vista sucia: las imágenes se dibujan debajo de su línea para poder cambiar su tamaño y recortarlas (no dentro del código).
     const dbi = !cleanV && src.some(l => l.text.includes('![')) ? blockInfo(src) : null;
-    // Búsqueda en el texto (barra superior del panel; no se aplica dentro de una entidad de texto).
-    const query = entId ? '' : ((s.search && s.search.q) || '').trim().toLowerCase();
-    if (!entId) this._matches = [];
+    // Búsqueda en el texto (barra superior de cada campo MKD; no se aplica dentro de una entidad de texto).
+    // state.search = { [clave del campo]: { q, active } }: cada campo tiene su buscador y solo busca en lo suyo.
+    const sq = sk && s.search ? s.search[sk] : null;
+    const query = sq ? (sq.q || '').trim().toLowerCase() : '';
+    if (sk) { this._matchesBy = this._matchesBy || {}; this._matchesBy[sk] = []; }
+    this._mt = sk ? this._matchesBy[sk] : []; this._mtActive = sq ? sq.active : -1;
     const isList = b => !!b && (b.kind === 'ul' || b.kind === 'ol');
     const isFence = b => !!b && (b.kind === 'code' || b.kind === 'copy');
     const isTab = b => !!b && (b.kind === 'trow' || b.kind === 'tsep');
@@ -222,7 +229,7 @@ NoteApp.partes.push(Base => class extends Base {
     };
     let prevHead = false, prevB = null;
     const lines = src.map((ln, idx) => {
-      const focused = !s.clean && s.focusId === ln.id;
+      const focused = !out && !s.clean && s.focusId === ln.id; // out: la copia limpia nunca tiene el cuadro de escribir
       const b = blocks ? blocks[idx] : { kind: 'p' };
       // hl: nivel de título de la línea (también un punto de lista con título: 1. ## x o ## 1. x).
       const p = b.kind === 'p' ? parseLine(ln.text) : { level: 0, start: 0 }, hl = p.level || (isList(b) && b.h) || 0, head = hl > 0;

@@ -61,3 +61,70 @@
 .app-diagrama-flotante .lista-entidades-panel {
   max-width: none;
 }
+
+/* Fila de campos de texto MKD de la hoja (Notas, versión 5.0.0.0). Cada grupo es un campo suelto (separado de los
+   demás, con sus esquinas redondeadas) o un campo con su copia limpia pegada (sin hueco entre los dos).
+   Si no caben, .app-campos se desplaza a los lados con una barra abajo (del mismo grosor que las verticales, base.css),
+   entre los campos y el borde del recuadro gris; la lista de entidades (izquierda) y la columna de entidades (derecha)
+   se quedan fijas. Dentro, .app-campos-fila mide lo que miden todos los campos juntos. */
+.app-campos {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.app-campos::-webkit-scrollbar-track {
+  margin: 0 7px;
+}
+.app-campos-fila {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  min-width: 0;
+  min-height: 0;
+}
+.app-campos-grupo {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+/* El asa de ancho va justo en el borde derecho del campo, por dentro: así no la corta el borde de la fila. */
+.app-campos .panel-texto-arrastra-ajustar-ancho {
+  right: 0;
+  justify-content: flex-end;
+}
+
+/* Esquinas redondeadas en los bordes de lo que se ve (versión 5.0.0.1): cuando un campo queda cortado al desplazarse,
+   su borde cortado se ve redondeado con el mismo radio que sus esquinas (7 px), como si terminara ahí.
+   Son dos marcas sin ancho, una al principio y otra al final de la fila, que se quedan pegadas al borde izquierdo y al
+   derecho de lo que se ve (position: sticky). Cada una pinta dos esquinas del gris del recuadro (#333) por fuera de
+   una curva de 7 px. Cuando el campo no está cortado, caen sobre sus propias esquinas, que ya son así, y no cambian
+   nada. El margen negativo anula el hueco (gap) que la fila deja entre ellas y el campo de al lado. */
+.app-campos-esquinas {
+  position: sticky;
+  z-index: 4;
+  flex: none;
+  width: 0;
+  align-self: stretch;
+  pointer-events: none;
+}
+.app-campos-esquinas-izq {
+  left: 0;
+  margin-right: -4px;
+}
+.app-campos-esquinas-der {
+  right: 0;
+  margin-left: -4px;
+}
+.app-campos-esquinas::before,
+.app-campos-esquinas::after {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 7px;
+}
+.app-campos-esquinas-izq::before { top: 0; left: 0; background: radial-gradient(circle at 100% 100%, transparent 7px, #333 7.5px); }
+.app-campos-esquinas-izq::after { bottom: 0; left: 0; background: radial-gradient(circle at 100% 0, transparent 7px, #333 7.5px); }
+.app-campos-esquinas-der::before { top: 0; right: 0; background: radial-gradient(circle at 0 100%, transparent 7px, #333 7.5px); }
+.app-campos-esquinas-der::after { bottom: 0; right: 0; background: radial-gradient(circle at 0 0, transparent 7px, #333 7.5px); }

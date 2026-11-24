@@ -27,6 +27,16 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '5.0.0.1',
+    fecha: '24 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Varios campos de texto en una misma hoja', texto: 'Encima del texto de cada hoja de Notas hay un circulito nuevo, a la derecha del botón de exportar. Al pulsarlo eliges «Crear nuevo campo» y aparece a la derecha otro campo de texto vacío, separado del primero, para organizar tus ideas desde cero sin crear otra hoja. Por ejemplo: escribes deprisa unas ideas en el primero y las pasas a limpio en el segundo. Puedes añadir todos los que quieras; si no caben, aparece una barra abajo para moverte a los lados.', tipos: ['visual', 'estructural'] },
+      { titulo: 'Copia limpia: ve el resultado mientras escribes', texto: 'En el mismo menú, «Crear copia limpia» pone a la derecha de un campo otro pegado a él, unidos por una línea verde, que enseña siempre ese texto en vista limpia y al momento. Así escribes en la vista sucia y a la vez ves cómo queda. Los dos bajan y suben juntos y miden lo mismo (se ensanchan desde el borde de la copia). En la copia puedes marcar casillas y copiar.', tipos: ['visual', 'estructural'] },
+      { titulo: 'Cada campo va por su cuenta', texto: 'Cada campo tiene su buscador, su botón de copiar y su botón de exportar, que solo tocan su texto (el archivo de un segundo campo se llama, por ejemplo, «Nota - Hoja (2).md»). El botón de ocultar las entidades deja a todo el ancho solo el campo donde lo pulsas y su copia limpia. Para quitar un campo añadido, usa «Eliminar campo» en su circulito.', tipos: ['visual', 'estructural'] },
+      { titulo: 'Los campos cortados siguen redondeados', texto: 'Cuando te desplazas a los lados y un campo queda cortado por el borde, ese borde se ve con las esquinas redondeadas, igual que las suyas, en vez de un corte recto. Y la barra de desplazamiento de abajo es ahora igual de fina que las demás.', tipos: ['correccion'] }
+    ]
+  },
+  {
     version: '4.9.5.3',
     fecha: '23 de noviembre de 2026',
     cambios: [
@@ -54,14 +64,6 @@ const NA_NOVEDADES = [
     cambios: [
       { titulo: 'Cambios al copiar un texto copiable', texto: 'Al pulsar el botón de copiar de un texto copiable (el que va entre comillas simples) ya no se abre una ventana en medio de la pantalla: se despliega un menú pequeño junto al botón, con «Copiar Markdown» y «Copiado literal». Se cierra al elegir, con Esc o pulsando fuera.', tipos: ['visual'] },
       { titulo: 'El historial, dentro de Espacios de trabajo', texto: 'En Ajustes › Sincronización, el Historial ya no es una sección aparte: ahora está en «Espacios de trabajo», debajo de los botones Cambiar, Copiar y Mudar. Así ves en un solo sitio el espacio que tienes abierto y puedes pasar a otro sin cambiar de sección.', tipos: ['visual'] }
-    ]
-  },
-  {
-    version: '4.7.5.1',
-    fecha: '18 de noviembre de 2026',
-    cambios: [
-      { titulo: 'La tecla N ya elige «N» en los extremos de una relación', texto: 'Con el menú de Origen o de Destino abierto, la tecla 1 ponía «1», pero la tecla N no ponía «N». Ahora las dos funcionan igual, sin tener que hacer clic.', tipos: ['correccion'] },
-      { titulo: 'Ya puedes escribir un 1 o una N en «Otro»', texto: 'Al escribir un 1 en el campo «Otro» de un extremo, el campo se quedaba vacío y se marcaba la opción «1». Ahora, mientras escribes en «Otro», las teclas 1 y N solo escriben: lo que pongas se queda en el campo.', tipos: ['correccion'] }
     ]
   }
 ];

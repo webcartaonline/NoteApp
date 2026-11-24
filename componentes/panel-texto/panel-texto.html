@@ -1,51 +1,70 @@
-<!-- Componente "panel-texto" de NoteApp. Campo de texto MKD de la hoja: en Notas, al lado de las entidades; en Diagrama,
-     flotante encima del lienzo (index.html, .app-diagrama-flotante). Barra superior (buscar, ocultar entidades (solo Notas),
-     copiar (menú: Markdown o literal) y exportar a Markdown), las líneas y el asa para cambiar el ancho.
-     La lista de entidades (componente lista-entidades) se abre con su botón de la barra de hojas y va a la izquierda de este.
-     Si la hoja tiene las entidades ocultas (botón de ancho completo), ocupa todo el ancho y no muestra el asa.
-     Los estilos fijos están en panel-texto.css; los que cambian ({{ }}) siguen aquí.
-     Los valores {{ }} vienen de renderVals() (js/app/render.js). -->
+<!-- Componente "panel-texto" de NoteApp. Un campo de texto MKD de la hoja. Recibe sus valores en "c" (js/app/campos.js, campoVals):
+     en Notas, uno por campo de la hoja (index.html, .app-campos: el principal y los añadidos con el botón del círculo);
+     en Diagrama, el campo flotante encima del lienzo (index.html, .app-diagrama-flotante).
+     Barra superior: buscar (solo en este campo), ocultar entidades (solo Notas), copiar (menú: Markdown o literal),
+     exportar a Markdown y el círculo (solo Notas: menú «Crear copia limpia» / «Crear nuevo campo» / «Eliminar campo»).
+     Debajo, las líneas y el asa para cambiar el ancho (borde derecho; en un campo con copia limpia, solo en la copia).
+     La copia limpia (c.isCopia) se une a su fuente con esquinas rectas y una línea verde en medio (.panel-texto-union).
+     La lista de entidades (componente lista-entidades) se abre con su botón de la barra de hojas y va a la izquierda.
+     Los estilos fijos están en panel-texto.css; los que cambian ({{ }}) siguen aquí. -->
 <x-dc>
-  <section ref="{{ panelRef }}" onMouseDown="{{ panelDown }}" class="panel-texto-seccion" style="flex:{{ panelFlex }};cursor:{{ panelCursor }};">
+  <section ref="{{ c.ref }}" onMouseDown="{{ c.panelDown }}" class="panel-texto-seccion" style="flex:{{ c.panelFlex }};cursor:{{ c.panelCursor }};border-radius:{{ c.radius }};">
+    <sc-if value="{{ c.isCopia }}" hint-placeholder-val="{{ false }}"><span class="panel-texto-union"></span></sc-if>
     <div onMouseDown="{{ stopBar }}" class="panel-texto-barra">
       <div class="panel-texto-buscar">
         <span class="panel-texto-buscar-icono"></span>
-        <input value="{{ searchQuery }}" onChange="{{ onSearchChange }}" onKeyDown="{{ onSearchKey }}" spellCheck="false" placeholder="Buscar en el texto…" aria-label="Buscar en el texto de la hoja" class="panel-texto-buscar-campo">
-        <sc-if value="{{ hasSearch }}" hint-placeholder-val="{{ false }}">
-          <span class="panel-texto-buscar-contador">{{ searchCountTxt }}</span>
-          <button onClick="{{ searchPrev }}" aria-label="Resultado anterior" title="Resultado anterior (Mayús+Intro)" class="panel-texto-buscar-nav panel-texto-buscar-prev"><span class="panel-texto-buscar-flecha"></span></button>
-          <button onClick="{{ searchNext }}" aria-label="Siguiente resultado" title="Siguiente resultado (Intro)" class="panel-texto-buscar-nav panel-texto-buscar-next"><span class="panel-texto-buscar-flecha"></span></button>
-          <button onClick="{{ searchClear }}" aria-label="Cerrar búsqueda" title="Cerrar búsqueda (Esc)" class="panel-texto-buscar-cerrar"><span class="panel-texto-texto-2"></span><span class="panel-texto-texto-3"></span></button>
+        <input value="{{ c.searchQuery }}" onChange="{{ c.onSearchChange }}" onKeyDown="{{ c.onSearchKey }}" spellCheck="false" placeholder="{{ c.searchPlaceholder }}" aria-label="Buscar en el texto de este campo" class="panel-texto-buscar-campo">
+        <sc-if value="{{ c.hasSearch }}" hint-placeholder-val="{{ false }}">
+          <span class="panel-texto-buscar-contador">{{ c.searchCountTxt }}</span>
+          <button onClick="{{ c.searchPrev }}" aria-label="Resultado anterior" title="Resultado anterior (Mayús+Intro)" class="panel-texto-buscar-nav panel-texto-buscar-prev"><span class="panel-texto-buscar-flecha"></span></button>
+          <button onClick="{{ c.searchNext }}" aria-label="Siguiente resultado" title="Siguiente resultado (Intro)" class="panel-texto-buscar-nav panel-texto-buscar-next"><span class="panel-texto-buscar-flecha"></span></button>
+          <button onClick="{{ c.searchClear }}" aria-label="Cerrar búsqueda" title="Cerrar búsqueda (Esc)" class="panel-texto-buscar-cerrar"><span class="panel-texto-texto-2"></span><span class="panel-texto-texto-3"></span></button>
         </sc-if>
       </div>
       <div class="panel-texto-barra-acciones">
-        <sc-if value="{{ canFull }}" hint-placeholder-val="{{ true }}">
-          <button onClick="{{ toggleFull }}" aria-label="Ocultar entidades" aria-pressed="{{ full }}" title="{{ fullTitle }}" class="panel-texto-boton">
-            <span class="panel-texto-boton-icono panel-texto-icono-ancho" style="background:{{ fullColor }};"></span>
+        <sc-if value="{{ c.canFull }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ c.toggleFull }}" aria-label="Ocultar entidades" aria-pressed="{{ c.full }}" title="{{ c.fullTitle }}" class="panel-texto-boton">
+            <span class="panel-texto-boton-icono panel-texto-icono-ancho" style="background:{{ c.fullColor }};"></span>
           </button>
         </sc-if>
         <div data-copymenu="1" class="panel-texto-menu">
-          <button onClick="{{ toggleCopyMenu }}" aria-label="Copiar" aria-haspopup="menu" aria-expanded="{{ copyMenuOpen }}" title="{{ copyMdTitle }}" class="panel-texto-boton">
-            <span class="panel-texto-boton-icono panel-texto-icono-copiar" style="background:{{ copyMdColor }};"></span>
+          <button onClick="{{ c.toggleCopyMenu }}" aria-label="Copiar" aria-haspopup="menu" aria-expanded="{{ c.copyMenuOpen }}" title="{{ c.copyMdTitle }}" class="panel-texto-boton">
+            <span class="panel-texto-boton-icono panel-texto-icono-copiar" style="background:{{ c.copyMdColor }};"></span>
           </button>
-          <sc-if value="{{ copyMenuOpen }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{ c.copyMenuOpen }}" hint-placeholder-val="{{ false }}">
             <div role="menu" class="panel-texto-menu-lista">
-              <button role="menuitem" onClick="{{ copyMd }}" title="Markdown estándar: las menciones con su valor y [True] como [x], igual que al exportar" class="panel-texto-opcion-menu">Copiar Markdown</button>
-              <button role="menuitem" onClick="{{ copyRaw }}" title="El texto exactamente como está, igual que en la vista sucia, con las menciones y todos los símbolos" class="panel-texto-opcion-menu">Copiado literal</button>
+              <button role="menuitem" onClick="{{ c.copyMd }}" title="Markdown estándar: las menciones con su valor y [True] como [x], igual que al exportar" class="panel-texto-opcion-menu">Copiar Markdown</button>
+              <button role="menuitem" onClick="{{ c.copyRaw }}" title="El texto exactamente como está, igual que en la vista sucia, con las menciones y todos los símbolos" class="panel-texto-opcion-menu">Copiado literal</button>
             </div>
           </sc-if>
         </div>
-        <button onClick="{{ exportMd }}" aria-label="Exportar a Markdown" title="{{ exportTitle }}" class="panel-texto-boton">
-          <span class="panel-texto-boton-icono panel-texto-icono-exportar" style="background:{{ exportColor }};"></span>
+        <button onClick="{{ c.exportMd }}" aria-label="Exportar a Markdown" title="{{ c.exportTitle }}" class="panel-texto-boton">
+          <span class="panel-texto-boton-icono panel-texto-icono-exportar" style="background:{{ c.exportColor }};"></span>
         </button>
+        <sc-if value="{{ c.hasCircle }}" hint-placeholder-val="{{ false }}">
+          <div data-campomenu="1" class="panel-texto-menu panel-texto-circulo-caja">
+            <button onClick="{{ c.circleToggle }}" aria-label="Más campos" aria-haspopup="menu" aria-expanded="{{ c.circleOpen }}" title="Añadir otro campo a la derecha" class="panel-texto-circulo" style="background:{{ c.circleColor }};"></button>
+            <sc-if value="{{ c.circleOpen }}" hint-placeholder-val="{{ false }}">
+              <div role="menu" class="panel-texto-menu-lista panel-texto-circulo-lista">
+                <sc-if value="{{ c.showLimpia }}" hint-placeholder-val="{{ true }}">
+                  <button role="menuitem" onClick="{{ c.crearLimpia }}" disabled="{{ c.limpiaOff }}" title="{{ c.limpiaTitle }}" class="panel-texto-opcion-menu" style="opacity:{{ c.limpiaOpacity }};">Crear copia limpia</button>
+                </sc-if>
+                <button role="menuitem" onClick="{{ c.crearNuevo }}" title="Un campo vacío a la derecha, separado de este, para empezar desde cero" class="panel-texto-opcion-menu">Crear nuevo campo</button>
+                <sc-if value="{{ c.canBorrar }}" hint-placeholder-val="{{ false }}">
+                  <button role="menuitem" onClick="{{ c.borrar }}" class="panel-texto-opcion-menu">Eliminar campo</button>
+                </sc-if>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
       </div>
     </div>
-    <div data-scroll="" data-lines="sheet" data-buscando="{{ searching }}" class="panel-texto-lineas">
-      <dc-import name="lineas" dc-props="{{ ui }}" list="{{ lines }}"></dc-import>
+    <div data-scroll="" data-lines="{{ c.key }}" data-buscando="{{ c.searching }}" onScroll="{{ c.onScroll }}" class="panel-texto-lineas">
+      <dc-import name="lineas" dc-props="{{ ui }}" list="{{ c.lines }}"></dc-import>
     </div>
-    <sc-if value="{{ showEnts }}" hint-placeholder-val="{{ true }}">
-    <div data-handle="1" onPointerDown="{{ resizeDown }}" onPointerMove="{{ resizeMove }}" onPointerUp="{{ resizeUp }}" onPointerCancel="{{ resizeUp }}" onDoubleClick="{{ resizeReset }}" title="Arrastra para ajustar el ancho" class="panel-texto-arrastra-ajustar-ancho">
-      <span data-handle="1" class="panel-texto-asa" style="background:{{ handleColor }};"></span>
+    <sc-if value="{{ c.showHandle }}" hint-placeholder-val="{{ true }}">
+    <div data-handle="1" onPointerDown="{{ c.resizeDown }}" onPointerMove="{{ c.resizeMove }}" onPointerUp="{{ c.resizeUp }}" onPointerCancel="{{ c.resizeUp }}" onDoubleClick="{{ c.resizeReset }}" title="Arrastra para ajustar el ancho" class="panel-texto-arrastra-ajustar-ancho">
+      <span data-handle="1" class="panel-texto-asa" style="background:{{ c.handleColor }};"></span>
     </div>
     </sc-if>
   </section>

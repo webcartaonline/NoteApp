@@ -2,10 +2,11 @@
 // copiar, cortar, pegar y borrar.
 NoteApp.partes.push(Base => class extends Base {
   // ----- Selección de texto entre varias líneas (vista sucia) -----
-  // this._msel = { key, ent, a: { id, o }, f: { id, o } }: a = donde empezó la selección, f = donde termina. key = 'sheet' o id de la entidad de texto.
+  // this._msel = { key, ent, a: { id, o }, f: { id, o } }: a = donde empezó la selección, f = donde termina. key = 'sheet', id de la entidad de texto o id de un campo añadido ('f…').
   linesOf(ent, s) {
     s = s || this.state; const sh = this.curSheet(s); if (!sh) return null;
     if (!ent) return sh.lines;
+    if (campoEsId(ent)) return campoLineas(sh, ent); // campo añadido de la hoja (js/motor/campos.js)
     const e = (sh.entities || []).find(x => x.id === ent); if (!e) return null;
     return e.lines && e.lines.length ? e.lines : [{ id: e.id + 'l', text: '' }];
   }

@@ -267,3 +267,49 @@
 .panel-texto-lineas[data-buscando="1"] .lineas-texto-4 {
   background: rgba(29, 43, 29, 0.35);
 }
+
+/* Copia limpia: unida a su fuente por el lateral (esquinas rectas donde se juntan, ver radius en js/app/campos.js)
+   y separada de ella por una línea del color principal. */
+.panel-texto-union {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background: #008000;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Botón del círculo (a la derecha del de exportar): un círculo sin recuadro, como el punto de opciones de la barra de
+   hojas. Abre un menú pequeño con el mismo estilo que el de ese punto (Eliminar hoja / Eliminar nota). */
+.panel-texto-circulo-caja {
+  align-items: center;
+  margin-left: 3px;
+}
+
+.panel-texto-circulo {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color .15s;
+}
+.panel-texto-circulo:hover {
+  background: #a6a6a6 !important;
+}
+
+.panel-texto-circulo-lista {
+  top: 22px;
+  right: -6px;
+  min-width: 180px;
+}
+.panel-texto-opcion-menu:disabled {
+  cursor: default;
+}
+.panel-texto-opcion-menu:disabled:hover {
+  background: transparent !important;
+}

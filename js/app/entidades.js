@@ -1,8 +1,10 @@
 // Crear, cambiar, mover, duplicar y borrar entidades (y filas/columnas de tablas, ramas de lógica...).
 NoteApp.partes.push(Base => class extends Base {
   setWidth(w) { this.setState(s => ({ notes: this.mapSheet(s, x => ({ ...x, width: w })) })); }
-  // Ocultar/mostrar las entidades de la hoja activa (campo "full": el texto ocupa todo el ancho).
-  toggleFull() { this.setState(s => ({ entMenu: null, colMenu: null, field: null, notes: this.mapSheet(s, x => { const { full, ...y } = x; return full ? y : { ...y, full: true }; }) })); }
+  // Ocultar/mostrar las entidades de la hoja activa (campo "full": un campo MKD ocupa todo el ancho).
+  // k = campo donde se pulsó ('sheet' o 'f…'). Se guarda la clave de su fuente (true si es el principal, como antes):
+  // se ven ese campo y su copia limpia; el resto de campos y las entidades se ocultan. Ver js/motor/campos.js.
+  toggleFull(k) { this.setState(s => ({ entMenu: null, colMenu: null, field: null, notes: this.mapSheet(s, x => { const { full, ...y } = x, g = campoFuente(x, k || CAMPO_MAIN); return campoFull(x) === g ? y : { ...y, full: g === CAMPO_MAIN ? true : g }; }) })); }
   // Añade una entidad al final y, si estaban ocultas, vuelve a mostrar las entidades para que se vea.
   pushEnt(s, e) { return { notes: this.mapSheet(s, x => { const { full, ...y } = x; return { ...y, entities: (x.entities || []).concat(e) }; }) }; }
   commit(kind, id) {

@@ -36,6 +36,7 @@ NoteApp.partes.push(Base => class extends Base {
   imgLinesOf(entId) {
     const x = this.curSheet(this.state); if (!x) return null;
     if (!entId) return x.lines;
+    if (campoEsId(entId)) return campoLineas(x, entId); // campo añadido de la hoja
     const e = (x.entities || []).find(e => e.id === entId); return e ? e.lines : null;
   }
   imgDown(e, info) {

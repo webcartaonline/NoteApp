@@ -68,7 +68,22 @@
     <sc-if value="{{ notDiagrama }}" hint-placeholder-val="{{ true }}">
     <div class="app-caja-2">
       <sc-if value="{{ leOn }}" hint-placeholder-val="{{ false }}"><dc-import name="lista-entidades" dc-props="{{ ui }}"></dc-import></sc-if>
-      <sc-if value="{{ isNotas }}" hint-placeholder-val="{{ true }}"><dc-import name="panel-texto" dc-props="{{ ui }}"></dc-import></sc-if>
+      <!-- Fila de campos MKD de la hoja (Notas). Cada grupo es un campo suelto o un campo con su copia limpia pegada
+           (js/app/campos.js). Si no caben, barra de desplazamiento abajo, dentro del recuadro gris. Las dos «esquinas»
+           (pegadas a los bordes de lo que se ve) redondean el campo que queda cortado al desplazarse (css/app.css). -->
+      <sc-if value="{{ isNotas }}" hint-placeholder-val="{{ true }}">
+      <div data-scroll="" class="app-campos" style="flex:{{ camposFlex }};">
+        <div class="app-campos-fila" style="flex:{{ camposFila }};">
+          <span class="app-campos-esquinas app-campos-esquinas-izq"></span>
+          <sc-for list="{{ campos }}" as="g" hint-placeholder-count="1">
+            <div class="app-campos-grupo" style="flex:{{ g.flex }};">
+              <sc-for list="{{ g.items }}" as="c" hint-placeholder-count="1"><dc-import name="panel-texto" dc-props="{{ ui }}" c="{{ c }}"></dc-import></sc-for>
+            </div>
+          </sc-for>
+          <span class="app-campos-esquinas app-campos-esquinas-der"></span>
+        </div>
+      </div>
+      </sc-if>
       <sc-if value="{{ showEnts }}" hint-placeholder-val="{{ true }}"><dc-import name="entidades" dc-props="{{ ui }}"></dc-import></sc-if>
     </div>
     </sc-if>
@@ -79,7 +94,7 @@
       <sc-if value="{{ dgFlotOn }}" hint-placeholder-val="{{ false }}">
       <div onPointerDown="{{ dgFlotDown }}" class="app-diagrama-flotante" style="width:{{ dgFlotW }};">
         <sc-if value="{{ leOn }}" hint-placeholder-val="{{ false }}"><dc-import name="lista-entidades" dc-props="{{ ui }}"></dc-import></sc-if>
-        <sc-if value="{{ dgMkdOn }}" hint-placeholder-val="{{ true }}"><dc-import name="panel-texto" dc-props="{{ ui }}"></dc-import></sc-if>
+        <sc-if value="{{ dgMkdOn }}" hint-placeholder-val="{{ true }}"><dc-import name="panel-texto" dc-props="{{ ui }}" c="{{ dgCampo }}"></dc-import></sc-if>
       </div>
       </sc-if>
     </div>
@@ -105,6 +120,7 @@ const Component = NoteApp.crearComponente(DCLogic);
 <script src="js/motor/mkd.js"></script>
 <script src="js/motor/renombrar.js"></script>
 <script src="js/motor/ids.js"></script>
+<script src="js/motor/campos.js"></script>
 <script src="js/motor/formas.js"></script>
 <script src="js/motor/guardado.js"></script>
 <script src="js/motor/imagenes.js"></script>
@@ -130,6 +146,7 @@ const Component = NoteApp.crearComponente(DCLogic);
 <script src="js/app/ajustes-sinc.js"></script>
 <script src="js/app/lista-entidades.js"></script>
 <script src="js/app/lineas.js"></script>
+<script src="js/app/campos.js"></script>
 <script src="js/app/imagen-editor.js"></script>
 <script src="js/app/diagrama.js"></script>
 <script src="js/app/render.js"></script>

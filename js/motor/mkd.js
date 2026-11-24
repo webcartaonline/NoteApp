@@ -23,7 +23,8 @@ function lineFlags(lines) {
   return out;
 }
 // Casillas-entidad de una hoja: su texto y sus entidades de texto.
-const sheetFlags = x => !x ? [] : lineFlags(x.lines).concat(...(x.entities || []).filter(e => e.type === 'text').map(e => lineFlags(e.lines)));
+// También las de los campos añadidos (hoja.campos, ver js/motor/campos.js): todos los campos de una hoja son la misma hoja.
+const sheetFlags = x => !x ? [] : lineFlags(x.lines).concat(...camposLineas(x).map(lineFlags), ...(x.entities || []).filter(e => e.type === 'text').map(e => lineFlags(e.lines)));
 function safeUrl(u, img) {
   u = String(u || '').trim(); if (!u) return null;
   if (/^www\./i.test(u)) u = 'https://' + u;

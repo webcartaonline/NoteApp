@@ -1,5 +1,6 @@
 // Ventana de confirmación (componente componentes/confirmar/), mientras está abierta state.confirm (no se guarda):
 // - antes de eliminar una nota o una hoja: { kind: 'sheet' | 'note', noteId, sheetId }
+// - antes de eliminar un campo MKD añadido de una hoja: { kind: 'campo', noteId, sheetId, campoId } (js/app/campos.js)
 // - al conectar una carpeta vacía sin carpeta anterior (o si la anterior ya no existe), para preguntar si se pasan
 //   las notas del navegador: { kind: 'folder', name, gone, count } (ver fsPick y fsAnswer en js/app/carpeta.js)
 // - antes de mudar el espacio de trabajo a otra carpeta: { kind: 'move', name, from } (wsCopiar y wsMudarOk, en
@@ -26,6 +27,13 @@ NoteApp.partes.push(Base => class extends Base {
   confirmDelete() {
     this.setState(st => {
       const c = st.confirm; if (!c) return null;
+      if (c.kind === 'campo') {
+        const k = c.campoId, n = st.notes.find(m => m.id === c.noteId), x = n && n.sheets.find(h => h.id === c.sheetId);
+        const cp = x && campoCopia(x, k); // su copia limpia se va con él
+        let search = st.search ? { ...st.search } : null;
+        if (search) { delete search[k]; if (cp) delete search[cp.id]; if (!Object.keys(search).length) search = null; }
+        return { confirm: null, focusId: null, search, notes: st.notes.map(n => n.id !== c.noteId ? n : { ...n, sheets: n.sheets.map(x => x.id !== c.sheetId ? x : this.campoQuitar(x, k)) }) };
+      }
       if (c.kind === 'sheet') {
         const n = st.notes.find(m => m.id === c.noteId); if (!n) return { confirm: null };
         const k = n.sheets.findIndex(x => x.id === c.sheetId); if (k < 0) return { confirm: null };
@@ -80,9 +88,16 @@ NoteApp.partes.push(Base => class extends Base {
       v.confirmEmpty = () => this.fsAnswer(false);
       return v;
     }
-    const n = s.notes.find(m => m.id === c.noteId), x = n && c.kind === 'sheet' ? n.sheets.find(h => h.id === c.sheetId) : null;
+    const n = s.notes.find(m => m.id === c.noteId), x = n && (c.kind === 'sheet' || c.kind === 'campo') ? n.sheets.find(h => h.id === c.sheetId) : null;
     const nm = t => (t || '').trim() || 'Sin nombre', dg = s.mode === 'diagrama';
-    if (c.kind === 'sheet') {
+    if (c.kind === 'campo') {
+      const cp = x ? campoDe(x, c.campoId) : null, limpia = !!(cp && cp.limpia), num = x ? campoNum(x, c.campoId) : 0, suya = x && !limpia ? campoCopia(x, c.campoId) : null;
+      v.confirmTitle = 'Eliminar campo';
+      v.confirmName = limpia ? 'Copia limpia del campo ' + num : 'Campo ' + num;
+      v.confirmDetail = 'Hoja «' + nm(x && x.name) + '» de la nota «' + nm(n && n.name) + '»';
+      v.confirmWarn = limpia ? 'Solo se quita la copia limpia: el texto del campo original no se toca.'
+        : 'Esta acción es irreversible: se borrará el texto de este campo' + (suya ? ' y su copia limpia' : '') + ', y no se podrá recuperar. El resto de la hoja no se toca.';
+    } else if (c.kind === 'sheet') {
       v.confirmTitle = 'Eliminar hoja';
       v.confirmName = nm(x && x.name);
       v.confirmDetail = (dg ? 'Hoja del diagrama «' : 'Hoja de la nota «') + nm(n && n.name) + '»';
