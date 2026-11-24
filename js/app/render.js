@@ -64,7 +64,8 @@ NoteApp.partes.push(Base => class extends Base {
       // Campos de texto MKD (componente panel-texto, uno por campo; cada uno recibe sus valores en "c").
       // Notas: la fila de campos de la hoja (campos, js/app/campos.js). Diagrama: el campo flotante (dgCampo).
       // Ocultar entidades: campo "full" de la hoja (js/motor/campos.js); entonces no se dibuja la columna de entidades.
-      showEnts: !(nt && campoFull(sheet)),
+      // Sin entidades en la hoja (Notas) tampoco se dibuja la columna: los campos aprovechan ese hueco (5.1.0.0).
+      showEnts: !(nt && (campoFull(sheet) || !entList.length)),
       stopBar: e => e.stopPropagation(),
       fsPick: () => this.fsPick(),
       fsIcon: s.fs === 'on' ? '#fff' : '#5a5a5a',

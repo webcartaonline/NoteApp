@@ -8,7 +8,7 @@
      La lista de entidades (componente lista-entidades) se abre con su botón de la barra de hojas y va a la izquierda.
      Los estilos fijos están en panel-texto.css; los que cambian ({{ }}) siguen aquí. -->
 <x-dc>
-  <section ref="{{ c.ref }}" onMouseDown="{{ c.panelDown }}" class="panel-texto-seccion" style="flex:{{ c.panelFlex }};cursor:{{ c.panelCursor }};border-radius:{{ c.radius }};">
+  <section ref="{{ c.ref }}" onMouseDown="{{ c.panelDown }}" class="panel-texto-seccion" style="flex:{{ c.panelFlex }};min-width:{{ c.minW }};contain:{{ c.contain }};cursor:{{ c.panelCursor }};border-radius:{{ c.radius }};">
     <sc-if value="{{ c.isCopia }}" hint-placeholder-val="{{ false }}"><span class="panel-texto-union"></span></sc-if>
     <div onMouseDown="{{ stopBar }}" class="panel-texto-barra">
       <div class="panel-texto-buscar">

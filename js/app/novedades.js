@@ -27,6 +27,13 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '5.1.0.0',
+    fecha: '24 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Más espacio para el texto en las hojas sin entidades', texto: 'Si una hoja de Notas no tiene ninguna entidad, ya no se guarda el hueco vacío de la derecha: los campos de texto ocupan todo el ancho. El último campo (con su copia limpia, si la tiene) se estira hasta el borde, y si solo hay uno, ocupa toda la hoja. Por ejemplo, una hoja solo con apuntes se lee a lo ancho. En cuanto añades una entidad, su columna vuelve a aparecer.', tipos: ['visual'] }
+    ]
+  },
+  {
     version: '5.0.0.1',
     fecha: '24 de noviembre de 2026',
     cambios: [
@@ -56,14 +63,6 @@ const NA_NOVEDADES = [
     cambios: [
       { titulo: 'La carpeta ya no se desconecta por un fallo suelto', texto: 'Si al guardar faltaba un archivo por un momento (por ejemplo, porque OneDrive lo estaba sincronizando), NoteApp creía que la carpeta se había borrado y la desconectaba: el icono de la carpeta se quedaba apagado. Ahora comprueba primero si la carpeta sigue ahí y, si está, vuelve a intentar guardar a los pocos segundos.', tipos: ['correccion'] },
       { titulo: 'Avisos en vez de silencio al cambiar de carpeta', texto: 'A veces, al pulsar el botón de la carpeta o al cambiar de espacio de trabajo, no pasaba nada y no sabías por qué. Ahora NoteApp te avisa si todavía está cambiando de carpeta, si la carpeta anterior tarda demasiado en guardar o si no se ha podido abrir la ventana para elegir carpeta. Y si un cambio de carpeta se queda atascado, al rato deja volver a intentarlo.', tipos: ['correccion'] }
-    ]
-  },
-  {
-    version: '4.9.5.0',
-    fecha: '20 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Cambios al copiar un texto copiable', texto: 'Al pulsar el botón de copiar de un texto copiable (el que va entre comillas simples) ya no se abre una ventana en medio de la pantalla: se despliega un menú pequeño junto al botón, con «Copiar Markdown» y «Copiado literal». Se cierra al elegir, con Esc o pulsando fuera.', tipos: ['visual'] },
-      { titulo: 'El historial, dentro de Espacios de trabajo', texto: 'En Ajustes › Sincronización, el Historial ya no es una sección aparte: ahora está en «Espacios de trabajo», debajo de los botones Cambiar, Copiar y Mudar. Así ves en un solo sitio el espacio que tienes abierto y puedes pasar a otro sin cambiar de sección.', tipos: ['visual'] }
     ]
   }
 ];

@@ -309,7 +309,8 @@ const AYUDA = [
         '- **Crear copia limpia**: un campo pegado al de la izquierda (con una línea verde en medio) que enseña **siempre su texto en vista limpia**, al momento, mientras escribes en la vista sucia. Los dos bajan y suben a la vez. En la copia no se escribe, pero sí puedes marcar casillas y copiar. Cada campo puede tener una sola copia limpia.',
         '- **Eliminar campo**: quita un campo añadido (antes te pregunta). Si tiene copia limpia, se va con él. El primer campo de la hoja no se puede eliminar.',
         'Cada campo tiene su propio buscador, su botón de copiar y su botón de exportar, y solo tocan su texto. El ancho se cambia arrastrando el borde derecho de cada campo; un campo y su copia limpia miden siempre lo mismo y se ensanchan desde el borde de la copia.',
-        'Si los campos no caben, aparece una barra abajo para desplazarte a los lados.'
+        'Si los campos no caben, aparece una barra abajo para desplazarte a los lados.',
+        'Si la hoja no tiene entidades, los campos aprovechan todo el ancho: el último se estira hasta el borde derecho (y si solo hay uno, ocupa todo). En cuanto añades una entidad, vuelve a salir su columna a la derecha.'
       ], nota: ['**Truco:** el botón de ocultar las entidades deja a todo el ancho solo ese campo (y su copia limpia). Vuelve a pulsarlo para ver otra vez todo.'] },
       { t: 'Buscar en la hoja', ic: 'buscar', p: [
         'Escribe en el buscador de encima del texto: las coincidencias se resaltan en verde y ves cuántas hay. Si la hoja tiene varios campos, cada uno busca solo en su texto.',

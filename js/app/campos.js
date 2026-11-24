@@ -56,7 +56,7 @@ NoteApp.partes.push(Base => class extends Base {
   campoResizeDown(e, k) {
     e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId);
     const sec = e.currentTarget.closest('.panel-texto-seccion'), sheet = this.curSheet(this.state);
-    this._rs = { x: e.clientX, w: sec.getBoundingClientRect().width, k, par: !!(sheet && campoFuente(sheet, k) !== k) };
+    this._rs = { x: e.clientX, w: sec.getBoundingClientRect().width, k, par: !!(sheet && campoFuente(sheet, k) !== k), sinEnts: !!(sheet && !(sheet.entities || []).length) };
     this.setState({ dragging: k }); document.body.style.cursor = 'col-resize';
   }
   // En Diagrama el panel flota sobre el lienzo: el máximo sale del ancho del lienzo y deja 120 px a la vista.
@@ -66,7 +66,8 @@ NoteApp.partes.push(Base => class extends Base {
     const el = e.currentTarget.closest('.panel-texto-seccion'), dgBox = el.closest('.app-diagrama');
     const p = (dgBox || el.closest('.app-caja-2') || el.parentElement).getBoundingClientRect().width;
     const le = this.state.elist && this.state.elist.on ? LE_ANCHO : 0, dx = e.clientX - r.x;
-    const w = Math.round(Math.max(dgBox ? 260 : 200, Math.min(p - (dgBox ? 120 : 440) - le, r.w + (r.par ? dx / 2 : dx))));
+    // Sin entidades (5.1.0.0) no hace falta dejarles sitio: el máximo es todo el ancho menos la lista de entidades.
+    const w = Math.round(Math.max(dgBox ? 260 : 200, Math.min(p - (dgBox ? 120 : r.sinEnts ? 0 : 440) - le, r.w + (r.par ? dx / 2 : dx))));
     const cur = this.curSheet(this.state); if (cur && w !== campoAncho(cur, r.k)) this.setCampoWidth(r.k, w);
   }
   campoResizeUp() { if (!this._rs) return; this._rs = null; this.setState({ dragging: false }); document.body.style.cursor = ''; }
@@ -92,7 +93,8 @@ NoteApp.partes.push(Base => class extends Base {
     if (Math.abs(b.scrollTop - top) >= 1) b.scrollTop = top;
   }
   // Valores de un campo para la plantilla panel-texto (se le pasa como "c").
-  // o = { diag: campo flotante del Diagrama, par: fuente con copia limpia, copia: es la copia limpia, full, solo }
+  // o = { diag: campo flotante del Diagrama, par: fuente con copia limpia, copia: es la copia limpia, full, solo,
+  //       llena: es el último grupo de una hoja sin entidades (crece hasta el borde derecho; ver camposVals) }
   campoVals(s, sheet, k, o) {
     o = o || {};
     const ent = this.campoEnt(sheet, k), copia = !!o.copia, otro = copia ? campoFuente(sheet, k) : o.par ? (campoCopia(sheet, k) || {}).id : null;
@@ -105,7 +107,11 @@ NoteApp.partes.push(Base => class extends Base {
       ref: k === CAMPO_MAIN ? this.panelRef : null,
       lines,
       isCopia: copia,
-      panelFlex: fullOn ? '1 1 0%' : o.diag || o.solo ? '0 1 ' + w + 'px' : '0 0 ' + w + 'px',
+      panelFlex: fullOn ? '1 1 0%' : o.llena ? (o.solo ? '1 1 ' : '1 0 ') + w + 'px' : o.diag || o.solo ? '0 1 ' + w + 'px' : '0 0 ' + w + 'px',
+      // El que se estira (llena): su ancho mínimo es el suyo y «contain: inline-size» hace que el navegador no mida su texto
+      // para calcular el ancho de la fila (si no, la fila mediría lo que mide la línea más larga y el campo crecería de más).
+      minW: o.llena && !o.solo ? w + 'px' : 'min(200px,100%)',
+      contain: o.llena && !o.solo ? 'inline-size' : 'none',
       panelCursor: s.clean || copia ? 'default' : 'text',
       // Esquinas: la fuente y su copia limpia se unen con esquinas rectas; el campo flotante del Diagrama tiene radio 10.
       radius: o.diag ? '10px' : copia ? '0 7px 7px 0' : o.par ? '7px 0 0 7px' : '7px',
@@ -162,7 +168,8 @@ NoteApp.partes.push(Base => class extends Base {
       canBorrar: campoEsId(k),
       borrar: () => this.campoAskDelete(k),
       // Asa del ancho: no en la fuente de una copia limpia (se cambia desde el borde de fuera, el de la copia).
-      showHandle: !fullOn && !o.par,
+      // Un solo campo en una hoja sin entidades llega hasta el borde: no hay ancho que cambiar.
+      showHandle: !fullOn && !o.par && !(o.llena && o.solo),
       handleColor: s.dragging === k ? '#008000' : 'transparent',
       resizeDown: e => this.campoResizeDown(e, k),
       resizeMove: e => this.campoResizeMove(e),
@@ -171,19 +178,24 @@ NoteApp.partes.push(Base => class extends Base {
     };
   }
   // Fila de campos de la hoja (Notas): grupos de un campo suelto o de un campo con su copia limpia.
+  // Hoja sin entidades (5.1.0.0, Camilo): no se dibuja la columna de entidades (showEnts en render.js) y la fila ocupa todo
+  // el ancho. Los campos mantienen su ancho y el último (con su copia limpia, si la tiene, las dos por igual) se estira hasta
+  // el borde derecho; si no caben, la fila se desplaza como siempre. Un solo campo ocupa todo el ancho.
   camposVals(s, sheet) {
     const full = campoFull(sheet), grupos = campoGrupos(sheet).filter(g => !full || g.src === full);
     const solo = !full && grupos.length === 1 && !grupos[0].copia;
+    const libre = !full && !(sheet.entities || []).length;
     return {
-      campos: grupos.map(g => {
-        const items = [this.campoVals(s, sheet, g.src, { par: !!g.copia, full: !!full, solo })];
-        if (g.copia) items.push(this.campoVals(s, sheet, g.copia, { copia: true, full: !!full }));
-        return { key: g.src, items, flex: full ? '1 1 0%' : solo ? '0 1 auto' : '0 0 auto' };
+      campos: grupos.map((g, i) => {
+        const llena = libre && i === grupos.length - 1;
+        const items = [this.campoVals(s, sheet, g.src, { par: !!g.copia, full: !!full, solo, llena })];
+        if (g.copia) items.push(this.campoVals(s, sheet, g.copia, { copia: true, full: !!full, llena }));
+        return { key: g.src, items, flex: full ? '1 1 0%' : llena ? (solo ? '1 1 auto' : '1 0 auto') : solo ? '0 1 auto' : '0 0 auto' };
       }),
-      camposFlex: full ? '1 1 0%' : '0 1 auto',
-      // Fila de dentro (.app-campos-fila): con varios campos mide lo que miden todos juntos (y se desplaza); con uno solo
-      // se puede encoger como antes; a todo el ancho, llena el hueco.
-      camposFila: full ? '1 1 0%' : solo ? '1 1 auto' : '0 0 auto'
+      camposFlex: full || libre ? '1 1 0%' : '0 1 auto',
+      // Fila de dentro (.app-campos-fila): con varios campos mide lo que miden todos juntos (y se desplaza; sin entidades,
+      // además crece hasta el borde); con uno solo se puede encoger como antes; a todo el ancho, llena el hueco.
+      camposFila: full ? '1 1 0%' : solo ? '1 1 auto' : libre ? '1 0 auto' : '0 0 auto'
     };
   }
 });
