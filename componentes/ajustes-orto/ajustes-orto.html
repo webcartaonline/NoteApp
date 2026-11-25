@@ -1,0 +1,62 @@
+<!-- Componente "ajustes-orto" de NoteApp. Contenido del menú Ortografía de la página de Ajustes:
+     · Corrector: el interruptor para encender o apagar el subrayado de las faltas y cómo funciona.
+     · Mi diccionario: las palabras que has añadido (para quitarlas) y un campo para añadir otras a mano.
+     Reutiliza los estilos de ajustes-sinc (tarjetas, botones, títulos); los suyos están en ajustes-orto.css.
+     Los valores {{ }} vienen de ortoAjVals() (js/app/ajustes-orto.js). -->
+<x-dc>
+  <sc-if value="{{ ortoEsCorrector }}" hint-placeholder-val="{{ true }}">
+    <div class="ajustes-sinc">
+      <div class="ajustes-sinc-cabeza">
+        <span class="ajustes-sinc-titulo">Corrector ortográfico</span>
+        <span class="ajustes-sinc-intro">NoteApp subraya en rojo las palabras que no están en el diccionario de español, para que veas las faltas de un vistazo. No cambia nada por su cuenta: tú decides qué corregir.</span>
+      </div>
+      <div class="ajustes-sinc-actual">
+        <span class="ajustes-sinc-actual-icono"><span class="ajustes-sinc-icono ajustes-orto-icono"></span></span>
+        <div class="ajustes-sinc-actual-textos">
+          <span class="ajustes-sinc-etiqueta">Corrector</span>
+          <span class="ajustes-sinc-actual-nombre">Subrayar las faltas de ortografía</span>
+          <span class="ajustes-sinc-actual-estado"><span class="ajustes-sinc-punto {{ ortoEstadoCls }}"></span><span>{{ ortoEstado }}</span></span>
+        </div>
+        <button role="switch" aria-checked="{{ ortoOnSw }}" onClick="{{ ortoSw }}" title="{{ ortoSwTitulo }}" class="ajustes-orto-sw {{ ortoSwCls }}"><span class="ajustes-orto-sw-bola"></span></button>
+      </div>
+      <div class="ajustes-sinc-acciones">
+        <div class="ajustes-sinc-accion">
+          <span class="ajustes-sinc-accion-nombre">Subrayado rojo</span>
+          <span class="ajustes-sinc-accion-texto">Las palabras que no conoce el diccionario se ven con una raya roja ondulada, en la vista limpia y en la sucia. La palabra que estás escribiendo no se marca hasta que la terminas.</span>
+        </div>
+        <div class="ajustes-sinc-accion">
+          <span class="ajustes-sinc-accion-nombre">Quisiste decir…</span>
+          <span class="ajustes-sinc-accion-texto">Haz clic derecho sobre una palabra subrayada: salen las palabras parecidas del diccionario. Pulsa una y se cambia en el texto. Por ejemplo, «ecsamen» → «examen».</span>
+        </div>
+        <div class="ajustes-sinc-accion">
+          <span class="ajustes-sinc-accion-nombre">Añadir al diccionario</span>
+          <span class="ajustes-sinc-accion-texto">En ese mismo menú, «Añadir al diccionario» deja de marcar una palabra que está bien (un nombre, un pueblo…). Se guarda en «Mi diccionario».</span>
+          <button onClick="{{ ortoVerDicc }}" class="ajustes-sinc-boton">Ver mi diccionario</button>
+        </div>
+      </div>
+      <span class="ajustes-sinc-pie">No revisa el código, lo copiable, las menciones (=Nombre), los enlaces, las siglas en mayúsculas (IVA) ni las palabras con números o guion bajo (mi_archivo). El diccionario va dentro de NoteApp, así que funciona sin internet y tus notas no salen de tu ordenador.</span>
+    </div>
+  </sc-if>
+  <sc-if value="{{ ortoEsDicc }}" hint-placeholder-val="{{ false }}">
+    <div class="ajustes-sinc">
+      <div class="ajustes-sinc-cabeza">
+        <span class="ajustes-sinc-titulo">Mi diccionario</span>
+        <span class="ajustes-sinc-intro">Las palabras que has añadido. El corrector las da por buenas (sin fijarse en mayúsculas). Se guardan con tus notas, también en la carpeta del espacio de trabajo. · {{ ortoCuenta }}</span>
+      </div>
+      <div class="ajustes-orto-nueva">
+        <input value="{{ ortoNueva }}" onChange="{{ ortoNuevaCambia }}" onKeyDown="{{ ortoNuevaTecla }}" spellCheck="false" placeholder="Añadir una palabra…" aria-label="Palabra para añadir a tu diccionario" class="ajustes-sinc-campo ajustes-orto-campo">
+        <button onClick="{{ ortoNuevaAnadir }}" disabled="{{ ortoNuevaVacia }}" class="ajustes-sinc-boton ajustes-sinc-boton-verde">Añadir</button>
+      </div>
+      <sc-if value="{{ ortoSinPalabras }}" hint-placeholder-val="{{ false }}">
+        <div class="ajustes-sinc-vacio"><span class="ajustes-sinc-vacio-texto">Todavía no has añadido ninguna palabra. Cuando el corrector marque una que está bien, haz clic derecho sobre ella y pulsa «Añadir al diccionario».</span></div>
+      </sc-if>
+      <sc-if value="{{ ortoHayPalabras }}" hint-placeholder-val="{{ true }}">
+        <div class="ajustes-orto-palabras">
+          <sc-for list="{{ ortoPalabras }}" as="p" hint-placeholder-count="4">
+            <span class="ajustes-orto-palabra"><span class="ajustes-orto-palabra-txt">{{ p.w }}</span><button onClick="{{ p.quitar }}" aria-label="{{ p.titulo }}" title="{{ p.titulo }}" class="ajustes-orto-quitar"><span class="ajustes-orto-x"></span></button></span>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+</x-dc>

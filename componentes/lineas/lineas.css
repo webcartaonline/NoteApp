@@ -266,3 +266,12 @@
   0%, 55% { opacity: 1; }
   56%, 100% { opacity: 0; }
 }
+
+/* Trozos de texto (runs): resaltado del buscador y subrayado rojo ondulado de las palabras mal escritas
+   (corrector ortográfico, js/app/ortografia.js; el estilo de la raya va en ORTO_RAYA, js/app/lineas.js). */
+.lineas-run {
+  border-radius: 2px;
+  text-decoration-skip-ink: none;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}

@@ -40,6 +40,8 @@
 <link rel="stylesheet" href="componentes/mensajes/mensajes.css">
 <link rel="stylesheet" href="componentes/confirmar/confirmar.css">
 <link rel="stylesheet" href="componentes/menu-copiar/menu-copiar.css">
+<link rel="stylesheet" href="componentes/menu-ortografia/menu-ortografia.css">
+<link rel="stylesheet" href="componentes/ajustes-orto/ajustes-orto.css">
 <link rel="stylesheet" href="componentes/novedades/novedades.css">
 <link rel="stylesheet" href="componentes/calculadora/calculadora.css">
 <link rel="stylesheet" href="componentes/ajustes/ajustes.css">
@@ -106,6 +108,7 @@
   <dc-import name="calculadora" dc-props="{{ ui }}"></dc-import>
   <dc-import name="confirmar" dc-props="{{ ui }}"></dc-import>
   <dc-import name="menu-copiar" dc-props="{{ ui }}"></dc-import>
+  <dc-import name="menu-ortografia" dc-props="{{ ui }}"></dc-import>
   <dc-import name="novedades" dc-props="{{ ui }}"></dc-import>
 </div>
 </x-dc>
@@ -126,6 +129,7 @@ const Component = NoteApp.crearComponente(DCLogic);
 <script src="js/motor/imagenes.js"></script>
 <script src="js/motor/espacios.js"></script>
 <script src="js/motor/calculos.js"></script>
+<script src="js/motor/ortografia.js"></script>
 <script src="js/app/estado-inicial.js"></script>
 <script src="js/app/base.js"></script>
 <script src="js/app/carpeta.js"></script>
@@ -144,8 +148,10 @@ const Component = NoteApp.crearComponente(DCLogic);
 <script src="js/app/ajustes-ayuda.js"></script>
 <script src="js/app/ajustes-actualizaciones.js"></script>
 <script src="js/app/ajustes-sinc.js"></script>
+<script src="js/app/ajustes-orto.js"></script>
 <script src="js/app/lista-entidades.js"></script>
 <script src="js/app/lineas.js"></script>
+<script src="js/app/ortografia.js"></script>
 <script src="js/app/campos.js"></script>
 <script src="js/app/imagen-editor.js"></script>
 <script src="js/app/diagrama.js"></script>

@@ -1,6 +1,8 @@
 // Líneas de texto: teclado y edición de cada línea (lineHandlers) y cómo se dibuja cada una (mkdLines).
 // Opacidad del texto que no coincide mientras se usa el buscador del panel de texto (se oscurece).
 const DIM_BUSCAR = '0.35';
+// Subrayado de las palabras mal escritas (corrector ortográfico): línea roja ondulada.
+const ORTO_RAYA = 'underline wavy #e5534b';
 NoteApp.partes.push(Base => class extends Base {
   lineHandlers(ln, idx, lines, entId) {
     const s = this.state, setL = (l, f, c) => this.setLines(l, f, c, entId);
@@ -24,6 +26,7 @@ NoteApp.partes.push(Base => class extends Base {
         this.focusLine(ln.id, o);
       },
       onChange: e => {
+        this._ortoEscr = { id: ln.id, c: null }; // se está escribiendo en esta línea (corrector: js/app/ortografia.js)
         const ta = e.target; let text = ta.value.replace(/\n/g, ' '), c = ta.selectionStart;
         if (c > 0 && text.length === ln.text.length + 1 && text[c - 1] === ' ' && text.slice(0, c - 1) + text.slice(c) === ln.text) {
           const pre = text.slice(0, c - 1), at = menAt(lines, idx, pre), off = this._menOff, au = this._menAuto;
@@ -163,17 +166,25 @@ NoteApp.partes.push(Base => class extends Base {
   }
   // Parte el texto de un trozo en "runs" (lo resaltado y lo que no) para dibujarlos en lineas.html.
   // bg = fondo verde de la coincidencia (más intenso la actual), col = color del texto, op = opacidad (se oscurece al buscar).
+  // Además, mal = palabras mal escritas del trozo (sg._mal, corrector ortográfico, js/app/ortografia.js): se subrayan
+  // con una línea roja ondulada (td = ORTO_RAYA).
   searchRuns(sg, on) {
-    const mk = (t, hl, off) => {
+    const mk = (t, hl, off, mal) => {
       t = t == null ? '' : String(t);
-      const plain = (x, o) => ({ t: x, bg: 'transparent', col: 'inherit', op: on ? DIM_BUSCAR : '1', off: o });
-      if (!hl || !hl.length) return [plain(t, off)];
-      const rs = hl.slice().sort((x, y) => x.a - y.a), out = []; let p = 0;
-      rs.forEach(r => { if (r.a > p) out.push(plain(t.slice(p, r.a), off + p)); out.push({ t: t.slice(r.a, r.b), bg: r.active ? '#008000' : 'rgba(0,128,0,.45)', col: '#fff', op: '1', off: off + r.a }); p = r.b; });
-      if (p < t.length) out.push(plain(t.slice(p), off + p));
+      if ((!hl || !hl.length) && (!mal || !mal.length)) return [{ t, bg: 'transparent', col: 'inherit', op: on ? DIM_BUSCAR : '1', td: 'none', off }];
+      // Cortes: donde empieza o acaba una coincidencia o una palabra mal escrita
+      const cuts = new Set([0, t.length]);
+      (hl || []).concat(mal || []).forEach(r => { cuts.add(Math.max(0, Math.min(t.length, r.a))); cuts.add(Math.max(0, Math.min(t.length, r.b))); });
+      const cs = Array.from(cuts).sort((x, y) => x - y), out = [];
+      for (let k = 0; k + 1 < cs.length; k++) {
+        const a = cs[k], b = cs[k + 1]; if (a >= b) continue;
+        const h = (hl || []).find(r => r.a <= a && r.b >= b), m = (mal || []).some(r => r.a <= a && r.b >= b);
+        out.push({ t: t.slice(a, b), bg: h ? (h.active ? '#008000' : 'rgba(0,128,0,.45)') : 'transparent', col: h ? '#fff' : 'inherit',
+          op: h || !on ? '1' : DIM_BUSCAR, td: m ? ORTO_RAYA : 'none', off: off + a });
+      }
       return out;
     };
-    if (sg.isText || sg.isCode || sg.isLink) sg.runs = mk(sg.text, sg._hl, sg.off);
+    if (sg.isText || sg.isCode || sg.isLink) sg.runs = mk(sg.text, sg._hl, sg.off, sg._mal);
     if (sg.isEnt) {
       sg.lruns = mk(sg.label, sg._hlL, sg.off2);
       const e = sg._hlE && sg._hlE.length ? sg._hlE[0] : null;
@@ -194,6 +205,9 @@ NoteApp.partes.push(Base => class extends Base {
     const query = sq ? (sq.q || '').trim().toLowerCase() : '';
     if (sk) { this._matchesBy = this._matchesBy || {}; this._matchesBy[sk] = []; }
     this._mt = sk ? this._matchesBy[sk] : []; this._mtActive = sq ? sq.active : -1;
+    // Corrector ortográfico (js/app/ortografia.js): solo donde se puede escribir (no en la copia limpia, ni en las formas
+    // del diagrama que no se están editando, ni en la Ayuda). obi = bloque de cada línea (código, tablas…), también en vista sucia.
+    const orto = !out && entId !== 'ayuda' && this.ortoOn(s), obi = orto ? (blocks || dbi || blockInfo(src)) : null, taO = this.taRef.current;
     const isList = b => !!b && (b.kind === 'ul' || b.kind === 'ol');
     const isFence = b => !!b && (b.kind === 'code' || b.kind === 'copy');
     const isTab = b => !!b && (b.kind === 'trow' || b.kind === 'tsep');
@@ -316,9 +330,19 @@ NoteApp.partes.push(Base => class extends Base {
       // se oscurece (runs con op = DIM_BUSCAR; los demás elementos, en panel-texto.css con [data-buscando="1"]).
       const cellSegs = v.isRow ? v.cells.reduce((a, c) => a.concat(c.segs), []) : [];
       if (query) this.searchLine(segs.concat(cellSegs), query, ln.id);
+      // Palabras mal escritas: mientras se escribe en una línea, la palabra pegada al cursor espera a que se termine.
+      // Solo si el cursor sigue donde se dejó al escribir (si se mueve con un clic o las flechas, ya se revisa).
+      let caret = null;
+      if (orto && focused && taO && this._ortoEscr && this._ortoEscr.id === ln.id && taO.selectionStart === taO.selectionEnd) {
+        if (this._ortoEscr.c == null) this._ortoEscr.c = taO.selectionStart;
+        if (this._ortoEscr.c === taO.selectionStart) caret = taO.selectionStart;
+      }
+      const mal = orto ? this.ortoMal(ln.text, obi[idx], caret) : [];
+      this.ortoTrozos(segs.concat(cellSegs), mal);
       segs.concat(cellSegs).forEach(sg => this.searchRuns(sg, !!query));
       const imgs = dbi && dbi[idx].kind !== 'code' && ln.text.includes('![') ? this.imgEditors(ln, entId) : [];
-      return { id: ln.id, text: ln.text, focused, segs, fs, lh, mt, fw: head ? 700 : 400, hasImgs: imgs.length > 0, imgs, ...v, ...this.lineHandlers(ln, idx, src, entId), ...(out ? { onDown: null } : null) };
+      return { id: ln.id, text: ln.text, focused, segs, fs, lh, mt, fw: head ? 700 : 400, hasImgs: imgs.length > 0, imgs, ...v, ...this.lineHandlers(ln, idx, src, entId), ...(out ? { onDown: null } : null),
+        onMenu: mal.length ? e => this.ortoMenuAbrir(e, ln, mal, entId) : null };
     });
     return lines;
   }

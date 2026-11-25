@@ -28,6 +28,8 @@
     'mensajes',
     'confirmar',
     'menu-copiar',
+    'menu-ortografia',
+    'ajustes-orto',
     'novedades',
     'calculadora',
     'ajustes',

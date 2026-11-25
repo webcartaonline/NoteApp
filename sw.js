@@ -1,7 +1,7 @@
 // Service worker de NoteApp: permite instalar la app y abrirla sin conexión.
 // Siempre intenta cargar la versión más reciente; la copia guardada solo se usa sin conexión.
 // Si añades o quitas archivos de la app, actualiza la lista APP y sube el número de VERSION.
-const VERSION = 'noteapp-v44';
+const VERSION = 'noteapp-v45';
 const APP = [
   '/',
   '/index.html',
@@ -22,6 +22,7 @@ const APP = [
   '/js/motor/imagenes.js',
   '/js/motor/espacios.js',
   '/js/motor/calculos.js',
+  '/js/motor/ortografia.js',
   '/js/app/estado-inicial.js',
   '/js/app/base.js',
   '/js/app/carpeta.js',
@@ -40,8 +41,10 @@ const APP = [
   '/js/app/ajustes-ayuda.js',
   '/js/app/ajustes-actualizaciones.js',
   '/js/app/ajustes-sinc.js',
+  '/js/app/ajustes-orto.js',
   '/js/app/lista-entidades.js',
   '/js/app/lineas.js',
+  '/js/app/ortografia.js',
   '/js/app/campos.js',
   '/js/app/imagen-editor.js',
   '/js/app/cursor.js',
@@ -91,6 +94,12 @@ const APP = [
   '/componentes/confirmar/confirmar.css',
   '/componentes/menu-copiar/menu-copiar.html',
   '/componentes/menu-copiar/menu-copiar.css',
+  '/componentes/menu-ortografia/menu-ortografia.html',
+  '/componentes/menu-ortografia/menu-ortografia.css',
+  // Corrector ortográfico: el diccionario (Hunspell en un Web Worker) y el diccionario de español
+  '/js/ortografia-worker.js',
+  '/diccionario/es.aff',
+  '/diccionario/es.dic',
   '/componentes/novedades/novedades.html',
   '/componentes/novedades/novedades.css',
   '/componentes/calculadora/calculadora.html',
@@ -103,6 +112,8 @@ const APP = [
   '/componentes/ajustes-actualizaciones/ajustes-actualizaciones.css',
   '/componentes/ajustes-sinc/ajustes-sinc.html',
   '/componentes/ajustes-sinc/ajustes-sinc.css',
+  '/componentes/ajustes-orto/ajustes-orto.html',
+  '/componentes/ajustes-orto/ajustes-orto.css',
   '/componentes/lista-entidades/lista-entidades.html',
   '/componentes/lista-entidades/lista-entidades.css',
   '/componentes/diagrama/diagrama.html',
@@ -151,6 +162,7 @@ const APP = [
   '/assets/seguridad.svg',
   '/assets/personalizacion.svg',
   '/assets/actualizaciones.svg',
+  '/assets/ortografia.svg',
   '/icons/apple-touch-icon.png',
   '/icons/favicon-32.png',
   '/icons/icon-192.png',

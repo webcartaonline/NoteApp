@@ -1,0 +1,106 @@
+/* Componente "ajustes-orto": menú Ortografía de Ajustes (corrector y «Mi diccionario"). Usa los estilos de ajustes-sinc
+   (tarjetas, botones, títulos); aquí solo lo propio: el interruptor, el campo de añadir y las palabras. */
+
+.ajustes-orto-icono {
+  mask: url(../../assets/ortografia.svg) center / contain no-repeat;
+  -webkit-mask: url(../../assets/ortografia.svg) center / contain no-repeat;
+}
+
+/* Interruptor (como el de vista limpia/sucia): gris = apagado, verde = encendido */
+.ajustes-orto-sw {
+  flex: none;
+  align-self: center;
+  position: relative;
+  width: 46px;
+  height: 26px;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #4a4a4a;
+  cursor: pointer;
+  outline: none;
+  transition: background-color .15s;
+}
+.ajustes-orto-sw:focus-visible {
+  box-shadow: 0 0 0 2px #1e1e1e, 0 0 0 4px #6a6a6a;
+}
+.ajustes-orto-sw-bola {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform .15s;
+}
+.ajustes-orto-sw-on {
+  background: #008000;
+}
+.ajustes-orto-sw-on .ajustes-orto-sw-bola {
+  transform: translateX(20px);
+}
+
+/* Añadir una palabra */
+.ajustes-orto-nueva {
+  display: flex;
+  gap: 10px;
+  max-width: 520px;
+  margin-bottom: 16px;
+}
+.ajustes-orto-campo {
+  flex: 1;
+  height: 38px;
+  font-size: 15px;
+  background: #1e1e1e;
+}
+
+/* Palabras del diccionario */
+.ajustes-orto-palabras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ajustes-orto-palabra {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 5px 5px 5px 12px;
+  border-radius: 999px;
+  background: #2f2f2f;
+  font-size: 14.5px;
+}
+.ajustes-orto-palabra-txt {
+  overflow-wrap: anywhere;
+}
+.ajustes-orto-quitar {
+  flex: none;
+  position: relative;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+.ajustes-orto-quitar:hover {
+  background: #454545 !important;
+}
+.ajustes-orto-x::before,
+.ajustes-orto-x::after {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 6px;
+  width: 2px;
+  height: 12px;
+  border-radius: 1px;
+  background: #a6a6a6;
+  transform: rotate(45deg);
+}
+.ajustes-orto-x::after {
+  transform: rotate(-45deg);
+}

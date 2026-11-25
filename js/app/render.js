@@ -99,6 +99,7 @@ NoteApp.partes.push(Base => class extends Base {
     };
     Object.assign(v, this.confirmVals(s)); // ventana de confirmación al eliminar
     Object.assign(v, this.cmenuVals(s)); // menú de copiar de lo copiable (js/app/menu-copiar.js)
+    Object.assign(v, this.ortoMenuVals(s)); // menú del corrector ortográfico (js/app/ortografia.js)
     Object.assign(v, this.novVals(s)); // ventana de novedades tras una actualización (js/app/novedades.js)
     Object.assign(v, this.calcVals(s)); // calculadora rápida con historial (js/app/calculadora.js)
     if (nt && sheet) Object.assign(v, this.camposVals(s, sheet)); // fila de campos MKD de la hoja (js/app/campos.js)

@@ -1,0 +1,110 @@
+Diccionario de español para el corrector ortográfico de NoteApp (diccionario/es.aff y es.dic).
+Procede del paquete dictionary-es 4.0.0 (https://github.com/wooorm/dictionaries), generado a partir de RLA-ES
+(https://github.com/sbosio/rla-es), el diccionario de español de LibreOffice. Licencia: GPL 3, LGPL 3 o MPL 1.1, a elegir.
+Cambio hecho para NoteApp (25/11/2026): en es.aff se añadieron 21 reglas REP (cs/x, b/v, s/c/z, j/g, k/c/qu, i/y, r/rr, np/mp, nb/mb)
+para que las sugerencias acierten más con las faltas habituales (por ejemplo «ecsamen» → «examen», «cojer» → «coger», «canpo» → «campo»).
+
+El motor (js/ortografia-worker.js) incluye hunspell-asm 4.0.2 (licencia MIT, © 2017 OJ Kwon) y Hunspell
+(MPL 1.1 / GPL 2 / LGPL 2.1).
+
+================ Texto original de la licencia del diccionario ================
+
+  ****************************************************************************
+  **                                                                        **
+  **          Diccionario para corrección ortográfica en español de         **
+  **                      LibreOffice/Apache OpenOffice                     **
+  **                                                                        **
+  ****************************************************************************
+
+Para: es_ES
+
+  ****************************************************************************
+
+                                  Versión 2.8
+
+SUMARIO
+
+1. AUTOR
+2. LICENCIA
+3. COLABORACIÓN
+4. AGRADECIMIENTOS
+
+
+1. AUTOR
+
+   Este diccionario ha sido desarrollado inicialmente por Santiago Bosio;
+quien actualmente coordina el desarrollo de todos los diccionarios localizados.
+
+   El diccionario es un desarrollo completamente nuevo, y NO ESTÁ BASADO en el
+trabajo de Jesús Carretero y Santiago Rodríguez, ni en la versión adaptada al
+formato de MySpell por Richard Holt.
+
+2. LICENCIA
+
+   Este diccionario para corrección ortográfica, integrado por el fichero
+de afijos y la lista de palabras (es_ES[.aff|.dic]) se distribuye
+bajo un triple esquema de licencias disjuntas: GNU GPL versión 3 o posterior,
+GNU LGPL versión 3 o posterior, ó MPL versión 1.1 o posterior. Puede
+seleccionar libremente bajo cuál de estas licencias utilizará este diccionario.
+En el fichero LICENSE.md encontrá más detalles.
+
+3. COLABORACIÓN
+
+   Este diccionario es resultado del trabajo colaborativo de muchas personas.
+La buena noticia es que ¡usted también puede participar!
+
+   ¿Tiene dudas o sugerencias? ¿Desearía ver palabras agregadas, o que se
+realizaran correcciones? Consulte las indicaciones técnicas publicadas en
+CONTRIBUTING.md. Estaremos encantados de atenderle.
+
+4. AGRADECIMIENTOS
+
+   Hay varias personas que han colaborado con aportes o sugerencias a la
+creación de este diccionario. Se agradece especialmente a:
+
+   - Richard Holt.
+   - Marcelo Garrone.
+   - Kevin Hendricks.
+   - Juan Rey Saura.
+   - Carlos Dávila.
+   - Román Gelbort.
+   - J. Eduardo Moreno.
+   - Gonzalo Higuera Díaz.
+   - Ricardo Palomares Martínez.
+   - Sergio Medina.
+   - Ismael Olea.
+   - Alejandro Moreno.
+   - Alexandro Colorado.
+   - Andrés Sánchez.
+   - Juan Rafael Fernández García.
+   - eksperimental.
+   - Ezequiel (ezeperez26).
+   - KNTRO.
+   - Ricardo Berlasso.
+   - Edward Villegas-Pulgarin (cosmocalibur)
+   - y a todos los integrantes de la comunidad en español que proponen mejoras
+     a este diccionario.
+
+================ Licencia de hunspell-asm ================
+
+MIT License
+
+Copyright (c) 2017 OJ Kwon
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

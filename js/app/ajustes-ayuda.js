@@ -317,6 +317,14 @@ const AYUDA = [
         '- **Intro**: la siguiente. **Mayús + Intro**: la anterior.',
         '- **Esc**: cerrar la búsqueda.'
       ] },
+      { t: 'Corrector ortográfico', ic: 'ortografia', p: [
+        'NoteApp **subraya en rojo** las palabras que no están en el diccionario de español, en la vista limpia y en la sucia. No cambia nada por su cuenta: tú decides qué corregir. La palabra que estás escribiendo no se marca hasta que la terminas.',
+        '- **Clic derecho** sobre una palabra subrayada: en «Quisiste decir…» salen palabras parecidas del diccionario. Pulsa una y se cambia en el texto.',
+        '- **Añadir al diccionario** (en el mismo menú): la palabra deja de marcarse. Útil para nombres, pueblos o palabras de tu trabajo.',
+        '- En **Ajustes › Ortografía** puedes apagar el corrector y ver o quitar las palabras de tu diccionario.',
+        'No revisa el código, lo copiable, las menciones, los enlaces, las siglas en mayúsculas (como IVA) ni las palabras con números o guion bajo.'
+      ], ficha: [['ecsamen', 'Quisiste decir: examen'], ['tambien', 'Quisiste decir: también'], ['porfavor', 'Quisiste decir: por favor']],
+        nota: ['**Truco:** el diccionario va dentro de NoteApp, así que funciona sin internet y tus notas no salen de tu ordenador.'] },
       { t: 'Lista de entidades', ic: 'lista-entidades', p: [
         'El botón de la lista está arriba, **a la derecha del interruptor de vista limpia/sucia**, en Notas, Agenda y Diagrama. Abre un panel con las entidades: en Notas a la izquierda del texto, en la Agenda a la izquierda de sus entidades y en Diagrama flotando encima del lienzo. Sirve para consultar un nombre, un valor o una ruta sin ir a buscarlos.',
         '- Cada entidad enseña su **nombre**, su **descripción** y su **valor**. Su botón de copiar te deja elegir entre la **ruta entera** (lista para pegarla en cualquier hoja) o **solo el nombre** (para la misma hoja).',

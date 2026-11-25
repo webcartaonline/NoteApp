@@ -2,8 +2,8 @@
 // izquierda, el contenido en el panel gris y, arriba a la derecha, las secciones del menú elegido.
 // Se abre con el botón del engranaje de la barra lateral y se cierra con la X o con Esc.
 //
-// Menús hechos: Ayuda (js/app/ajustes-ayuda.js), Sincronización (js/app/ajustes-sinc.js) y Actualizaciones
-// (js/app/ajustes-actualizaciones.js). Seguridad y Personalización se ven en la lista, pero de momento muestran «Próximamente».
+// Menús hechos: Ayuda (js/app/ajustes-ayuda.js), Sincronización (js/app/ajustes-sinc.js), Ortografía
+// (js/app/ajustes-orto.js) y Actualizaciones (js/app/ajustes-actualizaciones.js). Seguridad y Personalización se ven en la lista, pero de momento muestran «Próximamente».
 //
 // CÓMO TERMINAR UN MENÚ (más adelante):
 //   1. Pon listo: true en su entrada de AJ_MENUS y sus secciones en ajSecciones() (lista de [id, nombre]).
@@ -20,6 +20,8 @@ const AJ_MENUS = [
     desc: 'Guías de uso sobre el campo de texto MKD y las entidades' },
   { id: 'sinc', nombre: 'Sincronización', icono: 'sincronizacion', listo: true,
     desc: 'Importa o exporta el contenido y gestiona la conexión con la carpeta local' },
+  { id: 'orto', nombre: 'Ortografía', icono: 'ortografia', listo: true,
+    desc: 'Corrector ortográfico y tu diccionario de palabras' },
   { id: 'seguridad', nombre: 'Seguridad', icono: 'seguridad',
     desc: 'Establece una contraseña para acceder a la app, nota u hoja concreta',
     pronto: 'Aquí podrás poner una contraseña para entrar en NoteApp o para abrir una nota u hoja concreta.' },
@@ -41,6 +43,7 @@ NoteApp.partes.push(Base => class extends Base {
     if (menu === 'ayuda') return AYUDA.map(x => [x.id, x.nombre]);
     if (menu === 'act') return AJ_ACT_SECS;
     if (menu === 'sinc') return AJ_SINC_SECS; // js/app/ajustes-sinc.js
+    if (menu === 'orto') return AJ_ORTO_SECS; // js/app/ajustes-orto.js
     return [];
   }
   // Sección visible del menú (la última elegida, o la primera)
@@ -99,12 +102,14 @@ NoteApp.partes.push(Base => class extends Base {
     v.ajEsAyuda = menu.id === 'ayuda';
     v.ajEsAct = menu.id === 'act';
     v.ajEsSinc = menu.id === 'sinc';
+    v.ajEsOrto = menu.id === 'orto';
     v.ajPronto = !menu.listo;
     v.ajProntoTxt = menu.pronto || '';
     v.ajProntoIc = ajMask(menu.icono);
     if (v.ajEsAyuda) Object.assign(v, this.ayudaVals(s, sec));
     if (v.ajEsAct) Object.assign(v, this.actVals(s, sec));
     if (v.ajEsSinc) Object.assign(v, this.sincVals(s, sec));
+    if (v.ajEsOrto) Object.assign(v, this.ortoAjVals(s, sec));
     return v;
   }
 });

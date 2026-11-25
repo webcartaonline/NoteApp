@@ -27,6 +27,13 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '5.2.1.0',
+    fecha: '25 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Corrector ortográfico', tipos: ['visual', 'estructural'], texto: 'NoteApp ahora subraya en rojo las palabras mal escritas del texto de tus hojas, con el diccionario de español. No corrige nada solo: haz clic derecho sobre una palabra subrayada y elige la buena en «Quisiste decir…» (por ejemplo, «ecsamen» → «examen»). Si la palabra está bien (un nombre, un pueblo…), pulsa «Añadir al diccionario» y no se volverá a marcar. Funciona sin internet, y en Ajustes › Ortografía puedes apagarlo y ver tus palabras.' }
+    ]
+  },
+  {
     version: '5.1.0.0',
     fecha: '24 de noviembre de 2026',
     cambios: [
@@ -55,14 +62,6 @@ const NA_NOVEDADES = [
     fecha: '23 de noviembre de 2026',
     cambios: [
       { titulo: 'Cambiar de carpeta ya no se queda esperando para siempre', texto: 'Si una carpeta no respondía (por ejemplo, porque OneDrive estaba en pausa o tenía que descargar los archivos), el cambio de carpeta podía quedarse esperando sin terminar nunca. Ahora cada paso tiene un tiempo máximo: si se pasa, NoteApp lo deja, te dice qué carpeta no responde y qué puedes hacer. Y mientras espera, el aviso «Espera un momento» te dice qué está intentando y cuánto lleva.', tipos: ['correccion'] }
-    ]
-  },
-  {
-    version: '4.9.5.1',
-    fecha: '23 de noviembre de 2026',
-    cambios: [
-      { titulo: 'La carpeta ya no se desconecta por un fallo suelto', texto: 'Si al guardar faltaba un archivo por un momento (por ejemplo, porque OneDrive lo estaba sincronizando), NoteApp creía que la carpeta se había borrado y la desconectaba: el icono de la carpeta se quedaba apagado. Ahora comprueba primero si la carpeta sigue ahí y, si está, vuelve a intentar guardar a los pocos segundos.', tipos: ['correccion'] },
-      { titulo: 'Avisos en vez de silencio al cambiar de carpeta', texto: 'A veces, al pulsar el botón de la carpeta o al cambiar de espacio de trabajo, no pasaba nada y no sabías por qué. Ahora NoteApp te avisa si todavía está cambiando de carpeta, si la carpeta anterior tarda demasiado en guardar o si no se ha podido abrir la ventana para elegir carpeta. Y si un cambio de carpeta se queda atascado, al rato deja volver a intentarlo.', tipos: ['correccion'] }
     ]
   }
 ];

@@ -1,0 +1,20 @@
+<!-- Componente "menu-ortografia" de NoteApp. Menú que sale con el clic derecho sobre una palabra subrayada en rojo
+     (corrector ortográfico): «Quisiste decir…» con las sugerencias del diccionario (al elegir una, se cambia en el texto)
+     y «Añadir al diccionario». Mismo aspecto que el menú de copiar. Clic fuera, Esc o desplazar la página = cerrar.
+     Los estilos fijos están en menu-ortografia.css; los valores {{ }} vienen de ortoMenuVals() (js/app/ortografia.js). -->
+<x-dc>
+  <sc-if value="{{ omOn }}" hint-placeholder-val="{{ false }}">
+    <div data-ortomenu="1" role="menu" aria-label="Ortografía" onContextMenu="{{ omCerrar }}" class="menu-ortografia" style="top:{{ omTop }};left:{{ omLeft }};transform:{{ omTf }};">
+      <span class="menu-ortografia-etiqueta">Quisiste decir…</span>
+      <sc-if value="{{ omCargando }}" hint-placeholder-val="{{ false }}"><span class="menu-ortografia-nota">Buscando sugerencias…</span></sc-if>
+      <sc-if value="{{ omSinSug }}" hint-placeholder-val="{{ false }}"><span class="menu-ortografia-nota">No hay sugerencias para «{{ omPalabra }}»</span></sc-if>
+      <sc-if value="{{ omHaySug }}" hint-placeholder-val="{{ true }}">
+        <sc-for list="{{ omSugs }}" as="o" hint-placeholder-count="3">
+          <button role="menuitem" onClick="{{ o.pick }}" title="Cambiar «{{ omPalabra }}» por «{{ o.t }}»" class="menu-ortografia-opcion menu-ortografia-sug">{{ o.t }}</button>
+        </sc-for>
+      </sc-if>
+      <span class="menu-ortografia-raya"></span>
+      <button role="menuitem" onClick="{{ omAnadir }}" title="No volver a marcar «{{ omPalabra }}» como falta (se puede quitar en Ajustes › Ortografía)" class="menu-ortografia-opcion"><span class="menu-ortografia-mas"></span><span class="menu-ortografia-texto">Añadir al diccionario</span></button>
+    </div>
+  </sc-if>
+</x-dc>
