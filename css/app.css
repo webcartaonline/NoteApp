@@ -77,6 +77,15 @@
 .app-campos::-webkit-scrollbar-track {
   margin: 0 7px;
 }
+/* Barra centrada en el hueco entre los campos y el borde del recuadro gris (5.2.1.1, Camilo: se pegaba a los campos).
+   La raya que se ve mide 2 px, como en las barras verticales; lo demás es hueco transparente: 6 px encima (hasta los
+   campos) y 3 px debajo, más los 3 px de relleno de .app-principal = 6 px hasta el borde gris. */
+.app-campos::-webkit-scrollbar {
+  height: 11px;
+}
+.app-campos::-webkit-scrollbar-thumb {
+  border-width: 6px 3px 3px;
+}
 .app-campos-fila {
   position: relative;
   display: flex;

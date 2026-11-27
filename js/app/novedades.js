@@ -27,6 +27,13 @@
 //   Quien abra la app y no haya visto esa versión verá la ventana. Si se ha saltado varias, las ve todas juntas.
 const NA_NOVEDADES = [
   {
+    version: '5.2.1.1',
+    fecha: '27 de noviembre de 2026',
+    cambios: [
+      { titulo: 'Barra de abajo de los campos, bien centrada', tipos: ['correccion'], texto: 'La barra para moverte a los lados entre varios campos de texto estaba casi pegada a los campos. Ahora queda justo en medio, con el mismo espacio por encima (hasta los campos) que por debajo (hasta el borde del recuadro gris).' }
+    ]
+  },
+  {
     version: '5.2.1.0',
     fecha: '25 de noviembre de 2026',
     cambios: [
@@ -55,13 +62,6 @@ const NA_NOVEDADES = [
     fecha: '23 de noviembre de 2026',
     cambios: [
       { titulo: 'Ves en todo momento cómo va el cambio de carpeta', texto: 'En Ajustes › Sincronización, mientras cambias de espacio de trabajo, el recuadro de estado dice qué está haciendo NoteApp (guardar la carpeta anterior, leer la nueva o abrirla) y cuántos segundos lleva. Y cuando termina, el resultado se queda escrito ahí, para que lo leas con calma: antes solo salía unos segundos en un aviso de la esquina.', tipos: ['correccion'] }
-    ]
-  },
-  {
-    version: '4.9.5.2',
-    fecha: '23 de noviembre de 2026',
-    cambios: [
-      { titulo: 'Cambiar de carpeta ya no se queda esperando para siempre', texto: 'Si una carpeta no respondía (por ejemplo, porque OneDrive estaba en pausa o tenía que descargar los archivos), el cambio de carpeta podía quedarse esperando sin terminar nunca. Ahora cada paso tiene un tiempo máximo: si se pasa, NoteApp lo deja, te dice qué carpeta no responde y qué puedes hacer. Y mientras espera, el aviso «Espera un momento» te dice qué está intentando y cuánto lleva.', tipos: ['correccion'] }
     ]
   }
 ];
